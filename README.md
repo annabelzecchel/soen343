@@ -9,4 +9,4 @@
 | Annabel Zecchel (40245507)  | Tech Stack, Developer |
 | Oviya Sinnathamby (40249479)  | Documentation, Developer |
 | Jackson Amir (40249183)  | Diagraming, Developer |
-| Niki  | Documentation, Developer |
+| Niki Adamacopoulos (40245624)  | Documentation, Developer |
