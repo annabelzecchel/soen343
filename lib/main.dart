@@ -3,19 +3,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import "package:cloud_firestore/cloud_firestore.dart";
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
+  await dotenv.load();
   WidgetsFlutterBinding.ensureInitialized();
   if (kIsWeb) {
     await Firebase.initializeApp(
-        options: const FirebaseOptions(
-            apiKey: "AIzaSyAw4zuLw1rJIPPP-bJXQo6cs6GvYbsqA8A",
-            authDomain: "planini-firebase.firebaseapp.com",
-            projectId: "planini-firebase",
-            storageBucket: "planini-firebase.firebasestorage.app",
-            messagingSenderId: "655337851862",
-            appId: "1:655337851862:web:f394d8f57beebd9c1f3277",
-            measurementId: "G-F1TBGK9DEP"));
+        options: FirebaseOptions(
+            apiKey: dotenv.env['APIKEY'] ?? '',
+            authDomain: dotenv.env['AUTHDOMAIN'] ?? '',
+            projectId: dotenv.env['PROJECTID'] ?? '',
+            storageBucket: dotenv.env['STORAGEBUCKET'] ?? '',
+            messagingSenderId: dotenv.env['MESSAGESENDERID'] ?? '',
+            appId: dotenv.env['APPID'] ?? '',
+            measurementId: dotenv.env['MEASUREMENTID'] ?? ''));
   } else {
     await Firebase.initializeApp();
   }
@@ -117,8 +119,11 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 CollectionReference colRef =
                     FirebaseFirestore.instance.collection("events");
-                colRef.add(
-                    {"name": nameController.text, "type": typeController.text});
+                colRef.add({
+                  "name": nameController.text,
+                  "type": typeController.text,
+                  "id": colRef.doc().id,
+                });
               },
               child: const Text("Add Event"),
             ),
