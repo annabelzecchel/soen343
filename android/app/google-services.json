@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "655337851862",
+    "project_id": "planini-firebase",
+    "storage_bucket": "planini-firebase.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:655337851862:android:2e2a2ebe6513b5d01f3277",
+        "android_client_info": {
+          "package_name": "com.example.soen343"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLfsOYhR78DQAlJohFepKLHG2RxUHQI80"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
