@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:soen343/components/event_creation_form.dart';
+import 'package:soen343/components/app_theme.dart';
 
 class EventManagementPage extends StatefulWidget {
   final String title;
@@ -10,28 +11,29 @@ class EventManagementPage extends StatefulWidget {
 }
 
 class _EventManagementState extends State<EventManagementPage> {
+  
   final List<Widget> _screens = [
     Container(
-        color: const Color.fromARGB(100, 244, 67, 54),
+        color: AppTheme.colorScheme.primary,
         alignment: Alignment.center,
         child: const EventCreationForm(),
         ),
     Container(
-        color: const Color.fromARGB(101, 33, 149, 243),
+        color: AppTheme.colorScheme.primary,
         alignment: Alignment.center,
         child: const Text(
           'Manage Events',
           style: TextStyle(fontSize: 40),
         )),
     Container(
-        color: const Color.fromARGB(103, 76, 175, 79),
+        color: AppTheme.colorScheme.primary,
         alignment: Alignment.center,
         child: const Text(
           'Settings',
           style: TextStyle(fontSize: 40),
         )),
     Container(
-        color: const Color.fromARGB(100, 255, 235, 59),
+        color: AppTheme.colorScheme.primary,
         alignment: Alignment.center,
         child: const Text(
           'About',
@@ -45,7 +47,7 @@ class _EventManagementState extends State<EventManagementPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: const Color.fromARGB(255, 170, 130, 239),
+        backgroundColor: AppTheme.colorScheme.inversePrimary,
       ),
       body: Row(
         children: [
@@ -55,6 +57,8 @@ class _EventManagementState extends State<EventManagementPage> {
               border: Border(right: BorderSide(color: Colors.grey, width: 1)), // Border for separation
             ),
             child: NavigationRail(
+              backgroundColor: AppTheme.colorScheme.surface,
+              indicatorColor: AppTheme.colorScheme.secondaryContainer,
               onDestinationSelected: (int index) {
                 setState(() {
                   _selectedIndex = index;
@@ -64,15 +68,15 @@ class _EventManagementState extends State<EventManagementPage> {
               destinations: const [
                 NavigationRailDestination(
                   icon: Icon(Icons.event),
-                  label: Text('Events'),
+                  label: Text('Events Creation'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.person),
-                  label: Text('Profile'),
+                  label: Text('Event Management'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.settings),
-                  label: Text('Settings'),
+                  label: Text('Analytics & Reports'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.info),
@@ -80,8 +84,11 @@ class _EventManagementState extends State<EventManagementPage> {
                 ),
               ],
               labelType: NavigationRailLabelType.all,
-              selectedLabelTextStyle: const TextStyle(
-                color: Colors.blue,
+              selectedLabelTextStyle: TextStyle(
+                color: AppTheme.colorScheme.tertiary,
+              ),
+              selectedIconTheme: IconThemeData(
+                color: AppTheme.colorScheme.tertiary,
               ),
             ),
           ),
