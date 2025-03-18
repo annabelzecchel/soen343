@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class CreateAccountForm extends StatefulWidget {
   @override
@@ -8,7 +9,7 @@ class CreateAccountForm extends StatefulWidget {
 
 class _CreateAccountFormState extends State<CreateAccountForm> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _namelController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPassController = TextEditingController();
@@ -20,6 +21,7 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
     setState(() => _isLoading = true);
 
     try {
+      //await Firebase.initializeApp();
       if (_passwordController.text != _confirmPassController.text) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Passwords do not match')),
@@ -72,6 +74,21 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.person),
+                    hintText: 'Enter your name',
+                    labelText: 'Name',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your name';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
                     icon: Icon(Icons.email),
@@ -81,6 +98,9 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
+                    }
+                    if (!value.contains('@')) {
+                      return 'Please enter a valid email';
                     }
                     return null;
                   },
@@ -117,6 +137,22 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _roleController,
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.work),
+                    hintText: 'Enter your role',
+                    labelText: 'Role',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your role';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
                 _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
