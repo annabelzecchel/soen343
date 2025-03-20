@@ -60,4 +60,17 @@ flutter {
 
 dependencies {
     implementation platform('com.google.firebase:firebase-bom:33.10.0')
+    implementation 'com.google.firebase:firebase-auth' // Firebase Auth
+    implementation 'com.google.firebase:firebase-firestore' // Firestore
+    implementation 'com.google.firebase:firebase-storage'
+    implementation 'com.google.firebase:firebase-analytics'
 }
+
+plugins {
+  id 'com.android.application'
+
+  // Add the Google services Gradle plugin
+  id 'com.google.gms.google-services'
+}
+
+apply plugin: 'com.google.gms.google-services'
