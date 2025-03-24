@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:soen343/components/event_creation_form.dart';
 import 'package:soen343/components/app_theme.dart';
+import 'package:soen343/components/manage_event_tab.dart';
 
 class EventManagementPage extends StatefulWidget {
   final String title;
@@ -21,10 +22,8 @@ class _EventManagementState extends State<EventManagementPage> {
     Container(
         color: AppTheme.colorScheme.primary,
         alignment: Alignment.center,
-        child: const Text(
-          'Manage Events',
-          style: TextStyle(fontSize: 40),
-        )),
+        child: const ManageEventTab(),
+        ),
     Container(
         color: AppTheme.colorScheme.primary,
         alignment: Alignment.center,
@@ -68,11 +67,11 @@ class _EventManagementState extends State<EventManagementPage> {
               destinations: const [
                 NavigationRailDestination(
                   icon: Icon(Icons.event),
-                  label: Text('Events Creation'),
+                  label: Text('Create New Event'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.person),
-                  label: Text('Event Management'),
+                  label: Text('Manage My Events'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.settings),

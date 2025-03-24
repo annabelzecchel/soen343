@@ -92,8 +92,9 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: AppTheme.colorScheme.inversePrimary,
         title: Text(widget.title),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.event), // Event icon
+          ElevatedButton.icon(
+            // Organizer Event button
+            icon: const Icon(Icons.event, color: Colors.black),
             onPressed: () {
               Navigator.push(
                 context,
@@ -102,18 +103,27 @@ class _MyHomePageState extends State<MyHomePage> {
                         title: 'Event Management for Organizers')),
               );
             },
+            label: Text(
+              'Event Management',
+              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.login), // Login icon
+          const SizedBox(width: 10),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.login, color: Colors.black),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const LoginPage(title: 'Login And SignUp')),
+                    builder: (context) =>
+                        const LoginPage(title: 'Login And SignUp')),
               );
             },
+            label: Text(
+              'Sign In',
+              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+            ),
           ),
-          
         ],
       ),
       body: const UsersListScreen(),
