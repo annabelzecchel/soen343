@@ -77,9 +77,11 @@ class EventDetailView extends StatelessWidget {
                       decoration: const InputDecoration(
                         labelText: 'Enter your user ID',
                       ),
+                      //NOT WORKING
                       onSubmitted: (value) async {
                         if (value.isNotEmpty) {
                           await _eventController.addAttendee(event.id, value);
+                          //print("$value has been added to the ${event.id}");
                           Navigator.pop(context);
                         }
                       },
@@ -172,6 +174,7 @@ class EventDetailView extends StatelessWidget {
                 : ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
+                    //WORKS
                     itemCount: event.attendees.length,
                     itemBuilder: (context, index) {
                       return ListTile(
