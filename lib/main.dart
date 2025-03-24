@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import "package:cloud_firestore/cloud_firestore.dart";
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:soen343/event_management_page.dart';
+import 'package:soen343/login.dart';
 import 'package:soen343/components/app_theme.dart';
 
 void main() async {
@@ -97,6 +98,17 @@ class _MyHomePageState extends State<MyHomePage> {
               );
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.login), // Login icon
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const LoginPage(title: 'Login And SignUp')),
+              );
+            },
+          ),
+          
         ],
       ),
     );
