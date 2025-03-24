@@ -8,6 +8,8 @@ import 'package:soen343/event_management_page.dart';
 import 'package:soen343/login.dart';
 import 'package:soen343/profile.dart';
 import 'package:soen343/components/app_theme.dart';
+import 'package:soen343/components/eventList.dart';
+import 'package:soen343/views/events_list_view.dart';
 
 void main() async {
   await dotenv.load();
@@ -42,14 +44,17 @@ class MyApp extends StatelessWidget {
         title: 'Flutter Demo',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 235, 246, 236), // Main theme color (soft green)
+            seedColor: const Color.fromARGB(
+                255, 235, 246, 236), // Main theme color (soft green)
             primary: const Color(0xFFABC5AE), // Primary color
             secondary: const Color(0xFFCA946F), // Secondary color (light beige)
             tertiary: const Color(0xFFA74D0F), // Tertiary color (dark orange)
             surface: const Color(0xFFCBDBCD), // Background color
-            inversePrimary: const Color.fromARGB(255, 235, 246, 236), // Color for app bar
+            inversePrimary:
+                const Color.fromARGB(255, 235, 246, 236), // Color for app bar
             secondaryContainer: const Color(0xFFeddbcf), // light beige
-            error: const Color.fromARGB(255, 214, 7, 7), // Error color (dark orange)
+            error: const Color.fromARGB(
+                255, 214, 7, 7), // Error color (dark orange)
             onPrimary: Colors.black, // Text color on primary
             onSecondary: Colors.white, // Text color on secondary
             onTertiary: Colors.black, // Text color on secondary
@@ -57,11 +62,11 @@ class MyApp extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
-        home: Builder(builder: (context) {
-          AppTheme.init(context);
-          return const MyHomePage(title: 'Home Page');
-          Auth
-        },
+        home: Builder(
+          builder: (context) {
+            AppTheme.init(context);
+            return const MyHomePage(title: 'Home Page');
+          },
         ),
         debugShowCheckedModeBanner: false,
       ),
@@ -123,6 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
           
         ],
       ),
+      body: const EventsListView(),
     );
   }
 }
