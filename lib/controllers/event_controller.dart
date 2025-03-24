@@ -62,18 +62,11 @@ class EventController {
   Future<void> addAttendee(String eventId, String userId) async {
     try {
       final event = await getEventById(eventId);
+
       if (!event.attendees.contains(userId)) {
-        List<String> updatedAttendees = List.from(event.attendees)..add(userId);
-
-        Map<String, dynamic> attendeesMap = {};
-        for (int i = 0; i < updatedAttendees.length; i++) {
-          attendeesMap[i.toString()] = updatedAttendees[i];
-        }
-
-        await _firestore
-            .collection(collectionPath)
-            .doc(eventId)
-            .update({'attendees': attendeesMap});
+        await _firestore.collection(collectionPath).doc(eventId).update({
+          'attendees': FieldValue.arrayUnion([userId])
+        });
       }
     } catch (e) {
       throw Exception('Failed to add attendee: $e');
