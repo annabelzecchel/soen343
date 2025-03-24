@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:soen343/components/auth_service.dart';
 
 class CreateAccountForm extends StatefulWidget {
   @override
@@ -30,10 +31,15 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
         return;
       }
 
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+      final AuthService _authService = AuthService();
+      
+      String? result = await _authService.signUp(
+          name: _nameController.text,
+          email: _emailController.text,
+          password: _passwordController.text,
+          role: _roleController.text,
+        );
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Account created successfully!')),
       );
@@ -138,16 +144,35 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
                   },
                 ),
                 const SizedBox(height: 20),
-                TextFormField(
-                  controller: _roleController,
+                DropdownButtonFormField(
+                  value: _roleController.text.isEmpty ? null : _roleController.text,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _roleController.text = newValue ?? '';
+                    });
+                  },
                   decoration: const InputDecoration(
-                    icon: Icon(Icons.work),
-                    hintText: 'Enter your role',
+                    icon: Icon(Icons.filter_vintage_outlined),
+                    hintText: 'Select Role',
                     labelText: 'Role',
                   ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'organizer', child: Text('Organizer'), 
+                    ),
+                    DropdownMenuItem(
+                      value: 'attendee', child: Text('Attendee'), 
+                    ),
+                    DropdownMenuItem(
+                      value: 'administration', child: Text('Administration'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Stakeholders', child: Text('Stakeholders'), 
+                    ),
+                  ],
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your role';
+                      return 'Please enter role type';
                     }
                     return null;
                   },

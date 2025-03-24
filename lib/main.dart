@@ -6,6 +6,7 @@ import "package:cloud_firestore/cloud_firestore.dart";
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:soen343/event_management_page.dart';
 import 'package:soen343/login.dart';
+import 'package:soen343/profile.dart';
 import 'package:soen343/components/app_theme.dart';
 
 void main() async {
@@ -59,6 +60,7 @@ class MyApp extends StatelessWidget {
         home: Builder(builder: (context) {
           AppTheme.init(context);
           return const MyHomePage(title: 'Home Page');
+          Auth
         },
         ),
         debugShowCheckedModeBanner: false,
@@ -104,7 +106,17 @@ class _MyHomePageState extends State<MyHomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const LoginPage(title: 'Login And SignUp')),
+                    builder: (context) => const LoginPage(title: 'Login !')),
+              );
+            },
+          ),
+            ProfileButton(
+            icon: const Icon(Icons.child_care), // Login icon
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const LoginPage(title: 'Login !')),
               );
             },
           ),
