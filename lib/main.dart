@@ -6,6 +6,7 @@ import "package:cloud_firestore/cloud_firestore.dart";
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:soen343/event_management_page.dart';
 import 'package:soen343/login.dart';
+import 'package:soen343/components/app_theme.dart';
 
 void main() async {
   await dotenv.load();
@@ -39,10 +40,27 @@ class MyApp extends StatelessWidget {
       builder: (context, child) => MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color.fromARGB(255, 235, 246, 236), // Main theme color (soft green)
+            primary: const Color(0xFFABC5AE), // Primary color
+            secondary: const Color(0xFFCA946F), // Secondary color (light beige)
+            tertiary: const Color(0xFFA74D0F), // Tertiary color (dark orange)
+            surface: const Color(0xFFCBDBCD), // Background color
+            inversePrimary: const Color.fromARGB(255, 235, 246, 236), // Color for app bar
+            secondaryContainer: const Color(0xFFeddbcf), // light beige
+            error: const Color.fromARGB(255, 214, 7, 7), // Error color (dark orange)
+            onPrimary: Colors.black, // Text color on primary
+            onSecondary: Colors.white, // Text color on secondary
+            onTertiary: Colors.black, // Text color on secondary
+            onSurface: Colors.black, // Text color on background
+          ),
           useMaterial3: true,
         ),
-        home: const MyHomePage(title: 'Home Page'),
+        home: Builder(builder: (context) {
+          AppTheme.init(context);
+          return const MyHomePage(title: 'Home Page');
+        },
+        ),
         debugShowCheckedModeBanner: false,
       ),
     );
@@ -66,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: AppTheme.colorScheme.inversePrimary,
         title: Text(widget.title),
         actions: [
           IconButton(
@@ -75,7 +93,8 @@ class _MyHomePageState extends State<MyHomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const EventManagementPage(title: 'Event Management for Organizers')),
+                    builder: (context) => const EventManagementPage(
+                        title: 'Event Management for Organizers')),
               );
             },
           ),
@@ -92,38 +111,6 @@ class _MyHomePageState extends State<MyHomePage> {
           
         ],
       ),
-
-      // TextFormField(
-      //   controller: nameController,
-      //   decoration: const InputDecoration(
-      //     hintText: 'Name',
-      //   ),
-      // ),
-      // TextFormField(
-      //   controller: typeController,
-      //   decoration: const InputDecoration(
-      //     hintText: 'Type',
-      //   ),
-      // ),
-      // ElevatedButton(
-      //   onPressed: () {
-      //     CollectionReference colRef =
-      //         FirebaseFirestore.instance.collection("events");
-      //     colRef.add({
-      //       "name": nameController.text,
-      //       "type": typeController.text,
-      //       "id": colRef.doc().id,
-      //     });
-      //   },
-      //   child: const Text("Add Event"),
-      // ),
-      // const Text(
-      //   'You have pushed the button this many times:',
-      // ),
-      // Text(
-      //   '$_counter',
-      //   style: Theme.of(context).textTheme.headlineMedium,
-      // ),
     );
   }
 }
