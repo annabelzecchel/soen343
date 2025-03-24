@@ -7,6 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:soen343/event_management_page.dart';
 import 'package:soen343/components/app_theme.dart';
 import 'package:soen343/components/eventList.dart';
+import 'package:soen343/views/events_list_view.dart';
 
 void main() async {
   await dotenv.load();
@@ -104,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      body: const UsersListScreen(),
+      body: const EventsListView(),
     );
   }
 }
