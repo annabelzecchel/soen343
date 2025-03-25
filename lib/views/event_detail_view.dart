@@ -18,12 +18,22 @@ class EventDetailView extends StatefulWidget {
 class _EventDetailViewState extends State<EventDetailView> {
   final EventController _eventController = EventController();
   final ProfileController _profileController = ProfileController(AuthService());
+  final _userController = TextEditingController();
+  late Event _currentEvent;
   String? type;
 
   @override
   void initState() {
     super.initState();
+    _currentEvent = widget.event;
     _fetchUserRole();
+  }
+
+  Future<void> _refreshEventData() async {
+    final updatedEvent = await _eventController.getEventById(_currentEvent.id);
+    setState(() {
+      _currentEvent = updatedEvent;
+    });
   }
 
   Future<void> _fetchUserRole() async {
@@ -42,7 +52,7 @@ class _EventDetailViewState extends State<EventDetailView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.event.name),
+        title: Text(_currentEvent.name),
         actions: (type == 'organizer' ||
                 type == "stakeholders" ||
                 type == "administrator")
@@ -54,7 +64,7 @@ class _EventDetailViewState extends State<EventDetailView> {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            EventFormView(event: widget.event),
+                            EventFormView(event: _currentEvent),
                       ),
                     );
                   },
@@ -76,7 +86,7 @@ class _EventDetailViewState extends State<EventDetailView> {
                           TextButton(
                             onPressed: () async {
                               await _eventController
-                                  .deleteEvent(widget.event.id);
+                                  .deleteEvent(_currentEvent.id);
                               Navigator.pop(context); //Dialog
                               Navigator.pop(context); //List
                             },
@@ -113,12 +123,9 @@ class _EventDetailViewState extends State<EventDetailView> {
                         labelText: 'Enter your user ID',
                       ),
                       //NOT WORKING
-                      onSubmitted: (value) async {
+                      onChanged: (value) async {
                         if (value.isNotEmpty) {
-                          await _eventController.addAttendee(
-                              widget.event.id, value);
-                          //print("$value has been added to the ${event.id}");
-                          Navigator.pop(context);
+                          _userController.text = value;
                         }
                       },
                     ),
@@ -128,7 +135,10 @@ class _EventDetailViewState extends State<EventDetailView> {
                         child: const Text('Cancel'),
                       ),
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          await _eventController.addAttendee(
+                              _currentEvent.id, _userController.text);
+                          await _refreshEventData();
                           Navigator.pop(context);
                         },
                         child: const Text('Register'),
@@ -156,19 +166,19 @@ class _EventDetailViewState extends State<EventDetailView> {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
-            _buildInfoRow(Icons.description, widget.event.description),
-            _buildInfoRow(Icons.location_on, widget.event.location),
+            _buildInfoRow(Icons.description, _currentEvent.description),
+            _buildInfoRow(Icons.location_on, _currentEvent.location),
             _buildInfoRow(
               Icons.calendar_today,
               _formatDateTime(widget.event.dateTime),
             ),
             _buildInfoRow(Icons.attach_money,
                 '\$${widget.event.price.toStringAsFixed(2)}'),
-            _buildInfoRow(Icons.category, 'Type: ${widget.event.type}'),
+            _buildInfoRow(Icons.category, 'Type: ${_currentEvent.type}'),
             _buildInfoRow(
-                Icons.format_align_left, 'Format: ${widget.event.format}'),
+                Icons.format_align_left, 'Format: ${_currentEvent.format}'),
             _buildInfoRow(
-                Icons.email, 'Created by: ${widget.event.createdByEmail}'),
+                Icons.email, 'Created by: ${_currentEvent.createdByEmail}'),
           ],
         ),
       ),
@@ -203,7 +213,7 @@ class _EventDetailViewState extends State<EventDetailView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Attendees (${widget.event.attendees.length})',
+              'Attendees (${_currentEvent.attendees.length})',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -213,11 +223,11 @@ class _EventDetailViewState extends State<EventDetailView> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     //WORKS
-                    itemCount: widget.event.attendees.length,
+                    itemCount: _currentEvent.attendees.length,
                     itemBuilder: (context, index) {
                       return ListTile(
                         leading: const Icon(Icons.person),
-                        title: Text(widget.event.attendees[index]),
+                        title: Text(_currentEvent.attendees[index]),
                         dense: true,
                       );
                     },
