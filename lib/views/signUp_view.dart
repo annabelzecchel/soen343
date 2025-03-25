@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:soen343/components/auth_service.dart';
+import '../controllers/signUp_controller.dart';
+import 'profile_view.dart';
 
 class CreateAccountForm extends StatefulWidget {
   @override
@@ -9,6 +11,7 @@ class CreateAccountForm extends StatefulWidget {
 }
 
 class _CreateAccountFormState extends State<CreateAccountForm> {
+  final SignUpController _controller =SignUpController(AuthService());
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -16,40 +19,6 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
   final TextEditingController _confirmPassController = TextEditingController();
   final TextEditingController _roleController = TextEditingController();
   bool _isLoading = false;
-
-  Future<void> _register() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-
-    try {
-      //await Firebase.initializeApp();
-      if (_passwordController.text != _confirmPassController.text) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Passwords do not match')),
-        );
-        setState(() => _isLoading = false);
-        return;
-      }
-
-      final AuthService _authService = AuthService();
-      
-      String? result = await _authService.signUp(
-          name: _nameController.text,
-          email: _emailController.text,
-          password: _passwordController.text,
-          role: _roleController.text,
-        );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Account created successfully!')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
-    }
-    setState(() => _isLoading = false);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +150,28 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
                 _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                        onPressed: _register,
+                         onPressed: ()async{
+                    if (_formKey.currentState?.validate()??false){
+                        setState(()=>_isLoading=true);
+                       try{
+                        final auth = await _controller.signUp(
+                            _emailController.text.trim(),
+                            _passwordController.text.trim(),
+                            _nameController.text.trim(),
+                            _roleController.text.trim()
+                        );
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder:(_)=>ProfilePage())
+
+                        );
+                       }catch (e){
+                        throw Exception("ERROR"+e.toString());
+                       }finally {
+                        setState(()=>_isLoading=false);
+                       }
+                    }
+                },
                         child: const Text('Sign Up'),
                       ),
               ],

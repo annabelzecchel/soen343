@@ -37,7 +37,7 @@ class AuthService{
         final cred= await _auth.signInWithEmailAndPassword(email:email, password:password);
        return cred.user;
        }catch(e){
-            print("Something went wrong1");
+            print(e);
        }
        return null;
     }
