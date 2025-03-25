@@ -14,26 +14,26 @@ class _EventManagementState extends State<EventManagementPage> {
   
   final List<Widget> _screens = [
     Container(
-        color: AppTheme.colorScheme.primary,
+        // color: AppTheme.colorScheme.primary,
         alignment: Alignment.center,
         child: const EventCreationForm(),
         ),
     Container(
-        color: AppTheme.colorScheme.primary,
+        // color: AppTheme.colorScheme.primary,
         alignment: Alignment.center,
         child: const Text(
           'Manage Events',
           style: TextStyle(fontSize: 40),
         )),
     Container(
-        color: AppTheme.colorScheme.primary,
+        // color: AppTheme.colorScheme.primary,
         alignment: Alignment.center,
         child: const Text(
           'Settings',
           style: TextStyle(fontSize: 40),
         )),
     Container(
-        color: AppTheme.colorScheme.primary,
+        // color: AppTheme.colorScheme.primary,
         alignment: Alignment.center,
         child: const Text(
           'About',
@@ -47,7 +47,7 @@ class _EventManagementState extends State<EventManagementPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: AppTheme.colorScheme.inversePrimary,
+        // backgroundColor: AppTheme.colorScheme.inversePrimary,
       ),
       body: Row(
         children: [
@@ -57,8 +57,8 @@ class _EventManagementState extends State<EventManagementPage> {
               border: Border(right: BorderSide(color: Colors.grey, width: 1)), // Border for separation
             ),
             child: NavigationRail(
-              backgroundColor: AppTheme.colorScheme.surface,
-              indicatorColor: AppTheme.colorScheme.secondaryContainer,
+              // backgroundColor: AppTheme.colorScheme.surface,
+              // indicatorColor: AppTheme.colorScheme.secondaryContainer,
               onDestinationSelected: (int index) {
                 setState(() {
                   _selectedIndex = index;
@@ -84,12 +84,12 @@ class _EventManagementState extends State<EventManagementPage> {
                 ),
               ],
               labelType: NavigationRailLabelType.all,
-              selectedLabelTextStyle: TextStyle(
-                color: AppTheme.colorScheme.tertiary,
-              ),
-              selectedIconTheme: IconThemeData(
-                color: AppTheme.colorScheme.tertiary,
-              ),
+              // selectedLabelTextStyle: TextStyle(
+              //   color: AppTheme.colorScheme.tertiary,
+              // ),
+              // selectedIconTheme: IconThemeData(
+              //   color: AppTheme.colorScheme.tertiary,
+              // ),
             ),
           ),
           Expanded(child: _screens[_selectedIndex]),

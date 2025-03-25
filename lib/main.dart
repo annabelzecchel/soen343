@@ -43,31 +43,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       builder: (context, child) => MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(
-                255, 235, 246, 236), // Main theme color (soft green)
-            primary: const Color(0xFFABC5AE), // Primary color
-            secondary: const Color(0xFFCA946F), // Secondary color (light beige)
-            tertiary: const Color(0xFFA74D0F), // Tertiary color (dark orange)
-            surface: const Color(0xFFCBDBCD), // Background color
-            inversePrimary:
-                const Color.fromARGB(255, 235, 246, 236), // Color for app bar
-            secondaryContainer: const Color(0xFFeddbcf), // light beige
-            error: const Color.fromARGB(
-                255, 214, 7, 7), // Error color (dark orange)
-            onPrimary: Colors.black, // Text color on primary
-            onSecondary: Colors.white, // Text color on secondary
-            onTertiary: Colors.black, // Text color on secondary
-            onSurface: Colors.black, // Text color on background
-          ),
-          useMaterial3: true,
-        ),
+        title: 'Planini',
+        theme: AppTheme.lightTheme,
         home: Builder(
           builder: (context) {
-            AppTheme.init(context);
-            return const MyHomePage(title: 'Home Page');
+            return const MyHomePage(title: 'Planini');
           },
         ),
         debugShowCheckedModeBanner: false,
@@ -93,20 +73,34 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppTheme.colorScheme.inversePrimary,
-        title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.event), // Event icon
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const EventManagementPage(
-                        title: 'Event Management for Organizers')),
-              );
-            },
+      title: Row(
+        children: [
+        Image.asset(
+          '../../assets/panini.jpeg', // Replace with your image path
+          height: 40, // Adjust the height as needed
+        ),
+        const SizedBox(width: 10), // Add spacing between image and title
+        Text(
+          widget.title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 40
           ),
+        ),
+        ],
+      ),
+      actions: [
+        IconButton(
+        icon: const Icon(Icons.event), // Event icon
+        onPressed: () {
+          Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const EventManagementPage(
+              title: 'Event Management for Organizers')),
+          );
+        },
+        ),
           IconButton(
             icon: const Icon(Icons.login), // Login icon
             onPressed: () {
