@@ -84,18 +84,18 @@ class _EventFormViewState extends State<EventFormView> {
 
       try {
         if (widget.event != null) {
-          final updatedEvent = Event(
-            id: widget.event!.id,
-            attendees: widget.event!.attendees,
-            createdByEmail: widget.event!.createdByEmail,
-            dateTime: dateTime,
-            description: _descriptionController.text,
-            format: _formatController.text,
-            location: _locationController.text,
-            name: _nameController.text,
-            price: double.parse(_priceController.text),
-            type: _typeController.text,
-          );
+          final updatedEvent = EventBuilder()
+              .setId(widget.event!.id)
+              .setAttendees(widget.event!.attendees)
+              .setCreatedByEmail(widget.event!.createdByEmail)
+              .setDateTime(dateTime)
+              .setDescription(_descriptionController.text)
+              .setFormat(_formatController.text)
+              .setLocation(_locationController.text)
+              .setName(_nameController.text)
+              .setPrice(double.parse(_priceController.text))
+              .setType(_typeController.text)
+              .build();
 
           await _eventController.updateEvent(updatedEvent);
         }
