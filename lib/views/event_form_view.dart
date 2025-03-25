@@ -95,6 +95,7 @@ class _EventFormViewState extends State<EventFormView> {
             name: _nameController.text,
             price: double.parse(_priceController.text),
             type: _typeController.text,
+            image: widget.event!.image,
           );
 
           await _eventController.updateEvent(updatedEvent);

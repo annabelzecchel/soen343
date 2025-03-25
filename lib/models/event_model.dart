@@ -9,6 +9,7 @@ class Event {
   final String name;
   final double price;
   final String type;
+  final String image;
 
   Event({
     required this.id,
@@ -21,6 +22,7 @@ class Event {
     required this.name,
     required this.price,
     required this.type,
+    required this.image,
   });
 
   // Firebase to Event
@@ -61,6 +63,7 @@ class Event {
           ? double.tryParse(data['price'].toString()) ?? 0.0
           : 0.0,
       type: data['type'] ?? '',
+      image: data['image'] ?? '',
     );
   }
 
@@ -82,6 +85,7 @@ class Event {
       'name': name,
       'price': price.toString(),
       'type': type,
+      'image': image,
     };
   }
 }
