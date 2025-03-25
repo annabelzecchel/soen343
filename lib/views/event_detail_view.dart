@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../controllers/event_controller.dart';
+import '../controllers/profile_controller.dart';
+import '../components/auth_service.dart';
 import '../models/event_model.dart';
 import 'event_form_view.dart';
 
@@ -14,67 +17,78 @@ class EventDetailView extends StatefulWidget {
 
 class _EventDetailViewState extends State<EventDetailView> {
   final EventController _eventController = EventController();
-  final _userController = TextEditingController();
-  late Event _currentEvent;
+  final ProfileController _profileController = ProfileController(AuthService());
+  String? type;
 
-    @override
+  @override
   void initState() {
     super.initState();
-    _currentEvent = widget.event; // Initialize with the passed event
+    _fetchUserRole();
   }
 
-  Future<void> _refreshEventData() async {
-    final updatedEvent = await _eventController.getEventById(_currentEvent.id);
-    setState(() {
-      _currentEvent = updatedEvent;
-    });
+  Future<void> _fetchUserRole() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      String userRole = await _profileController.getRoleById(user.uid);
+      print(userRole);
+      setState(() {
+        type = userRole;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_currentEvent.name),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => EventFormView(event: _currentEvent),
+        title: Text(widget.event.name),
+        actions: (type == 'organizer' ||
+                type == "stakeholders" ||
+                type == "administrator")
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            EventFormView(event: widget.event),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Delete Event'),
-                  content:
-                      const Text('Are you SURE you want to DELETE this event?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        await _eventController.deleteEvent(_currentEvent.id);
-                        Navigator.pop(context); //Dialog
-                        Navigator.pop(context); //List
-                      },
-                      child: const Text('Delete'),
-                    ),
-                  ],
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Delete Event'),
+                        content: const Text(
+                            'Are you SURE you want to DELETE this event?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              await _eventController
+                                  .deleteEvent(widget.event.id);
+                              Navigator.pop(context); //Dialog
+                              Navigator.pop(context); //List
+                            },
+                            child: const Text('Delete'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-        ],
+              ]
+            : null,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -99,9 +113,12 @@ class _EventDetailViewState extends State<EventDetailView> {
                         labelText: 'Enter your user ID',
                       ),
                       //NOT WORKING
-                      onChanged: (value) async {
+                      onSubmitted: (value) async {
                         if (value.isNotEmpty) {
-                          _userController.text = value;
+                          await _eventController.addAttendee(
+                              widget.event.id, value);
+                          //print("$value has been added to the ${event.id}");
+                          Navigator.pop(context);
                         }
                       },
                     ),
@@ -111,9 +128,7 @@ class _EventDetailViewState extends State<EventDetailView> {
                         child: const Text('Cancel'),
                       ),
                       TextButton(
-                        onPressed: () async {
-                          await _eventController.addAttendee(_currentEvent.id, _userController.text);
-                          await _refreshEventData();
+                        onPressed: () {
                           Navigator.pop(context);
                         },
                         child: const Text('Register'),
@@ -137,21 +152,23 @@ class _EventDetailViewState extends State<EventDetailView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              _currentEvent.name,
+              widget.event.name,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
-            _buildInfoRow(Icons.description, _currentEvent.description),
-            _buildInfoRow(Icons.location_on, _currentEvent.location),
+            _buildInfoRow(Icons.description, widget.event.description),
+            _buildInfoRow(Icons.location_on, widget.event.location),
             _buildInfoRow(
               Icons.calendar_today,
-              _formatDateTime(_currentEvent.dateTime),
+              _formatDateTime(widget.event.dateTime),
             ),
+            _buildInfoRow(Icons.attach_money,
+                '\$${widget.event.price.toStringAsFixed(2)}'),
+            _buildInfoRow(Icons.category, 'Type: ${widget.event.type}'),
             _buildInfoRow(
-                Icons.attach_money, '\$${_currentEvent.price.toStringAsFixed(2)}'),
-            _buildInfoRow(Icons.category, 'Type: ${_currentEvent.type}'),
-            _buildInfoRow(Icons.format_align_left, 'Format: ${_currentEvent.format}'),
-            _buildInfoRow(Icons.email, 'Created by: ${_currentEvent.createdByEmail}'),
+                Icons.format_align_left, 'Format: ${widget.event.format}'),
+            _buildInfoRow(
+                Icons.email, 'Created by: ${widget.event.createdByEmail}'),
           ],
         ),
       ),
@@ -186,21 +203,21 @@ class _EventDetailViewState extends State<EventDetailView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Attendees (${_currentEvent.attendees.length})',
+              'Attendees (${widget.event.attendees.length})',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            _currentEvent.attendees.isEmpty
+            widget.event.attendees.isEmpty
                 ? const Text('No attendees yet')
                 : ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     //WORKS
-                    itemCount: _currentEvent.attendees.length,
+                    itemCount: widget.event.attendees.length,
                     itemBuilder: (context, index) {
                       return ListTile(
                         leading: const Icon(Icons.person),
-                        title: Text(_currentEvent.attendees[index]),
+                        title: Text(widget.event.attendees[index]),
                         dense: true,
                       );
                     },

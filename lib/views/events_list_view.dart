@@ -1,6 +1,9 @@
 // VIEW
 // lib/views/events_list_view.dart
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:soen343/components/auth_service.dart';
+import 'package:soen343/controllers/profile_controller.dart';
 import '../controllers/event_controller.dart';
 import '../models/event_model.dart';
 import 'event_detail_view.dart';
@@ -10,11 +13,31 @@ class EventsListView extends StatefulWidget {
   const EventsListView({Key? key}) : super(key: key);
 
   @override
-  _EventsListViewState createState() => _EventsListViewState();
+  _EventListViewState createState() => _EventListViewState();
 }
 
-class _EventsListViewState extends State<EventsListView> {
+class _EventListViewState extends State<EventsListView> {
   final EventController _eventController = EventController();
+  String? email;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchEmail();
+  }
+
+  Future<void> _fetchEmail() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      String? myemail = user.email;
+      print(email);
+      setState(() {
+        email = myemail;
+        print(email);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +73,16 @@ class _EventsListViewState extends State<EventsListView> {
                   subtitle: Text(
                     '${_formatDateTime(event.dateTime)} • ${event.location}',
                   ),
-                  trailing: Text('\$${event.price.toStringAsFixed(2)}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('\$${event.price.toStringAsFixed(2)}'),
+                      const SizedBox(width: 8),
+                      if (event.attendees
+                          .contains(FirebaseAuth.instance.currentUser?.email))
+                        const Icon(Icons.check_circle, color: Colors.green),
+                    ],
+                  ),
                   onTap: () {
                     Navigator.push(
                       context,
