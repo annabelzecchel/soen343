@@ -23,20 +23,11 @@ class _EventListViewState extends State<EventsListView> {
   @override
   void initState() {
     super.initState();
-    _fetchEmail();
-  }
-
-  Future<void> _fetchEmail() async {
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user != null) {
-      String? myemail = user.email;
-      print(email);
+    FirebaseAuth.instance.authStateChanges().listen((user) {
       setState(() {
-        email = myemail;
-        print(email);
+        email = user?.email ?? "Not logged in";
       });
-    }
+    });
   }
 
   @override
