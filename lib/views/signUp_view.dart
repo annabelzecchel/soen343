@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:soen343/components/auth_service.dart';
+import '../controllers/signUp_controller.dart';
+import 'profile_view.dart';
 
 class CreateAccountForm extends StatefulWidget {
   @override
@@ -8,6 +11,7 @@ class CreateAccountForm extends StatefulWidget {
 }
 
 class _CreateAccountFormState extends State<CreateAccountForm> {
+  final SignUpController _controller =SignUpController(AuthService());
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -15,35 +19,6 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
   final TextEditingController _confirmPassController = TextEditingController();
   final TextEditingController _roleController = TextEditingController();
   bool _isLoading = false;
-
-  Future<void> _register() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-
-    try {
-      //await Firebase.initializeApp();
-      if (_passwordController.text != _confirmPassController.text) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Passwords do not match')),
-        );
-        setState(() => _isLoading = false);
-        return;
-      }
-
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Account created successfully!')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
-    }
-    setState(() => _isLoading = false);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,16 +113,35 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
                   },
                 ),
                 const SizedBox(height: 20),
-                TextFormField(
-                  controller: _roleController,
+                DropdownButtonFormField(
+                  value: _roleController.text.isEmpty ? null : _roleController.text,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _roleController.text = newValue ?? '';
+                    });
+                  },
                   decoration: const InputDecoration(
-                    icon: Icon(Icons.work),
-                    hintText: 'Enter your role',
+                    icon: Icon(Icons.filter_vintage_outlined),
+                    hintText: 'Select Role',
                     labelText: 'Role',
                   ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'organizer', child: Text('Organizer'), 
+                    ),
+                    DropdownMenuItem(
+                      value: 'attendee', child: Text('Attendee'), 
+                    ),
+                    DropdownMenuItem(
+                      value: 'administration', child: Text('Administration'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Stakeholders', child: Text('Stakeholders'), 
+                    ),
+                  ],
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your role';
+                      return 'Please enter role type';
                     }
                     return null;
                   },
@@ -156,7 +150,28 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
                 _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                        onPressed: _register,
+                         onPressed: ()async{
+                    if (_formKey.currentState?.validate()??false){
+                        setState(()=>_isLoading=true);
+                       try{
+                        final auth = await _controller.signUp(
+                            _emailController.text.trim(),
+                            _passwordController.text.trim(),
+                            _nameController.text.trim(),
+                            _roleController.text.trim()
+                        );
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder:(_)=>ProfilePage())
+
+                        );
+                       }catch (e){
+                        throw Exception("ERROR"+e.toString());
+                       }finally {
+                        setState(()=>_isLoading=false);
+                       }
+                    }
+                },
                         child: const Text('Sign Up'),
                       ),
               ],

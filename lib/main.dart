@@ -9,6 +9,9 @@ import 'package:soen343/login.dart';
 import 'package:soen343/components/app_theme.dart';
 import 'package:soen343/components/eventList.dart';
 import 'package:soen343/views/events_list_view.dart';
+import 'package:soen343/views/profile_view.dart';
+import 'package:soen343/views/login_view.dart';
+import 'package:soen343/views/signUp_view.dart';
 
 void main() async {
   await dotenv.load();
@@ -110,7 +113,17 @@ class _MyHomePageState extends State<MyHomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const LoginPage(title: 'Login And SignUp')),
+                    builder: (context) => const LoginPage(title: 'Login !')),
+              );
+            },
+          ),
+            IconButton(
+            icon: const Icon(Icons.child_care), // Profile icon
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ProfilePage(),),
               );
             },
           ),
