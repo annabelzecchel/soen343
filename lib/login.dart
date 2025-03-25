@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:soen343/components/login_form.dart';
-import 'package:soen343/components/create_account_form.dart';
+import 'package:soen343/views/login_view.dart';
+import 'package:soen343/views/signUp_view.dart';
 
 class LoginPage extends StatefulWidget {
   final String title;
@@ -23,13 +23,13 @@ class _LoginState extends State<LoginPage> {
             borderRadius: BorderRadius.circular(10)
         ),
         alignment: Alignment.center,
-        child: LoginForm(title: 'Login'),
+        child:  LoginForm(title: "IT WORKS"),
 )),
     Container(
         color: const Color.fromARGB(101, 255, 192, 203),
         alignment: Alignment.center,
-        child: CreateAccountForm(
-        )),
+        child: CreateAccountForm(),
+        ),
   ];
   int _selectedIndex = 0;
 
