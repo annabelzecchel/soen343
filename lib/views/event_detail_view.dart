@@ -3,17 +3,38 @@ import '../controllers/event_controller.dart';
 import '../models/event_model.dart';
 import 'event_form_view.dart';
 
-class EventDetailView extends StatelessWidget {
+class EventDetailView extends StatefulWidget {
   final Event event;
-  final EventController _eventController = EventController();
 
   EventDetailView({Key? key, required this.event}) : super(key: key);
+
+  @override
+  _EventDetailViewState createState() => _EventDetailViewState();
+}
+
+class _EventDetailViewState extends State<EventDetailView> {
+  final EventController _eventController = EventController();
+  final _userController = TextEditingController();
+  late Event _currentEvent;
+
+    @override
+  void initState() {
+    super.initState();
+    _currentEvent = widget.event; // Initialize with the passed event
+  }
+
+  Future<void> _refreshEventData() async {
+    final updatedEvent = await _eventController.getEventById(_currentEvent.id);
+    setState(() {
+      _currentEvent = updatedEvent;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(event.name),
+        title: Text(_currentEvent.name),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
@@ -21,7 +42,7 @@ class EventDetailView extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => EventFormView(event: event),
+                  builder: (context) => EventFormView(event: _currentEvent),
                 ),
               );
             },
@@ -42,7 +63,7 @@ class EventDetailView extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () async {
-                        await _eventController.deleteEvent(event.id);
+                        await _eventController.deleteEvent(_currentEvent.id);
                         Navigator.pop(context); //Dialog
                         Navigator.pop(context); //List
                       },
@@ -78,11 +99,9 @@ class EventDetailView extends StatelessWidget {
                         labelText: 'Enter your user ID',
                       ),
                       //NOT WORKING
-                      onSubmitted: (value) async {
+                      onChanged: (value) async {
                         if (value.isNotEmpty) {
-                          await _eventController.addAttendee(event.id, value);
-                          //print("$value has been added to the ${event.id}");
-                          Navigator.pop(context);
+                          _userController.text = value;
                         }
                       },
                     ),
@@ -92,7 +111,9 @@ class EventDetailView extends StatelessWidget {
                         child: const Text('Cancel'),
                       ),
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          await _eventController.addAttendee(_currentEvent.id, _userController.text);
+                          await _refreshEventData();
                           Navigator.pop(context);
                         },
                         child: const Text('Register'),
@@ -116,21 +137,21 @@ class EventDetailView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              event.name,
+              _currentEvent.name,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
-            _buildInfoRow(Icons.description, event.description),
-            _buildInfoRow(Icons.location_on, event.location),
+            _buildInfoRow(Icons.description, _currentEvent.description),
+            _buildInfoRow(Icons.location_on, _currentEvent.location),
             _buildInfoRow(
               Icons.calendar_today,
-              _formatDateTime(event.dateTime),
+              _formatDateTime(_currentEvent.dateTime),
             ),
             _buildInfoRow(
-                Icons.attach_money, '\$${event.price.toStringAsFixed(2)}'),
-            _buildInfoRow(Icons.category, 'Type: ${event.type}'),
-            _buildInfoRow(Icons.format_align_left, 'Format: ${event.format}'),
-            _buildInfoRow(Icons.email, 'Created by: ${event.createdByEmail}'),
+                Icons.attach_money, '\$${_currentEvent.price.toStringAsFixed(2)}'),
+            _buildInfoRow(Icons.category, 'Type: ${_currentEvent.type}'),
+            _buildInfoRow(Icons.format_align_left, 'Format: ${_currentEvent.format}'),
+            _buildInfoRow(Icons.email, 'Created by: ${_currentEvent.createdByEmail}'),
           ],
         ),
       ),
@@ -165,21 +186,21 @@ class EventDetailView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Attendees (${event.attendees.length})',
+              'Attendees (${_currentEvent.attendees.length})',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            event.attendees.isEmpty
+            _currentEvent.attendees.isEmpty
                 ? const Text('No attendees yet')
                 : ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     //WORKS
-                    itemCount: event.attendees.length,
+                    itemCount: _currentEvent.attendees.length,
                     itemBuilder: (context, index) {
                       return ListTile(
                         leading: const Icon(Icons.person),
-                        title: Text(event.attendees[index]),
+                        title: Text(_currentEvent.attendees[index]),
                         dense: true,
                       );
                     },
