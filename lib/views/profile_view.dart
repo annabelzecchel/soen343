@@ -7,6 +7,7 @@ import '../models/users_model.dart';
 import '../models/auth_model.dart';
 import 'package:soen343/components/auth_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:soen343/views/payment_view.dart';
 
 class ProfilePage extends StatefulWidget{
     const ProfilePage({Key?key}): super (key: key);
@@ -40,10 +41,9 @@ class _ProfilePageState extends State<ProfilePage>{
 
       if (user!=null){
         final userModel = await _controller.getProfile(user?.uid ?? '');
-         final uName = await _controller.getNameById(user?.uid ?? '');
+        final uName = await _controller.getNameById(user?.uid ?? '');
         setState((){_user=userModel;userName=uName;});
       }
- 
     } catch (e) {
       print('Error loading user name: $e');
     }
@@ -55,6 +55,20 @@ class _ProfilePageState extends State<ProfilePage>{
         return Scaffold(
             appBar: AppBar(
             title: const Text('Profile'),
+            actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: IconButton(
+              icon: const Icon(Icons.payment),
+              onPressed: () {
+                Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PaymentView()),
+                );
+              },
+              ),
+            ),
+          ],
             ),
             body:Center(
                 child:Column(
