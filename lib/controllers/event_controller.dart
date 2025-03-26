@@ -75,4 +75,14 @@ class EventController {
       throw Exception('Failed to add attendee: $e');
     }
   }
+
+  //Get all the events A user attends 
+  Stream <List<Event>> getUserEvents(String email){
+      return FirebaseFirestore.instance.collection(collectionPath).where('attendees', arrayContains: email)
+      .snapshots().map((snapshot) {
+        return snapshot.docs.map<Event>((doc) {
+          return Event.fromFirestore(doc.data(), doc.id);
+        }).toList();
+      });
+  }
 }
