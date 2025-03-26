@@ -56,11 +56,11 @@ class _LoginState extends State<LoginPage> {
               selectedIndex: _selectedIndex,
               destinations: const [
                 NavigationRailDestination(
-                  icon: Icon(Icons.person),
+                  icon: Icon(Icons.login),
                   label: Text('Log in'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.login),
+                  icon: Icon(Icons.add_circle_outline),
                   label: Text('Sign up'),
                 ),
               ],

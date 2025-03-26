@@ -26,7 +26,7 @@ class SignUpController {
                 );
             }
 
-                       return Auth(
+            return Auth(
         id: '',
         email: email,
         name: '',

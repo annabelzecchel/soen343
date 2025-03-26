@@ -7,6 +7,9 @@ import '../models/users_model.dart';
 import '../models/auth_model.dart';
 import 'package:soen343/components/auth_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:soen343/views/payment_view.dart';
+import 'package:soen343/views/analytics_view.dart'; // Ensure this file exists and contains the AnalyticsView class
+import 'dart:developer' as developer;
 import 'event_form_view.dart';
 import '../controllers/event_controller.dart';
 import 'package:soen343/views/events_list_view.dart';
@@ -55,7 +58,6 @@ class _ProfilePageState extends State<ProfilePage>{
 
         setState((){_user=userModel;userName=uName;userRole=role;});
       }
- 
     } catch (e) {
       print('Error loading user name: $e');
     }
