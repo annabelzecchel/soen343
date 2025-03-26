@@ -66,23 +66,25 @@ class EventController {
       List<String> attendees = event.attendees ?? [];
 
       if (!attendees.contains(userId)) {
-        await _firestore
-            .collection(collectionPath)
-            .doc(eventId)
-            .update({'attendees': FieldValue.arrayUnion([userId])});
+        await _firestore.collection(collectionPath).doc(eventId).update({
+          'attendees': FieldValue.arrayUnion([userId])
+        });
       }
     } catch (e) {
       throw Exception('Failed to add attendee: $e');
     }
   }
 
-  //Get all the events A user attends 
-  Stream <List<Event>> getUserEvents(String email){
-      return FirebaseFirestore.instance.collection(collectionPath).where('attendees', arrayContains: email)
-      .snapshots().map((snapshot) {
-        return snapshot.docs.map<Event>((doc) {
-          return Event.fromFirestore(doc.data(), doc.id);
-        }).toList();
-      });
+  //Get all the events A user attends
+  Stream<List<Event>> getUserEvents(String email) {
+    return FirebaseFirestore.instance
+        .collection(collectionPath)
+        .where('attendees', arrayContains: email)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map<Event>((doc) {
+        return Event.fromFirestore(doc.data(), doc.id);
+      }).toList();
+    });
   }
 }

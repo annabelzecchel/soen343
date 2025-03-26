@@ -151,7 +151,6 @@ class EventBuilder {
     if (id == null ||
         createdByEmail == null ||
         dateTime == null ||
-        description == null ||
         format == null ||
         location == null ||
         name == null ||
