@@ -49,9 +49,9 @@ class MyApp extends StatelessWidget {
   }
 }
 // Ensure Flutter bindings are initialized before running the app
-void ensureFlutterBinding() {
-  WidgetsFlutterBinding.ensureInitialized();
-}
+// void ensureFlutterBinding() {
+//   WidgetsFlutterBinding.ensureInitialized();
+// }
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
