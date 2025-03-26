@@ -8,6 +8,8 @@ import '../models/auth_model.dart';
 import 'package:soen343/components/auth_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:soen343/views/payment_view.dart';
+import 'package:soen343/views/analytics_view.dart'; // Ensure this file exists and contains the AnalyticsView class
+import 'dart:developer' as developer;
 
 class ProfilePage extends StatefulWidget{
     const ProfilePage({Key?key}): super (key: key);
@@ -54,17 +56,29 @@ class _ProfilePageState extends State<ProfilePage>{
 
         return Scaffold(
             appBar: AppBar(
-            title: const Text('Profile'),
+            title: const Center(child: Text('Profile')),
             actions: [
             Padding(
-              padding: const EdgeInsets.only(right: 8.0),
+              padding: const EdgeInsets.only(right: 5.0),
               child: IconButton(
               icon: const Icon(Icons.payment),
               onPressed: () {
-                Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const PaymentView()),
-                );
+              Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PaymentView()),
+              );
+              },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: IconButton(
+              icon: const Icon(Icons.analytics),
+              onPressed: () {
+              Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AnalyticsView()),
+              );
               },
               ),
             ),
