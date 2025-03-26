@@ -76,4 +76,22 @@ class ProfileController {
       throw Exception('LOGIN FAILED');
     }
   }
+
+  Future<String> getEmailById(String id) async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        final userP = FirebaseFirestore.instance.collection('users');
+        final doc = await userP.doc(id).get();
+        if (doc.exists) {
+          final userData = doc.data()!;
+          return userData['email'];
+        }
+        return '';
+      }
+      return '';
+    } catch (e) {
+      throw Exception('LOGIN FAILED');
+    }
+  }
 }

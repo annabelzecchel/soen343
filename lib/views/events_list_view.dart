@@ -1,13 +1,8 @@
-// VIEW
-// lib/views/events_list_view.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:soen343/components/auth_service.dart';
-import 'package:soen343/controllers/profile_controller.dart';
 import '../controllers/event_controller.dart';
 import '../models/event_model.dart';
 import 'event_detail_view.dart';
-import 'event_form_view.dart';
 
 class EventsListView extends StatefulWidget {
   const EventsListView({Key? key}) : super(key: key);
