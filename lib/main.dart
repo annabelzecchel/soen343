@@ -77,20 +77,21 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 251.0, // Increase the height of the AppBar
       title: Row(
         children: [
         Image.asset(
-          '../../assets/panini.jpeg', // Replace with your image path
-          height: 40, // Adjust the height as needed
+          '../../assets/Planini_NoBackground.png', // Replace with your image path
+          height: 250, // Adjust the height as needed
         ),
-        const SizedBox(width: 10), // Add spacing between image and title
-        Text(
+        //const SizedBox(width: 10), // Add spacing between image and title
+        /*Text(
           widget.title,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 40
           ),
-        ),
+        ),*/
         ],
       ),
       actions: [
