@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import "package:cloud_firestore/cloud_firestore.dart";
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:soen343/event_management_page.dart';
 import 'package:soen343/login.dart';
@@ -55,7 +56,10 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
+// Ensure Flutter bindings are initialized before running the app
+void ensureFlutterBinding() {
+  WidgetsFlutterBinding.ensureInitialized();
+}
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -113,12 +117,23 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
             IconButton(
             icon: const Icon(Icons.child_care), // Profile icon
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const ProfilePage(),),
-              );
+            onPressed: () async {
+              final user = await FirebaseAuth.instance.currentUser;
+              if (user != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfilePage(),
+                  ),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LoginPage(title: 'Login !'),
+                  ),
+                );
+              }
             },
           ),
           

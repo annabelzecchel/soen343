@@ -108,12 +108,15 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
                   validator: (value) {
                     if (value == null || value.length < 6) {
                       return 'Password must be at least 6 characters';
+                    } if (value != _passwordController.text) {
+                      return 'Passwords do not match';
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 20),
                 DropdownButtonFormField(
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                   value: _roleController.text.isEmpty ? null : _roleController.text,
                   onChanged: (String? newValue) {
                     setState(() {
@@ -121,7 +124,7 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
                     });
                   },
                   decoration: const InputDecoration(
-                    icon: Icon(Icons.filter_vintage_outlined),
+                    icon: Icon(Icons.work),
                     hintText: 'Select Role',
                     labelText: 'Role',
                   ),
@@ -141,7 +144,7 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
                   ],
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter role type';
+                      return 'Please select your role';
                     }
                     return null;
                   },
@@ -150,10 +153,10 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
                 _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                         onPressed: ()async{
+                        onPressed: ()async{
                     if (_formKey.currentState?.validate()??false){
                         setState(()=>_isLoading=true);
-                       try{
+                      try{
                         final auth = await _controller.signUp(
                             _emailController.text.trim(),
                             _passwordController.text.trim(),
@@ -165,11 +168,11 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
                             MaterialPageRoute(builder:(_)=>ProfilePage())
 
                         );
-                       }catch (e){
+                      }catch (e){
                         throw Exception("ERROR"+e.toString());
-                       }finally {
+                      }finally {
                         setState(()=>_isLoading=false);
-                       }
+                      }
                     }
                 },
                         child: const Text('Sign Up'),
