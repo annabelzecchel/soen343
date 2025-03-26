@@ -86,6 +86,24 @@ class _ProfilePageState extends State<ProfilePage>{
                 type =="attendee")
             ? [
                 IconButton(
+                  icon: const Icon(Icons.payment),
+                  onPressed: () {
+                    Navigator.push(
+               context,
+               MaterialPageRoute(builder: (context) => const PaymentView()),
+               );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.analytics),
+                  onPressed: () {
+                  Navigator.push(
+                 context,
+                MaterialPageRoute(builder: (context) => AnalyticsView()),
+                );
+                  },
+                ),
+                IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () {
                     //NEED TO ADD THE EDIT METHOD
