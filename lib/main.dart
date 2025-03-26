@@ -72,7 +72,23 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final nameController = TextEditingController();
   final typeController = TextEditingController();
+  String ? logIn_Out;
+  final FirebaseAuth _auth =FirebaseAuth.instance;
+  User?_currentUser;
+  
+  
+  @override
+  void initState() {
+    super.initState();
+    _auth.authStateChanges().listen((user){
+      setState((){
+        _currentUser=user;
+      });
+    });
+    
+  }
 
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,6 +132,8 @@ class _MyHomePageState extends State<MyHomePage> {
               );
             },
           ),
+          const SizedBox(height: 20),
+          // if (_currentUser != null){
             IconButton(
             icon: const Icon(Icons.child_care), // Profile icon
             onPressed: () async {
@@ -137,6 +155,26 @@ class _MyHomePageState extends State<MyHomePage> {
               }
             },
           ),
+          
+            ElevatedButton(
+            onPressed: () async {
+              if (_currentUser == null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LoginPage(title:'Sign In!'),
+                  ),
+                );
+              } else {
+                await FirebaseAuth.instance.signOut();
+                    Navigator.pushReplacement(context,
+                     MaterialPageRoute(
+                    builder: (context) => const MyHomePage(title: "HOME"),
+                     )
+                  );
+              }
+            },child:Text(_currentUser==null?"Sign in!": "Sign out!"),
+            ),
           
         ],
       ),

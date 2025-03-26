@@ -55,7 +55,7 @@ class _EventDetailViewState extends State<EventDetailView> {
         title: Text(_currentEvent.name),
         actions: (type == 'organizer' ||
                 type == "stakeholders" ||
-                type == "administrator")
+                type == "administration")
             ? [
                 IconButton(
                   icon: const Icon(Icons.edit),
