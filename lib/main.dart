@@ -1,18 +1,16 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import "package:cloud_firestore/cloud_firestore.dart";
+import 'package:provider/provider.dart';
+import 'package:soen343/controllers/event_controller.dart';
+import 'package:soen343/models/event_model.dart';
+import 'package:soen343/views/profile_view.dart';
+import 'package:soen343/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:soen343/event_management_page.dart';
-import 'package:soen343/login.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:soen343/views/home_page_view.dart';
 import 'package:soen343/components/app_theme.dart';
-import 'package:soen343/components/eventList.dart';
-import 'package:soen343/views/events_list_view.dart';
-import 'package:soen343/views/profile_view.dart';
-import 'package:soen343/views/login_view.dart';
-import 'package:soen343/views/signUp_view.dart';
+
 
 void main() async {
   await dotenv.load();
@@ -42,17 +40,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      builder: (context, child) => MaterialApp(
-        title: 'Planini',
-        theme: AppTheme.lightTheme,
-        home: Builder(
-          builder: (context) {
-            return const MyHomePage(title: 'Planini');
-          },
-        ),
-        debugShowCheckedModeBanner: false,
-      ),
+    return MaterialApp(
+      title: 'Planini',
+      theme: AppTheme.lightTheme,
+      home: const HomePage(title: 'PLANINI'),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
