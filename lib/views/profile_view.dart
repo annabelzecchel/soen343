@@ -42,10 +42,10 @@ class _ProfilePageState extends State<ProfilePage>{
     String?userRole;
     String? type;
     String? _email;
-    final _emailController = TextEditingController();
-    final _nameController = TextEditingController();
-     final _roleController = TextEditingController();
-       final _formKey = GlobalKey<FormState>();
+    late TextEditingController _emailController;
+    late TextEditingController _nameController;
+    late TextEditingController _roleController;
+    final _formKey = GlobalKey<FormState>();
 
 
   @override
@@ -54,7 +54,6 @@ class _ProfilePageState extends State<ProfilePage>{
     _loadUserProfile();
       _fetchUserRole();
        _setUserEmail();
-       _saveUser();
         final users = widget.users;
   }
 
@@ -67,31 +66,6 @@ class _ProfilePageState extends State<ProfilePage>{
         _email = email;
       });
     } 
-  }
-
-  Future<void> _saveUser() async {
-    if (_formKey.currentState!.validate()) {
-         setState(() => _isLoading = true);
-      try {
-      if (widget.users != null) {
-        final updatedUser = UsersBuilder()
-            .setId(widget.users!.id)
-            .setEmail(_emailController.text)
-            .setName(_nameController.text)
-            .setRole(_roleController.text)
-            .build();
-          await _controller.updateUser(updatedUser);
-
-        }
-
-         Navigator.pop(context);
-
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
-    }
   }
 
   Future<void> _loadUserProfile() async {
@@ -125,8 +99,11 @@ class _ProfilePageState extends State<ProfilePage>{
 
     @override
     Widget build(BuildContext context){
-         final theme = Theme.of(context);
+    final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    _nameController = TextEditingController(text: userName);
+    _emailController = TextEditingController(text: user.email);
+    _roleController = TextEditingController(text: userRole);
     return Scaffold(
       appBar: AppBar(
         title: Text('Welcome to your Profile Page ${userName ?? 'User'}'),
@@ -187,8 +164,10 @@ class _ProfilePageState extends State<ProfilePage>{
             if(type == 'Stakeholders')
             _buildMySponsorsList(context),
             const SizedBox(height: 24),
-            Text('All Users'),
             
+            
+            if(type == 'administration')
+            Text('All Users'),
             if(type == 'administration')
                Expanded(
             child: StreamBuilder<List<Users>>(
@@ -291,7 +270,7 @@ class _ProfilePageState extends State<ProfilePage>{
                                           showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
-                                            title: const Text('Are you sure you WANT to Update User'),
+                                            title: const Text('You are now updating this user.'),
                                             content: 
                                             Container(
                                             child:Form(
@@ -347,7 +326,24 @@ class _ProfilePageState extends State<ProfilePage>{
                                                 child: const Text('Cancel'),
                                               ),
                                              TextButton(
-                                                  onPressed: _saveUser,
+                                                  onPressed: () async{
+                                                         try {
+                                                              if (user != null) {
+                                                                final updatedUser = UsersBuilder()
+                                                                    .setId(user.id)
+                                                                    .setEmail(_emailController.text)
+                                                                    .setName(_nameController.text)
+                                                                    .setRole(_roleController.text)
+                                                                    .build();
+                                                                  await _controller.updateUser(updatedUser);
+                                                          
+                                                                }   Navigator.pop(context);
+                                                                } catch (e) {
+                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                  SnackBar(content: Text('Error: $e')),
+                                                                );
+                                                              }
+                                                          },
                                                   
                                                   child: const Text("Update a User"),
                                                 ),
@@ -376,7 +372,7 @@ class _ProfilePageState extends State<ProfilePage>{
                                                   await _controller
                                                       .deleteUser(user.id);
                                                   Navigator.pop(context); //Dialog
-                                                  Navigator.pop(context); //List
+                                                 // Navigator.pop(context); //List
                                                 },
                                                 child: const Text('Delete'),
                                               ),
@@ -416,26 +412,6 @@ class _ProfilePageState extends State<ProfilePage>{
                 );
               },
             )),
-
-             Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: 
-                    [
-                // IconButton(
-                //   icon: const Icon(Icons.edit),
-                //   onPressed: () {
-                //     Navigator.push(
-                //       context,
-                //       MaterialPageRoute(
-                //         builder: (context) =>
-                //             EventFormView(event: _currentEvent),
-                //       ),
-                //     );
-                //   },
-                // ),
-              ]
-                    )
-            
         ],
       ),
     );
