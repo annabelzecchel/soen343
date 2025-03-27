@@ -6,13 +6,15 @@ import "package:cloud_firestore/cloud_firestore.dart";
 import 'dart:developer';
 
 class AuthService {
-  //SINGLETON
+  /* PATTERN: Singleton creates 1 instance which is _instance below EAGER SINGLETON */
   static final AuthService _instance = AuthService._internal();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  /* Privatizing the constructor to prevent new instances from outside class */
   AuthService._internal();
 
+  /* Returns same instance instead of creating new */
   factory AuthService() {
     return _instance;
   }
