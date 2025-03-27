@@ -20,13 +20,15 @@ class _ChatRoomsViewState extends State<ChatRoomsView> {
   @override
   void initState() {
     super.initState();
-    // Subscribe to chat room creation updates (Observer pattern)
+    // PATTERN: Subscribe to chat room creation updates (Observer pattern)
+    /** UI as observer here wdiget subscribes/listen to the onCharRoomCreated stream of line 17 in chat_controller */
     _chatRoomSubscription =
         _chatController.onChatRoomCreated.listen((chatRoomId) {
       setState(() {});
     });
   }
 
+// Dispose the subscription when the widget is removed from the tree
   @override
   void dispose() {
     _chatRoomSubscription.cancel();

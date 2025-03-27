@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+/* PATTERN: Event is complex objects with multiple properties thus builder pattern is fitting toconstruct
+Event step by step avoiding long constrcutor */
 class Event {
   final String id;
   final List<String> attendees;
@@ -12,6 +14,7 @@ class Event {
   final double price;
   final String type;
 
+/* no normal constrcutor with multiple paramater only throught Event builder */
   Event._builder(EventBuilder builder)
       : id = builder.id!,
         attendees = builder.attendees,
@@ -24,6 +27,7 @@ class Event {
         price = builder.price!,
         type = builder.type!;
 
+/* set each properties */
   factory Event.fromFirestore(Map<String, dynamic> data, String documentId) {
     return EventBuilder()
         .setId(documentId)

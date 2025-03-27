@@ -5,6 +5,9 @@ import '../models/chat_message_model.dart';
 import '../models/chat_room_model.dart';
 
 class ChatController {
+  /* PATTERN: StreamController is used to notify UI component -> class chat_rooms_view
+  the controller manages steam of chat room creations events. Allows controller to decouple from UI it
+   doesnt know abt chat_rooms_view widget + stream allows real-time updates */
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final StreamController<String> _chatRoomCreatedController =
@@ -31,7 +34,7 @@ class ChatController {
       DocumentReference docRef = await _firestore
           .collection('chatRooms')
           .add(chatRoomData.toFirestore());
-
+      /*notifies all UI components that new chat room has been created */
       _chatRoomCreatedController.add(docRef.id);
 
       return docRef.id;
