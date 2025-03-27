@@ -23,6 +23,7 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
+
   @override
 Widget build(BuildContext context) {
   return Scaffold(  // Wrap in Scaffold to provide Material widget
@@ -61,7 +62,7 @@ Widget build(BuildContext context) {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
-                  }
+                  } 
                   return null;
                 },
               ),
@@ -77,9 +78,9 @@ Widget build(BuildContext context) {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';
-                  } if (value != _passwordController.text) {
-                      return 'Password or email is incorrect';
-                    }
+                  } if (value != FirebaseAuth.instance.currentUser?.email) {
+                    return 'Password is incorrect';
+                  }
                   return null;
                 },
               ),
