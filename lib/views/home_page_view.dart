@@ -44,18 +44,18 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future<void> _fetchUserRole() async {
-    final user = FirebaseAuth.instance.currentUser;
+  // Future<void> _fetchUserRole() async {
+  //   final user = FirebaseAuth.instance.currentUser;
 
-    if (user != null) {
-      String userRole = await _profileController.getRoleById(user.uid);
-       String userName = await _profileController.getNameById(user.uid);
-      setState(() {
-        type = userRole;
-        name = userName;
-      });
-    }
-  }
+  //   if (user != null) {
+  //     String userRole = await _profileController.getRoleById(user.uid);
+  //      String userName = await _profileController.getNameById(user.uid);
+  //     setState(() {
+  //       type = userRole;
+  //       name = userName;
+  //     });
+  //   }
+  // }
 
   Future<void> _fetchUserRole() async {
     final user = FirebaseAuth.instance.currentUser;

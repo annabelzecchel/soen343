@@ -162,6 +162,10 @@ class _EventDetailViewState extends State<EventDetailView> {
             const SizedBox(height: 16),
             _buildAttendeesList(context),
             const SizedBox(height: 24),
+              if(type == 'organizer' ||
+                type == "administration"||
+                type == 'Stakeholders' ||
+                type == "attendee")
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
