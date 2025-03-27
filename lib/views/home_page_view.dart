@@ -22,6 +22,20 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   String _selectedCategory = 'All';
   String _searchQuery = '';
+  final FirebaseAuth _auth =FirebaseAuth.instance;
+  User?_currentUser;
+  
+  
+  @override
+  void initState() {
+    super.initState();
+    _auth.authStateChanges().listen((user){
+      setState((){
+        _currentUser=user;
+      });
+    });
+    
+  }
 
   final List<String> _categories = [
     'All',
@@ -90,6 +104,25 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.account_circle, color: Colors.brown[600]),
             onPressed: () => _navigateToProfile(context),
           ),
+          ElevatedButton(
+            onPressed: () async {
+              if (_currentUser == null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LoginPage(title:'Sign In!'),
+                  ),
+                );
+              } else {
+                await FirebaseAuth.instance.signOut();
+                    Navigator.pushReplacement(context,
+                     MaterialPageRoute(
+                    builder: (context) => const HomePage(title: "HOME"),
+                     )
+                  );
+              }
+            },child:Text(_currentUser==null?"Sign in!": "Sign out!"),
+            ),
         ],
       ),
       body: Column(
