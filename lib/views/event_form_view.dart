@@ -71,7 +71,6 @@ class _EventFormViewState extends State<EventFormView> {
     }
   }
 
-  // We shouldve change the firebase db field to date separted and time separated
   Future<void> _saveEvent() async {
     if (_formKey.currentState!.validate()) {
       final dateTime = DateTime(
@@ -82,6 +81,7 @@ class _EventFormViewState extends State<EventFormView> {
         _selectedTime.minute,
       );
 
+/*  PATTERN: setting values step by step insteas of passing all param in constructor */
       try {
         if (widget.event != null) {
           final updatedEvent = EventBuilder()
