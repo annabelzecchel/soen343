@@ -5,7 +5,13 @@ import '../controllers/profile_controller.dart';
 import '../components/auth_service.dart';
 import '../models/event_model.dart';
 import 'event_form_view.dart';
+<<<<<<< HEAD
 import 'payment_screen.dart';
+=======
+import 'chat_detail_view.dart';
+import '../controllers/chat_controller.dart';
+import '../models/chat_room_model.dart';
+>>>>>>> main
 
 class EventDetailView extends StatefulWidget {
   final Event event;
@@ -20,6 +26,7 @@ class _EventDetailViewState extends State<EventDetailView> {
   final EventController _eventController = EventController();
   final ProfileController _profileController = ProfileController(AuthService());
   final _userController = TextEditingController();
+  final ChatController _chatController = ChatController();
   late Event _currentEvent;
   String? type;
 
@@ -49,6 +56,55 @@ class _EventDetailViewState extends State<EventDetailView> {
     }
   }
 
+  void _initiateChat() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please login to chat')),
+      );
+      return;
+    }
+
+    try {
+      // Check if there's an existing chat room for this event and user
+      final chatRooms =
+          await _chatController.getUserChatRooms(currentUser.uid).first;
+      final existingChatRoom = chatRooms
+          .where(
+              (room) => room.eventId == _currentEvent.id && !room.isGroupChat)
+          .toList();
+
+      ChatRoom chatRoom;
+
+      if (existingChatRoom.isNotEmpty) {
+        chatRoom = existingChatRoom.first;
+      } else {
+        // Create a new chat room for this user and event creator
+        final chatRoomId = await _chatController.createChatRoom(
+          name: 'Chat about ${_currentEvent.name}',
+          participants: [currentUser.uid, _currentEvent.createdByEmail],
+          eventId: _currentEvent.id,
+          isGroupChat: false,
+        );
+
+        // Get the created chat room
+        chatRoom = await _chatController.getChatRoomById(chatRoomId);
+      }
+
+      // Navigate to chat detail
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatDetailView(chatRoom: chatRoom),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error initiating chat: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +112,7 @@ class _EventDetailViewState extends State<EventDetailView> {
         title: Text(_currentEvent.name),
         actions: (type == 'organizer' ||
                 type == "stakeholders" ||
-                type == "administrator")
+                type == "administration")
             ? [
                 IconButton(
                   icon: const Icon(Icons.edit),
@@ -110,6 +166,7 @@ class _EventDetailViewState extends State<EventDetailView> {
             const SizedBox(height: 16),
             _buildAttendeesList(context),
             const SizedBox(height: 24),
+<<<<<<< HEAD
             ElevatedButton.icon(
               icon: const Icon(Icons.person_add),
               label: const Text('Register for Event'),
@@ -214,9 +271,61 @@ actions: [
             child: const Text('Register'),
           ),
         ],
+=======
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.person_add),
+                    label: const Text('Register for Event'),
+                    onPressed: () {
+                      //IDK TEMPORARY FOR N0W TO SEE IF IT WORKS
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Register for Event'),
+                          content: TextField(
+                            decoration: const InputDecoration(
+                              labelText: 'Enter your user ID',
+                            ),
+                            //NOT WORKING
+                            onChanged: (value) async {
+                              if (value.isNotEmpty) {
+                                _userController.text = value;
+                              }
+                            },
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                await _eventController.addAttendee(
+                                    _currentEvent.id, _userController.text);
+                                await _refreshEventData();
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Register'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+>>>>>>> main
                   ),
-                );
-              },
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.chat),
+                    label: const Text('Chat with Organizer'),
+                    onPressed: _initiateChat,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
