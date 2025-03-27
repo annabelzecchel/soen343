@@ -23,7 +23,6 @@ class _EventDetailViewState extends State<EventDetailView> {
   final EventController _eventController = EventController();
   final ProfileController _profileController = ProfileController(AuthService());
   final _userController = TextEditingController();
-  final ChatController _chatController = ChatController();
   late Event _currentEvent;
   String? type;
 
@@ -53,55 +52,6 @@ class _EventDetailViewState extends State<EventDetailView> {
     }
   }
 
-  void _initiateChat() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please login to chat')),
-      );
-      return;
-    }
-
-    try {
-      // Check if there's an existing chat room for this event and user
-      final chatRooms =
-          await _chatController.getUserChatRooms(currentUser.uid).first;
-      final existingChatRoom = chatRooms
-          .where(
-              (room) => room.eventId == _currentEvent.id && !room.isGroupChat)
-          .toList();
-
-      ChatRoom chatRoom;
-
-      if (existingChatRoom.isNotEmpty) {
-        chatRoom = existingChatRoom.first;
-      } else {
-        // Create a new chat room for this user and event creator
-        final chatRoomId = await _chatController.createChatRoom(
-          name: 'Chat about ${_currentEvent.name}',
-          participants: [currentUser.uid, _currentEvent.createdByEmail],
-          eventId: _currentEvent.id,
-          isGroupChat: false,
-        );
-
-        // Get the created chat room
-        chatRoom = await _chatController.getChatRoomById(chatRoomId);
-      }
-
-      // Navigate to chat detail
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChatDetailView(chatRoom: chatRoom),
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error initiating chat: $e')),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,7 +59,7 @@ class _EventDetailViewState extends State<EventDetailView> {
         title: Text(_currentEvent.name),
         actions: (type == 'organizer' ||
                 type == "stakeholders" ||
-                type == "administration")
+                type == "administrator")
             ? [
                 IconButton(
                   icon: const Icon(Icons.edit),
