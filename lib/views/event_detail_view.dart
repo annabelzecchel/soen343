@@ -8,6 +8,7 @@ import 'event_form_view.dart';
 import 'chat_detail_view.dart';
 import '../controllers/chat_controller.dart';
 import '../models/chat_room_model.dart';
+import 'event_polls_view.dart';
 
 class EventDetailView extends StatefulWidget {
   final Event event;
@@ -62,7 +63,6 @@ class _EventDetailViewState extends State<EventDetailView> {
     }
 
     try {
-      // Check if there's an existing chat room for this event and user
       final chatRooms =
           await _chatController.getUserChatRooms(currentUser.uid).first;
       final existingChatRoom = chatRooms
@@ -75,7 +75,6 @@ class _EventDetailViewState extends State<EventDetailView> {
       if (existingChatRoom.isNotEmpty) {
         chatRoom = existingChatRoom.first;
       } else {
-        // Create a new chat room for this user and event creator
         final chatRoomId = await _chatController.createChatRoom(
           name: 'Chat about ${_currentEvent.name}',
           participants: [currentUser.uid, _currentEvent.createdByEmail],
@@ -101,8 +100,28 @@ class _EventDetailViewState extends State<EventDetailView> {
     }
   }
 
+  void _navigateToPolls() {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please login to access polls')),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EventPollsView(event: _currentEvent),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_currentEvent.name),
@@ -163,14 +182,15 @@ class _EventDetailViewState extends State<EventDetailView> {
             _buildAttendeesList(context),
             const SizedBox(height: 24),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.person_add),
-                    label: const Text('Register for Event'),
+                    label: const Text('Register'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.surface,
+                    ),
                     onPressed: () {
-                      //IDK TEMPORARY FOR N0W TO SEE IF IT WORKS
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
@@ -179,7 +199,6 @@ class _EventDetailViewState extends State<EventDetailView> {
                             decoration: const InputDecoration(
                               labelText: 'Enter your user ID',
                             ),
-                            //NOT WORKING
                             onChanged: (value) async {
                               if (value.isNotEmpty) {
                                 _userController.text = value;
@@ -206,12 +225,27 @@ class _EventDetailViewState extends State<EventDetailView> {
                     },
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.chat),
-                    label: const Text('Chat with Organizer'),
+                    label: const Text('Chat'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.surface,
+                    ),
                     onPressed: _initiateChat,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.poll),
+                    label: const Text('Polls'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.surface,
+                      foregroundColor: Colors.black,
+                    ),
+                    onPressed: _navigateToPolls,
                   ),
                 ),
               ],
@@ -290,7 +324,6 @@ class _EventDetailViewState extends State<EventDetailView> {
                 : ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    //WORKS
                     itemCount: _currentEvent.attendees.length,
                     itemBuilder: (context, index) {
                       return ListTile(
