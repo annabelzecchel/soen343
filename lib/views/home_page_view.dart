@@ -7,6 +7,10 @@ import 'package:soen343/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:soen343/event_management_page.dart';
 import 'package:soen343/views/event_detail_view.dart';
+import '../controllers/profile_controller.dart';
+import '../components/auth_service.dart';
+import '../models/users_model.dart';
+import '../controllers/profile_controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
@@ -19,11 +23,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
+  final ProfileController _profileController = ProfileController(AuthService());
   int _currentIndex = 0;
   String _selectedCategory = 'All';
   String _searchQuery = '';
   final FirebaseAuth _auth =FirebaseAuth.instance;
   User?_currentUser;
+  String? type;
+  String? name;
   
   
   @override
@@ -32,9 +39,23 @@ class _HomePageState extends State<HomePage> {
     _auth.authStateChanges().listen((user){
       setState((){
         _currentUser=user;
+      _fetchUserRole();
       });
     });
     
+  }
+
+  Future<void> _fetchUserRole() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      String userRole = await _profileController.getRoleById(user.uid);
+       String userName = await _profileController.getNameById(user.uid);
+      setState(() {
+        type = userRole;
+        name = userName;
+      });
+    }
   }
 
   final List<String> _categories = [
@@ -100,6 +121,7 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.notifications, color: Colors.brown[600]),
             onPressed: () {},
           ),
+          if (_currentUser!=null)
           IconButton(
             icon: Icon(Icons.account_circle, color: Colors.brown[600]),
             onPressed: () => _navigateToProfile(context),
@@ -123,6 +145,10 @@ class _HomePageState extends State<HomePage> {
               }
             },child:Text(_currentUser==null?"Sign in!": "Sign out!"),
             ),
+        // ListTile(
+        //       title:Text("Welcome $name !"),
+        //       subtitle:Text( '$type')
+        //   ),
         ],
       ),
       body: Column(
@@ -412,6 +438,36 @@ class _HomePageState extends State<HomePage> {
                                         ],
                                       ),
                                     ),
+                                  if (event.stakeholder==
+                                      FirebaseAuth.instance.currentUser?.email)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red[100],
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.check_circle,
+                                            size: 16,
+                                            color: Colors.red[800],
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Sponsoring',
+                                            style: TextStyle(
+                                              color: Colors.red[800],
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                 ],
                               ),
                             ],
@@ -424,6 +480,7 @@ class _HomePageState extends State<HomePage> {
               },
             ),
           ),
+      
         ],
       ),
      

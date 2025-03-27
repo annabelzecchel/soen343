@@ -54,7 +54,6 @@ class _EventDetailViewState extends State<EventDetailView> {
       appBar: AppBar(
         title: Text(_currentEvent.name),
         actions: (type == 'organizer' ||
-                type == "stakeholders" ||
                 type == "administration")
             ? [
                 IconButton(
@@ -109,6 +108,10 @@ class _EventDetailViewState extends State<EventDetailView> {
             const SizedBox(height: 16),
             _buildAttendeesList(context),
             const SizedBox(height: 24),
+            if(type == 'organizer' ||
+                type == "administration"||
+                type == 'Stakeholders' ||
+                type == "attendee")
             ElevatedButton.icon(
               icon: const Icon(Icons.person_add),
               label: const Text('Register for Event'),
@@ -142,6 +145,48 @@ class _EventDetailViewState extends State<EventDetailView> {
                           Navigator.pop(context);
                         },
                         child: const Text('Register'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            //SPONSORING AN EVENT
+            const SizedBox(height: 24),
+            if(type == 'Stakeholders')
+            ElevatedButton.icon(
+              icon: const Icon(Icons.person_add),
+              label: const Text('Sponsor Event'),
+              onPressed: () {
+                //IDK TEMPORARY FOR N0W TO SEE IF IT WORKS
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Sponsor this event'),
+                    content: TextField(
+                      decoration: const InputDecoration(
+                        labelText: 'Enter your user email',
+                      ),
+                      //NOT WORKING
+                      onChanged: (value) async {
+                        if (value.isNotEmpty) {
+                          _userController.text = value;
+                        }
+                      },
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          await _eventController.addSponsor(
+                              _currentEvent.id, _userController.text);
+                          await _refreshEventData();
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Sponsor'),
                       ),
                     ],
                   ),

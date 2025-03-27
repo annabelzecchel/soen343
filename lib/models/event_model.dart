@@ -11,6 +11,7 @@ class Event {
   final String name;
   final double price;
   final String type;
+  final String stakeholder;
 
   Event._builder(EventBuilder builder)
       : id = builder.id!,
@@ -22,7 +23,8 @@ class Event {
         location = builder.location!,
         name = builder.name!,
         price = builder.price!,
-        type = builder.type!;
+        type = builder.type!,
+        stakeholder = builder.stakeholder!;
 
   factory Event.fromFirestore(Map<String, dynamic> data, String documentId) {
     return EventBuilder()
@@ -38,6 +40,7 @@ class Event {
             ? double.tryParse(data['price'].toString()) ?? 0.0
             : 0.0)
         .setType(data['type'] ?? '')
+        .setStakeholder(data['stakeholder'] ?? '')
         .build();
   }
 
@@ -52,6 +55,7 @@ class Event {
       'name': name,
       'price': price.toString(),
       'type': type,
+      'stakeholder': stakeholder,
     };
   }
 
@@ -96,6 +100,7 @@ class EventBuilder {
   String? name;
   double? price;
   String? type;
+  String? stakeholder;
 
   EventBuilder setId(String id) {
     this.id = id;
@@ -144,6 +149,11 @@ class EventBuilder {
 
   EventBuilder setType(String type) {
     this.type = type;
+    return this;
+  }
+
+  EventBuilder setStakeholder(String stakeholder) {
+    this.stakeholder = stakeholder;
     return this;
   }
 

@@ -87,4 +87,40 @@ class EventController {
       }).toList();
     });
   }
+
+    Stream<List<Event>> getOrganizerEvents(String email) {
+    return FirebaseFirestore.instance
+        .collection(collectionPath)
+        .where('createdByEmail', isEqualTo: email)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map<Event>((doc) {
+        return Event.fromFirestore(doc.data(), doc.id);
+      }).toList();
+    });
+  }
+
+    Future<void> addSponsor(String eventId, String userId) async {
+    try {
+      final event = await getEventById(eventId);
+
+        await _firestore.collection(collectionPath).doc(eventId).update({
+          'stakeholder': userId
+        });
+    } catch (e) {
+      throw Exception('Failed to add sponsor: $e');
+    }
+  }
+
+   Stream<List<Event>> getSponsorEvents(String email) {
+    return FirebaseFirestore.instance
+        .collection(collectionPath)
+        .where('stakeholder', isEqualTo: email)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map<Event>((doc) {
+        return Event.fromFirestore(doc.data(), doc.id);
+      }).toList();
+    });
+  }
 }
