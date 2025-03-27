@@ -1,4 +1,5 @@
 import '../models/payment_strategy.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PaymentService {
   PaymentStrategy? _currentStrategy;
@@ -26,7 +27,22 @@ class PaymentService {
       throw Exception(validationError);
     }
     
-    return await _currentStrategy!.processPayment(_paymentDetails);
+    final paymentSuccess = await _currentStrategy!.processPayment(_paymentDetails);
+    if (paymentSuccess) {
+      // Save payment details to Firebase
+      try {
+        final paymentCollection = FirebaseFirestore.instance.collection('payments');
+        await paymentCollection.add({
+          'paymentDetails': _paymentDetails,
+          'timestamp': FieldValue.serverTimestamp(),
+          'paymentType': _currentStrategy!.name,
+        });
+      } catch (e) {
+        throw Exception('Failed to save payment information: $e');
+      }
+    }
+    
+    return paymentSuccess;
   }
 
   void updatePaymentDetails(Map<String, dynamic> details) {
