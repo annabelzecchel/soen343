@@ -23,6 +23,7 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
+
   @override
 Widget build(BuildContext context) {
   return Scaffold(  // Wrap in Scaffold to provide Material widget
@@ -61,7 +62,7 @@ Widget build(BuildContext context) {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
-                  }
+                  } 
                   return null;
                 },
               ),
@@ -77,6 +78,8 @@ Widget build(BuildContext context) {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';
+                  } if (value != FirebaseAuth.instance.currentUser?.email) {
+                    return 'Password is incorrect';
                   }
                   return null;
                 },
@@ -87,7 +90,7 @@ Widget build(BuildContext context) {
                 onPressed: ()async{
                     if (_formKey.currentState?.validate() ??false){
                         setState(()=>_isLoading=true);
-                       try{
+                      try{
                         final auth = await _controller.login(
                             _emailController.text.trim(),
                             _passwordController.text.trim()
@@ -97,11 +100,11 @@ Widget build(BuildContext context) {
                             MaterialPageRoute(builder:(_)=>ProfilePage()),
 
                         );
-                       }catch (e){
+                      }catch (e){
                         throw Exception("ERROR"+e.toString());
-                       }finally {
+                      }finally {
                         setState(()=>_isLoading=false);
-                       }
+                      }
                     }
                 },
                 child: const Text('Login'),
