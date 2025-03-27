@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:soen343/components/auth_service.dart';
 import 'package:soen343/components/event_creation_form.dart';
-import 'package:soen343/components/app_theme.dart';
+import 'package:soen343/controllers/profile_controller.dart';
+import 'package:soen343/views/calendar_view.dart';
 
 class EventManagementPage extends StatefulWidget {
   final String title;
@@ -11,54 +14,79 @@ class EventManagementPage extends StatefulWidget {
 }
 
 class _EventManagementState extends State<EventManagementPage> {
-  
-  final List<Widget> _screens = [
-    Container(
-        // color: AppTheme.colorScheme.primary,
-        alignment: Alignment.center,
-        child: const EventCreationForm(),
-        ),
-    Container(
-        // color: AppTheme.colorScheme.primary,
-        alignment: Alignment.center,
-        child: const Text(
-          'Manage Events',
-          style: TextStyle(fontSize: 40),
-        )),
-    Container(
-        // color: AppTheme.colorScheme.primary,
-        alignment: Alignment.center,
-        child: const Text(
-          'Settings',
-          style: TextStyle(fontSize: 40),
-        )),
-    Container(
-        // color: AppTheme.colorScheme.primary,
-        alignment: Alignment.center,
-        child: const Text(
-          'About',
-          style: TextStyle(fontSize: 40),
-        ))
-  ];
+  String? _email;
+  final ProfileController _profileController = ProfileController(AuthService());
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserEmail();
+  }
+
+  Future<void> _fetchUserEmail() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      String userRole = await _profileController.getEmailById(user.uid);
+      setState(() {
+        _email = userRole;
+        print('Fetched email: $_email');
+      });
+    } else {
+      setState(() {
+        _email = "gftjytkyk";
+      });
+    }
+  }
+
   int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> screens = [
+      Container(
+        alignment: Alignment.center,
+        child: const EventCreationForm(),
+      ),
+      Container(
+        alignment: Alignment.center,
+        child: _email != null
+            ? CalendarComponent(
+                key: ValueKey(_email),
+                userEmail: _email!,
+              )
+            : const CircularProgressIndicator(),
+      ),
+      Container(
+        alignment: Alignment.center,
+        child: const Text(
+          'Settings',
+          style: TextStyle(fontSize: 40),
+        ),
+      ),
+      Container(
+        alignment: Alignment.center,
+        child: const Text(
+          'About',
+          style: TextStyle(fontSize: 40),
+        ),
+      )
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        // backgroundColor: AppTheme.colorScheme.inversePrimary,
       ),
       body: Row(
         children: [
           Container(
             width: 200,
             decoration: const BoxDecoration(
-              border: Border(right: BorderSide(color: Colors.grey, width: 1)), // Border for separation
+              border: Border(
+                right: BorderSide(color: Colors.grey, width: 1),
+              ),
             ),
             child: NavigationRail(
-              // backgroundColor: AppTheme.colorScheme.surface,
-              // indicatorColor: AppTheme.colorScheme.secondaryContainer,
               onDestinationSelected: (int index) {
                 setState(() {
                   _selectedIndex = index;
@@ -84,15 +112,9 @@ class _EventManagementState extends State<EventManagementPage> {
                 ),
               ],
               labelType: NavigationRailLabelType.all,
-              // selectedLabelTextStyle: TextStyle(
-              //   color: AppTheme.colorScheme.tertiary,
-              // ),
-              // selectedIconTheme: IconThemeData(
-              //   color: AppTheme.colorScheme.tertiary,
-              // ),
             ),
           ),
-          Expanded(child: _screens[_selectedIndex]),
+          Expanded(child: screens[_selectedIndex]),
         ],
       ),
     );
