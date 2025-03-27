@@ -4,6 +4,8 @@ import 'package:soen343/components/auth_service.dart';
 import 'package:soen343/components/event_creation_form.dart';
 import 'package:soen343/controllers/profile_controller.dart';
 import 'package:soen343/views/calendar_view.dart';
+import 'package:soen343/views/analytics_view.dart';
+import 'package:soen343/views/event_promotion.dart';
 
 class EventManagementPage extends StatefulWidget {
   final String title;
@@ -59,10 +61,11 @@ class _EventManagementState extends State<EventManagementPage> {
       ),
       Container(
         alignment: Alignment.center,
-        child: const Text(
-          'Settings',
-          style: TextStyle(fontSize: 40),
-        ),
+        child: const EventPromotionPage(),
+      ),
+      Container(
+        alignment: Alignment.center,
+        child: AnalyticsView(),
       ),
       Container(
         alignment: Alignment.center,
@@ -103,7 +106,11 @@ class _EventManagementState extends State<EventManagementPage> {
                   label: Text('Event Management'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.settings),
+                  icon: Icon(Icons.share),
+                  label: Text('Event Promotion'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.analytics),
                   label: Text('Analytics & Reports'),
                 ),
                 NavigationRailDestination(
