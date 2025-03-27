@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:soen343/views/login_view.dart';
 import 'package:soen343/views/signUp_view.dart';
+import 'package:soen343/components/app_theme.dart';
 
 class LoginPage extends StatefulWidget {
   final String title;
@@ -12,21 +13,21 @@ class LoginPage extends StatefulWidget {
 
 class _LoginState extends State<LoginPage> {
   
-  
+   
   final List<Widget> _screens = [
     UnconstrainedBox(
         child:Container(
         height : 600,
         width:400,
         decoration:BoxDecoration(
-            color: Color.fromARGB(100,237,219,207),
+            color: Color.fromARGB(255, 235, 246, 236),
             borderRadius: BorderRadius.circular(10)
         ),
         alignment: Alignment.center,
         child:  LoginForm(title: "IT WORKS"),
 )),
     Container(
-        color: const Color.fromARGB(101, 255, 192, 203),
+        color: const Color.fromARGB(255, 235, 246, 236),
         alignment: Alignment.center,
         child: CreateAccountForm(),
         ),
@@ -38,7 +39,7 @@ class _LoginState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: const Color.fromARGB(255, 170, 130, 239),
+        backgroundColor: const Color.fromARGB(255, 235, 246, 236),
       ),
       body: Row(
         children: [
@@ -66,7 +67,7 @@ class _LoginState extends State<LoginPage> {
               ],
               labelType: NavigationRailLabelType.all,
               selectedLabelTextStyle: const TextStyle(
-                color: Colors.blue,
+                color: Colors.black,
               ),
             ),
           ),

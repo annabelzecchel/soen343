@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import "package:cloud_firestore/cloud_firestore.dart";
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:soen343/controllers/profile_controller.dart';
+import 'package:soen343/components/auth_service.dart';
 
 class EventCreationForm extends StatefulWidget {
   const EventCreationForm({super.key});
@@ -22,12 +24,32 @@ class _EventCreationFormState extends State<EventCreationForm> {
   final _dateTimeController = TextEditingController();
   final _priceController = TextEditingController();
   final _locationController = TextEditingController();
+  final ProfileController _profileController = ProfileController(AuthService());
   final _discountController = TextEditingController();
+
 
   FilePickerResult? _filePickerResult;
   Uint8List? _imageBytes;
   String? _fileName;
   String? imageURL;
+  String? _email;
+
+    @override
+  void initState() {
+    super.initState();
+    _setUserEmail();
+  }
+
+  Future<void> _setUserEmail() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      String email = await _profileController.getEmailById(user.uid);
+      setState(() {
+        _email = email;
+      });
+    } 
+  }
 
 // Behavior of Date and Time Picker
   Future<void> _selectDateTime(BuildContext context) async {
@@ -324,7 +346,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                       if (_formKey.currentState?.validate() ?? false) {
                         // Get the currently logged-in user
                         // User? user = FirebaseAuth.instance.currentUser; this is for when user auth implemented
-                        String userEmail = "haaha@gmail.com";
+                        //String userEmail = "haaha@gmail.com";
         
                         // if (user == null) {
                         //   ScaffoldMessenger.of(context).showSnackBar(
@@ -354,7 +376,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                             "location": _locationController.text,
                             "price": _priceController.text,
                             "createdByEmail":
-                                userEmail,
+                                _email,
                             "image": imageURL,
                           });
         

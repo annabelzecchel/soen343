@@ -94,4 +94,50 @@ class ProfileController {
       throw Exception('LOGIN FAILED');
     }
   }
+
+  //UPDATE 
+   Future<void> updateUser(Users user) async {
+    try {
+      await firestore
+          .collection('users')
+          .doc(user.id)
+          .update(user.toFirestore());
+    } catch (e) {
+      throw Exception('Failed to update event: $e');
+    }
+  }
+
+  // DELELE
+  Future<void> deleteUser(String id) async {
+    try {
+      await firestore.collection('users').doc(id).delete();
+    } catch (e) {
+      throw Exception('Failed to delete event: $e');
+    }
+  }
+
+    // READ all STREAM ALLWOS FOR REAL TIME UPDATES
+  Stream<List<Users>> getUsers() {
+    // return firestore.collection('users').snapshots().map((snapshot) {
+    //   return snapshot.docs.map((doc) {
+    //     return Users.fromFirestore(doc.data(), doc.id);
+    //   }).toList();
+    // });
+     return firestore
+      .collection('users')
+      .snapshots()
+      .map((snapshot) {
+        if (snapshot.docs.isEmpty) {
+          return [];
+        }
+        try {
+          return snapshot.docs.map((doc) {
+            return Users.fromFirestore(doc.data(), doc.id);
+          }).toList();
+        } catch (e) {
+          print('Error mapping users: $e');
+          rethrow;
+        }
+      });
+  }
 }
