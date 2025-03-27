@@ -95,8 +95,9 @@ class _EventFormViewState extends State<EventFormView> {
               .setName(_nameController.text)
               .setPrice(double.parse(_priceController.text))
               .setType(_typeController.text)
+              /**FIX TEMPORARY */
+              .setStakeholder("hrllo")
               .build();
-
           await _eventController.updateEvent(updatedEvent);
         }
 
