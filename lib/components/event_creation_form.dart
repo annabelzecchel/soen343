@@ -22,6 +22,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
   final _dateTimeController = TextEditingController();
   final _priceController = TextEditingController();
   final _locationController = TextEditingController();
+  final _discountController = TextEditingController();
 
   FilePickerResult? _filePickerResult;
   Uint8List? _imageBytes;
@@ -298,6 +299,21 @@ class _EventCreationFormState extends State<EventCreationForm> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter ticket price';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _discountController,
+                    decoration: const InputDecoration(
+                      icon: Icon(Icons.attach_money_sharp),
+                      hintText: 'Enter Event Ticket Discount',
+                      labelText: 'Ticket Discount Value (enter value in CAD)',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter ticket discount value';
                       }
                       return null;
                     },
