@@ -5,6 +5,7 @@ import '../controllers/profile_controller.dart';
 import '../components/auth_service.dart';
 import '../models/event_model.dart';
 import 'event_form_view.dart';
+import 'payment_screen.dart';
 
 class EventDetailView extends StatefulWidget {
   final Event event;
@@ -113,37 +114,106 @@ class _EventDetailViewState extends State<EventDetailView> {
               icon: const Icon(Icons.person_add),
               label: const Text('Register for Event'),
               onPressed: () {
-                //IDK TEMPORARY FOR N0W TO SEE IF IT WORKS
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
                     title: const Text('Register for Event'),
-                    content: TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'Enter your user ID',
-                      ),
-                      //NOT WORKING
-                      onChanged: (value) async {
-                        if (value.isNotEmpty) {
-                          _userController.text = value;
-                        }
-                      },
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: _userController,
+                          decoration: const InputDecoration(
+                            labelText: 'Enter your email',
+                            hintText: 'user@example.com',
+                          ),
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                        if (_currentEvent.price >
+                            0) // Only show payment option if event has a price
+                          const SizedBox(height: 16),
+                        if (_currentEvent.price > 0)
+                          const Text(
+                              'Payment will be required after registration',
+                              style:
+                                  TextStyle(fontSize: 12, color: Colors.grey)),
+                      ],
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
+actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (_userController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter your email')));
+                return;
+              }
+
+              // Validate email format
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                  .hasMatch(_userController.text)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter a valid email')));
+                return;
+              }
+
+              try {
+                // Show loading indicator
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+
+                // Register attendee
+                await _eventController.addAttendee(
+                    _currentEvent.id, _userController.text);
+                await _refreshEventData();
+
+                // Close loading dialog
+                Navigator.pop(context);
+
+                // Close registration dialog
+                Navigator.pop(context);
+
+                // If event has a price, navigate to payment screen
+                if (_currentEvent.price > 0) {
+                  if (!mounted) return;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PaymentScreen(
+                        event: _currentEvent,
+                        attendeeEmail: _userController.text,
+                        amount: _currentEvent.price,
                       ),
-                      TextButton(
-                        onPressed: () async {
-                          await _eventController.addAttendee(
-                              _currentEvent.id, _userController.text);
-                          await _refreshEventData();
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Register'),
-                      ),
-                    ],
+                    ),
+                  );
+                } else {
+                  // Show success message for free event
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Registration successful!')));
+                }
+              } catch (e) {
+                // Close loading dialog if still open
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error: ${e.toString()}')),
+                );
+              }
+            },
+            child: const Text('Register'),
+          ),
+        ],
                   ),
                 );
               },
