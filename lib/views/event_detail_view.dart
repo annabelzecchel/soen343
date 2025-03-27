@@ -8,6 +8,7 @@ import 'event_form_view.dart';
 import 'chat_detail_view.dart';
 import '../controllers/chat_controller.dart';
 import '../models/chat_room_model.dart';
+import 'event_polls_view.dart';
 import 'payment_screen.dart';
 
 class EventDetailView extends StatefulWidget {
@@ -63,7 +64,6 @@ class _EventDetailViewState extends State<EventDetailView> {
     }
 
     try {
-      // Check if there's an existing chat room for this event and user
       final chatRooms =
           await _chatController.getUserChatRooms(currentUser.uid).first;
       final existingChatRoom = chatRooms
@@ -76,7 +76,6 @@ class _EventDetailViewState extends State<EventDetailView> {
       if (existingChatRoom.isNotEmpty) {
         chatRoom = existingChatRoom.first;
       } else {
-        // Create a new chat room for this user and event creator
         final chatRoomId = await _chatController.createChatRoom(
           name: 'Chat about ${_currentEvent.name}',
           participants: [currentUser.uid, _currentEvent.createdByEmail],
@@ -102,8 +101,28 @@ class _EventDetailViewState extends State<EventDetailView> {
     }
   }
 
+  void _navigateToPolls() {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please login to access polls')),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EventPollsView(event: _currentEvent),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_currentEvent.name),
@@ -167,130 +186,154 @@ class _EventDetailViewState extends State<EventDetailView> {
                 type == 'Stakeholders' ||
                 type == "attendee")
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.person_add),
-                    label: const Text('Register for Event'),
+                    label: const Text('Register'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.surface,
+                    ),
                     onPressed: () {
-                      //IDK TEMPORARY FOR N0W TO SEE IF IT WORKS
-                        showDialog(
+                      showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
                           title: const Text('Register for Event'),
                           content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextField(
-                            decoration: const InputDecoration(
-                              labelText: 'Enter your user email',
-                              hintText: 'user@example.com',
-                            ),
-                            keyboardType: TextInputType.emailAddress,
-                            onChanged: (value) async {
-                              if (value.isNotEmpty) {
-                              _userController.text = value;
-                              }
-                            },
-                            ),
-                            if (_currentEvent.price > 0) // Only show payment option if event has a price
-                            const SizedBox(height: 16),
-                            if (_currentEvent.price > 0)
-                            const Text(
-                              'Payment will be required after registration',
-                              style: TextStyle(
-                                fontSize: 12, color: Colors.grey),
-                            ),
-                          ],
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextField(
+                                decoration: const InputDecoration(
+                                  labelText: 'Enter your user email',
+                                  hintText: 'user@example.com',
+                                ),
+                                keyboardType: TextInputType.emailAddress,
+                                onChanged: (value) async {
+                                  if (value.isNotEmpty) {
+                                    _userController.text = value;
+                                  }
+                                },
+                              ),
+                              if (_currentEvent.price >
+                                  0) // Only show payment option if event has a price
+                                const SizedBox(height: 16),
+                              if (_currentEvent.price > 0)
+                                const Text(
+                                  'Payment will be required after registration',
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.grey),
+                                ),
+                            ],
                           ),
                           actions: [
-                             TextButton(
-             onPressed: () => Navigator.pop(context),
-             child: const Text('Cancel'),
-           ),
-           TextButton(
-             onPressed: () async {
-               if (_userController.text.isEmpty) {
-                 ScaffoldMessenger.of(context).showSnackBar(
-                   const SnackBar(content: Text('Please enter your email')));
-                 return;
-               }
- 
-               // Validate email format
-               if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                   .hasMatch(_userController.text)) {
-                 ScaffoldMessenger.of(context).showSnackBar(
-                   const SnackBar(content: Text('Please enter a valid email')));
-                 return;
-               }
- 
-               try {
-                 // Show loading indicator
-                 showDialog(
-                   context: context,
-                   barrierDismissible: false,
-                   builder: (context) => const Center(
-                     child: CircularProgressIndicator(),
-                   ),
-                 );
- 
-                 // Register attendee
-                 await _eventController.addAttendee(
-                     _currentEvent.id, _userController.text);
-                 await _refreshEventData();
- 
-                 // Close loading dialog
-                 Navigator.pop(context);
- 
-                 // Close registration dialog
-                 Navigator.pop(context);
- 
-                 // If event has a price, navigate to payment screen
-                 if (_currentEvent.price > 0) {
-                   if (!mounted) return;
-                   Navigator.push(
-                     context,
-                     MaterialPageRoute(
-                       builder: (context) => PaymentScreen(
-                         event: _currentEvent,
-                         attendeeEmail: _userController.text,
-                         amount: _currentEvent.price,
-                                            ),
-                   ),
-                   );
-                 } else {
-                   // Show success message for free event
-                   if (!mounted) return;
-                   ScaffoldMessenger.of(context).showSnackBar(
-                     const SnackBar(content: Text('Registration successful!')));
-                 }
-               } catch (e) {
-                 // Close loading dialog if still open
-                 if (Navigator.canPop(context)) {
-                   Navigator.pop(context);
-                 }
-                 if (!mounted) return;
-                 ScaffoldMessenger.of(context).showSnackBar(
-                   SnackBar(content: Text('Error: ${e.toString()}')),
-                 );
-               }
-             },
-             child: const Text('Register'),
-           ),
-         
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                if (_userController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content:
+                                              Text('Please enter your email')));
+                                  return;
+                                }
+
+                                // Validate email format
+                                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                    .hasMatch(_userController.text)) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              'Please enter a valid email')));
+                                  return;
+                                }
+
+                                try {
+                                  // Show loading indicator
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) => const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+
+                                  // Register attendee
+                                  await _eventController.addAttendee(
+                                      _currentEvent.id, _userController.text);
+                                  await _refreshEventData();
+
+                                  // Close loading dialog
+                                  Navigator.pop(context);
+
+                                  // Close registration dialog
+                                  Navigator.pop(context);
+
+                                  // If event has a price, navigate to payment screen
+                                  if (_currentEvent.price > 0) {
+                                    if (!mounted) return;
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => PaymentScreen(
+                                          event: _currentEvent,
+                                          attendeeEmail: _userController.text,
+                                          amount: _currentEvent.price,
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    // Show success message for free event
+                                    if (!mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'Registration successful!')));
+                                  }
+                                } catch (e) {
+                                  // Close loading dialog if still open
+                                  if (Navigator.canPop(context)) {
+                                    Navigator.pop(context);
+                                  }
+                                  if (!mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content:
+                                            Text('Error: ${e.toString()}')),
+                                  );
+                                }
+                              },
+                              child: const Text('Register'),
+                            ),
                           ],
                         ),
                       );
                     },
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.chat),
-                    label: const Text('Chat with Organizer'),
+                    label: const Text('Chat'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.surface,
+                    ),
                     onPressed: _initiateChat,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.poll),
+                    label: const Text('Polls'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.surface,
+                      foregroundColor: Colors.black,
+                    ),
+                    onPressed: _navigateToPolls,
                   ),
                 ),
               ],
@@ -411,7 +454,6 @@ class _EventDetailViewState extends State<EventDetailView> {
                 : ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    //WORKS
                     itemCount: _currentEvent.attendees.length,
                     itemBuilder: (context, index) {
                       return ListTile(
