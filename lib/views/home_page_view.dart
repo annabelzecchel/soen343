@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:soen343/controllers/event_controller.dart';
 import 'package:soen343/models/event_model.dart';
 import 'package:soen343/views/profile_view.dart';
@@ -7,6 +6,7 @@ import 'package:soen343/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:soen343/event_management_page.dart';
 import 'package:soen343/views/event_detail_view.dart';
+import 'package:soen343/views/chat_rooms_view.dart';
 import '../controllers/profile_controller.dart';
 import '../components/auth_service.dart';
 import '../models/users_model.dart';
@@ -42,7 +42,19 @@ class _HomePageState extends State<HomePage> {
       _fetchUserRole();
       });
     });
-    
+  }
+
+  Future<void> _fetchUserRole() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      String userRole = await _profileController.getRoleById(user.uid);
+       String userName = await _profileController.getNameById(user.uid);
+      setState(() {
+        type = userRole;
+        name = userName;
+      });
+    }
   }
 
   Future<void> _fetchUserRole() async {
@@ -118,6 +130,27 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           IconButton(
+            icon: Icon(Icons.chat, color: Colors.brown[600]),
+            onPressed: () {
+              final user = FirebaseAuth.instance.currentUser;
+              if (user != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChatRoomsView(),
+                  ),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LoginPage(title: 'Login !'),
+                  ),
+                );
+              }
+            },
+          ),
+          IconButton(
             icon: Icon(Icons.notifications, color: Colors.brown[600]),
             onPressed: () {},
           ),
@@ -132,23 +165,20 @@ class _HomePageState extends State<HomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const LoginPage(title:'Sign In!'),
+                    builder: (context) => const LoginPage(title: 'Sign In!'),
                   ),
                 );
               } else {
                 await FirebaseAuth.instance.signOut();
-                    Navigator.pushReplacement(context,
-                     MaterialPageRoute(
-                    builder: (context) => const HomePage(title: "HOME"),
-                     )
-                  );
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HomePage(title: "HOME"),
+                    ));
               }
-            },child:Text(_currentUser==null?"Sign in!": "Sign out!"),
-            ),
-        // ListTile(
-        //       title:Text("Welcome $name !"),
-        //       subtitle:Text( '$type')
-        //   ),
+            },
+            child: Text(_currentUser == null ? "Sign in!" : "Sign out!"),
+          ),
         ],
       ),
       body: Column(
@@ -172,7 +202,8 @@ class _HomePageState extends State<HomePage> {
                 controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'Search events...',
-                  hintStyle: TextStyle(color: Colors.brown[600]?.withOpacity(0.6)),
+                  hintStyle:
+                      TextStyle(color: Colors.brown[600]?.withOpacity(0.6)),
                   prefixIcon: Icon(Icons.search, color: Colors.brown[600]),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
@@ -184,14 +215,15 @@ class _HomePageState extends State<HomePage> {
                         )
                       : null,
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                 ),
                 style: TextStyle(color: Colors.brown[800]),
                 onChanged: (value) => setState(() => _searchQuery = value),
               ),
             ),
           ),
-          
+
           // Category Chips - Green with brown text
           SizedBox(
             height: 60,
@@ -216,11 +248,14 @@ class _HomePageState extends State<HomePage> {
                       _selectedCategory = selected ? _categories[index] : 'All';
                     }),
                     selectedColor: colorScheme.primary, // Medium green
-                    backgroundColor: colorScheme.secondaryContainer, // Light beige
+                    backgroundColor:
+                        colorScheme.secondaryContainer, // Light beige
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
-                        color: isSelected ? Colors.transparent : Colors.brown[300]!,
+                        color: isSelected
+                            ? Colors.transparent
+                            : Colors.brown[300]!,
                         width: 1,
                       ),
                     ),
@@ -258,7 +293,8 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.event_available, size: 50, color: Colors.brown[600]),
+                        Icon(Icons.event_available,
+                            size: 50, color: Colors.brown[600]),
                         const SizedBox(height: 16),
                         Text(
                           'No events available',
@@ -274,11 +310,17 @@ class _HomePageState extends State<HomePage> {
 
                 // Filter events
                 final filteredEvents = snapshot.data!.where((event) {
-                  final matchesCategory = _selectedCategory == 'All' || 
-                      event.name.toLowerCase().contains(_selectedCategory.toLowerCase());
+                  final matchesCategory = _selectedCategory == 'All' ||
+                      event.name
+                          .toLowerCase()
+                          .contains(_selectedCategory.toLowerCase());
                   final matchesSearch = _searchQuery.isEmpty ||
-                      event.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                      event.location.toLowerCase().contains(_searchQuery.toLowerCase());
+                      event.name
+                          .toLowerCase()
+                          .contains(_searchQuery.toLowerCase()) ||
+                      event.location
+                          .toLowerCase()
+                          .contains(_searchQuery.toLowerCase());
                   return matchesCategory && matchesSearch;
                 }).toList();
 
@@ -287,7 +329,8 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.search_off, size: 50, color: Colors.brown[600]),
+                        Icon(Icons.search_off,
+                            size: 50, color: Colors.brown[600]),
                         const SizedBox(height: 16),
                         Text(
                           'No matching events found',
@@ -308,7 +351,8 @@ class _HomePageState extends State<HomePage> {
                 }
 
                 return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   itemCount: filteredEvents.length,
                   itemBuilder: (context, index) {
                     final event = filteredEvents[index];
@@ -325,7 +369,8 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => EventDetailView(event: event),
+                              builder: (context) =>
+                                  EventDetailView(event: event),
                             ),
                           );
                         },
@@ -340,7 +385,8 @@ class _HomePageState extends State<HomePage> {
                                     width: 50,
                                     height: 50,
                                     decoration: BoxDecoration(
-                                      color: colorScheme.primary, // Medium green
+                                      color:
+                                          colorScheme.primary, // Medium green
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Icon(
@@ -352,7 +398,8 @@ class _HomePageState extends State<HomePage> {
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           event.name,
@@ -483,7 +530,6 @@ class _HomePageState extends State<HomePage> {
       
         ],
       ),
-     
     );
   }
 
@@ -514,8 +560,18 @@ class _HomePageState extends State<HomePage> {
 
   String _getMonthName(int month) {
     return [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ][month - 1];
   }
 

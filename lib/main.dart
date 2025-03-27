@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:soen343/controllers/event_controller.dart';
-import 'package:soen343/models/event_model.dart';
 import 'package:soen343/views/profile_view.dart';
 import 'package:soen343/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,7 +9,7 @@ import 'package:soen343/views/home_page_view.dart';
 import 'package:soen343/components/app_theme.dart';
 import 'package:soen343/event_management_page.dart';
 import 'package:soen343/views/events_list_view.dart';
-
+import 'package:soen343/views/chat_rooms_view.dart';
 
 void main() async {
   await dotenv.load();
@@ -39,7 +36,6 @@ class MyApp extends StatelessWidget {
   final nameController = TextEditingController();
   final typeController = TextEditingController();
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
