@@ -109,18 +109,18 @@ class _ProfilePageState extends State<ProfilePage>{
         title: Text('Welcome to your Profile Page ${userName ?? 'User'}'),
         actions:[ if (type == 'organizer' ||
                 type == "Stakeholders" ||
-                type == "administrator"||
+                type == "administration"||
                 type =="attendee")
               ...[
-                IconButton(
-                  icon: const Icon(Icons.payment),
-                  onPressed: () {
-              //       Navigator.push(
-              //  context,
-              //  MaterialPageRoute(builder: (context) => const PaymentScreen()),
-              //  );
-                  },
-                ),
+              //   IconButton(
+              //     icon: const Icon(Icons.payment),
+              //     onPressed: () {
+              // //       Navigator.push(
+              // //  context,
+              // //  MaterialPageRoute(builder: (context) => const PaymentScreen()),
+              // //  );
+              //     },
+              //   ),
                 IconButton(
                   icon: const Icon(Icons.analytics),
                   onPressed: () {
@@ -140,6 +140,63 @@ class _ProfilePageState extends State<ProfilePage>{
                     //   //   builder: (context) =>,
                     //   // ),
                     // );
+                    showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: const Text('You are now updating your credentials.'),
+                                            content: 
+                                            Container(
+                                            child:Form(
+                                              key: _formKey,
+                                              child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  TextFormField(
+                                                            controller: _nameController,
+                                                            decoration: const InputDecoration(
+                                                              icon: Icon(Icons.email),
+                                                              hintText: 'Enter the new name',
+                                                              labelText: 'Name',
+                                                            ),
+                                                            validator: (value) {
+                                                              if (value == null || value.isEmpty) {
+                                                                return 'Please enter NEW name';
+                                                              }
+                                                              return null;
+                                                            },
+                                                          ),
+               
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(context),
+                                                child: const Text('Cancel'),
+                                              ),
+                                             TextButton(
+                                                  onPressed: () async{
+                                                         try {
+                                                              if (user != null) {
+                                                                final updatedUser = UsersBuilder()
+                                                                    .setId(user?.uid ??'')
+                                                                    .setEmail(user.email??'')
+                                                                    .setName(_nameController.text)
+                                                                    .setRole(userRole??'')
+                                                                    .build();
+                                                                  await _controller.updateUser(updatedUser);
+                                                                }   Navigator.pushReplacement(context,
+                                                                MaterialPageRoute(builder: (context) => const ProfilePage())
+                                                                );
+                                                                } catch (e) {
+                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                  SnackBar(content: Text('Error: $e')),
+                                                                );
+                                                              }
+                                                          },
+                                                  
+                                                  child: const Text("Update your UserName"),
+                                                ),
+                                            ])
+                                            ),),
+                                          ),
+                                        );
                   },
                 ),
               
