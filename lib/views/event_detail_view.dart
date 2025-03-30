@@ -27,6 +27,8 @@ class _EventDetailViewState extends State<EventDetailView> {
   final ChatController _chatController = ChatController();
   late Event _currentEvent;
   String? type;
+  String? email;
+        
 
   @override
   void initState() {
@@ -47,9 +49,11 @@ class _EventDetailViewState extends State<EventDetailView> {
 
     if (user != null) {
       String userRole = await _profileController.getRoleById(user.uid);
+      String email1 = await _profileController.getEmailById(user.uid);
       print(userRole);
       setState(() {
         type = userRole;
+        email=email1;
       });
     }
   }
@@ -198,22 +202,22 @@ class _EventDetailViewState extends State<EventDetailView> {
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: const Text('Register for Event'),
+                          title: const Text('Are you sure you want to register for this event?'),
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              TextField(
-                                decoration: const InputDecoration(
-                                  labelText: 'Enter your user email',
-                                  hintText: 'user@example.com',
-                                ),
-                                keyboardType: TextInputType.emailAddress,
-                                onChanged: (value) async {
-                                  if (value.isNotEmpty) {
-                                    _userController.text = value;
-                                  }
-                                },
-                              ),
+                              // TextField(
+                              //   decoration: const InputDecoration(
+                              //     labelText: 'Enter your user email',
+                              //     hintText: 'user@example.com',
+                              //   ),
+                              //   keyboardType: TextInputType.emailAddress,
+                              //   onChanged: (value) async {
+                              //     if (value.isNotEmpty) {
+                              //       _userController.text = value;
+                              //     }
+                              //   },
+                              // ),
                               if (_currentEvent.price >
                                   0) // Only show payment option if event has a price
                                 const SizedBox(height: 16),
@@ -221,7 +225,7 @@ class _EventDetailViewState extends State<EventDetailView> {
                                 const Text(
                                   'Payment will be required after registration',
                                   style: TextStyle(
-                                      fontSize: 12, color: Colors.grey),
+                                      fontSize: 20, color: Colors.grey),
                                 ),
                             ],
                           ),
@@ -232,23 +236,23 @@ class _EventDetailViewState extends State<EventDetailView> {
                             ),
                             TextButton(
                               onPressed: () async {
-                                if (_userController.text.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content:
-                                              Text('Please enter your email')));
-                                  return;
-                                }
+                                // if (_userController.text.isEmpty) {
+                                //   ScaffoldMessenger.of(context).showSnackBar(
+                                //       const SnackBar(
+                                //           content:
+                                //               Text('Please enter your email')));
+                                //   return;
+                                // }
 
                                 // Validate email format
-                                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                                    .hasMatch(_userController.text)) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text(
-                                              'Please enter a valid email')));
-                                  return;
-                                }
+                                // if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                //     .hasMatch(_userController.text)) {
+                                //   ScaffoldMessenger.of(context).showSnackBar(
+                                //       const SnackBar(
+                                //           content: Text(
+                                //               'Please enter a valid email')));
+                                //   return;
+                                // }
 
                                 try {
                                   // Show loading indicator
@@ -262,7 +266,7 @@ class _EventDetailViewState extends State<EventDetailView> {
 
                                   // Register attendee
                                   await _eventController.addAttendee(
-                                      _currentEvent.id, _userController.text);
+                                      _currentEvent.id, email ??'');
                                   await _refreshEventData();
 
                                   // Close loading dialog
@@ -279,7 +283,7 @@ class _EventDetailViewState extends State<EventDetailView> {
                                       MaterialPageRoute(
                                         builder: (context) => PaymentScreen(
                                           event: _currentEvent,
-                                          attendeeEmail: _userController.text,
+                                          attendeeEmail: email??'',
                                           amount: _currentEvent.price,
                                         ),
                                       ),
@@ -305,7 +309,7 @@ class _EventDetailViewState extends State<EventDetailView> {
                                   );
                                 }
                               },
-                              child: const Text('Register'),
+                              child: const Text('Yes!'),
                             ),
                           ],
                         ),
