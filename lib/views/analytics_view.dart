@@ -5,9 +5,6 @@ class AnalyticsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Analytics & Reporting'),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -44,7 +41,7 @@ class AnalyticsView extends StatelessWidget {
       child: ListTile(
         title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(value),
-        leading: Icon(Icons.analytics, color: Colors.blue),
+        leading: Icon(Icons.analytics, color: Color.fromARGB(255, 118, 157, 123)),
       ),
     );
   }
