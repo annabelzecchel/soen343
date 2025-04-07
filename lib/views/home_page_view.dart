@@ -27,19 +27,18 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   String _selectedCategory = 'All';
   String _searchQuery = '';
-  final FirebaseAuth _auth =FirebaseAuth.instance;
-  User?_currentUser;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  User? _currentUser;
   String? type;
   String? name;
-  
-  
+
   @override
   void initState() {
     super.initState();
-    _auth.authStateChanges().listen((user){
-      setState((){
-        _currentUser=user;
-      _fetchUserRole();
+    _auth.authStateChanges().listen((user) {
+      setState(() {
+        _currentUser = user;
+        _fetchUserRole();
       });
     });
   }
@@ -62,7 +61,7 @@ class _HomePageState extends State<HomePage> {
 
     if (user != null) {
       String userRole = await _profileController.getRoleById(user.uid);
-       String userName = await _profileController.getNameById(user.uid);
+      String userName = await _profileController.getNameById(user.uid);
       setState(() {
         type = userRole;
         name = userName;
@@ -154,11 +153,11 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.notifications, color: Colors.brown[600]),
             onPressed: () {},
           ),
-          if (_currentUser!=null)
-          IconButton(
-            icon: Icon(Icons.account_circle, color: Colors.brown[600]),
-            onPressed: () => _navigateToProfile(context),
-          ),
+          if (_currentUser != null)
+            IconButton(
+              icon: Icon(Icons.account_circle, color: Colors.brown[600]),
+              onPressed: () => _navigateToProfile(context),
+            ),
           ElevatedButton(
             onPressed: () async {
               if (_currentUser == null) {
@@ -485,7 +484,7 @@ class _HomePageState extends State<HomePage> {
                                         ],
                                       ),
                                     ),
-                                  if (event.stakeholder==
+                                  if (event.stakeholder ==
                                       FirebaseAuth.instance.currentUser?.email)
                                     Container(
                                       padding: const EdgeInsets.symmetric(
@@ -527,7 +526,6 @@ class _HomePageState extends State<HomePage> {
               },
             ),
           ),
-      
         ],
       ),
     );

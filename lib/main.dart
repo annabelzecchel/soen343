@@ -10,6 +10,7 @@ import 'package:soen343/components/app_theme.dart';
 import 'package:soen343/event_management_page.dart';
 import 'package:soen343/views/events_list_view.dart';
 import 'package:soen343/views/chat_rooms_view.dart';
+import 'package:soen343/components/sendEmail.dart';
 
 void main() async {
   await dotenv.load();
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Planini',
       theme: AppTheme.lightTheme,
-      home: const HomePage(title: 'PLANINI'),
+      home: EmailForm(),
       debugShowCheckedModeBanner: false,
     );
   }
