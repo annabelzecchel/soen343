@@ -24,6 +24,7 @@ void main() async {
             messagingSenderId: dotenv.env['MESSAGESENDERID'] ?? '',
             appId: dotenv.env['APPID'] ?? '',
             measurementId: dotenv.env['MEASUREMENTID'] ?? ''));
+    await dotenv.load(fileName: ".env");
   } else {
     await Firebase.initializeApp();
   }

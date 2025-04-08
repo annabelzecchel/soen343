@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:soen343/components/sendEmail.dart';
 import '../controllers/event_controller.dart';
 import '../controllers/profile_controller.dart';
 import '../components/auth_service.dart';
@@ -14,6 +15,7 @@ import 'event_feedback_form.dart';
 import '../../components/event_feedback_list.dart';
 import '../models/event_feedback_model.dart';
 import '../../controllers/event_feedback_service.dart';
+// Import the EmailForm widget which should accept a list of emails as a parameter.
 
 class EventDetailView extends StatefulWidget {
   final Event event;
@@ -32,7 +34,6 @@ class _EventDetailViewState extends State<EventDetailView> {
   late Event _currentEvent;
   String? type;
   String? email;
-        
 
   @override
   void initState() {
@@ -57,7 +58,7 @@ class _EventDetailViewState extends State<EventDetailView> {
       print(userRole);
       setState(() {
         type = userRole;
-        email=email1;
+        email = email1;
       });
     }
   }
@@ -95,7 +96,7 @@ class _EventDetailViewState extends State<EventDetailView> {
         chatRoom = await _chatController.getChatRoomById(chatRoomId);
       }
 
-      // Navigate to chat detail
+      // Navigate to chat detail view
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -134,8 +135,7 @@ class _EventDetailViewState extends State<EventDetailView> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_currentEvent.name),
-        actions: (type == 'organizer' ||
-                type == "administration")
+        actions: (type == 'organizer' || type == "administration")
             ? [
                 IconButton(
                   icon: const Icon(Icons.edit),
@@ -167,8 +167,8 @@ class _EventDetailViewState extends State<EventDetailView> {
                             onPressed: () async {
                               await _eventController
                                   .deleteEvent(_currentEvent.id);
-                              Navigator.pop(context); //Dialog
-                              Navigator.pop(context); //List
+                              Navigator.pop(context); // Close dialog
+                              Navigator.pop(context); // Return to previous view
                             },
                             child: const Text('Delete'),
                           ),
@@ -188,134 +188,147 @@ class _EventDetailViewState extends State<EventDetailView> {
             _buildInfoCard(context),
             const SizedBox(height: 16),
             _buildAttendeesList(context),
+            const SizedBox(height: 16),
+            if (type != null &&
+                (type!.toLowerCase() == 'organizer' ||
+                    type!.toLowerCase() == 'administration' ||
+                    type!.toLowerCase() == 'stakeholders'))
+              ElevatedButton.icon(
+                icon: const Icon(Icons.email),
+                label: const Text('Update Attendees'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          EmailForm(emails: _currentEvent.attendees),
+                    ),
+                  );
+                },
+              ),
             const SizedBox(height: 24),
-              if(type == 'organizer' ||
-                type == "administration"||
+            if (type == 'organizer' ||
+                type == "administration" ||
                 type == 'Stakeholders' ||
                 type == "attendee")
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.person_add),
-                    label: const Text('Register'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.surface,
-                    ),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Are you sure you want to register for this event?'),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (_currentEvent.price >
-                                  0) // Only show payment option if event has a price
-                                const SizedBox(height: 16),
-                              if (_currentEvent.price > 0)
-                                const Text(
-                                  'Payment will be required after registration',
-                                  style: TextStyle(
-                                      fontSize: 20, color: Colors.grey),
-                                ),
-                            ],
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Cancel'),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.person_add),
+                      label: const Text('Register'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.surface,
+                      ),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text(
+                                'Are you sure you want to register for this event?'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (_currentEvent.price > 0)
+                                  const SizedBox(height: 16),
+                                if (_currentEvent.price > 0)
+                                  const Text(
+                                    'Payment will be required after registration',
+                                    style: TextStyle(
+                                        fontSize: 20, color: Colors.grey),
+                                  ),
+                              ],
                             ),
-                            TextButton(
-                              onPressed: () async {
-                                try {
-                                  // Show loading indicator
-                                  showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (context) => const Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  );
-
-                                  // Register attendee
-                                  await _eventController.addAttendee(
-                                      _currentEvent.id, email ??'');
-                                  await _refreshEventData();
-
-                                  // Close loading dialog
-                                  Navigator.pop(context);
-
-                                  // Close registration dialog
-                                  Navigator.pop(context);
-
-                                  // If event has a price, navigate to payment screen
-                                  if (_currentEvent.price > 0) {
-                                    if (!mounted) return;
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PaymentScreen(
-                                          event: _currentEvent,
-                                          attendeeEmail: email??'',
-                                          amount: _currentEvent.price,
-                                        ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  try {
+                                    // Show loading indicator
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (context) => const Center(
+                                        child: CircularProgressIndicator(),
                                       ),
                                     );
-                                  } else {
-                                    // Show success message for free event
+
+                                    // Register attendee
+                                    await _eventController.addAttendee(
+                                        _currentEvent.id, email ?? '');
+                                    await _refreshEventData();
+
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+
+                                    // Navigate to payment screen if event has a price
+                                    if (_currentEvent.price > 0) {
+                                      if (!mounted) return;
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PaymentScreen(
+                                            event: _currentEvent,
+                                            attendeeEmail: email ?? '',
+                                            amount: _currentEvent.price,
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      if (!mounted) return;
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                              content: Text(
+                                                  'Registration successful!')));
+                                    }
+                                  } catch (e) {
+                                    if (Navigator.canPop(context)) {
+                                      Navigator.pop(context);
+                                    }
                                     if (!mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                            content: Text(
-                                                'Registration successful!')));
+                                      SnackBar(
+                                          content:
+                                              Text('Error: ${e.toString()}')),
+                                    );
                                   }
-                                } catch (e) {
-                                  // Close loading dialog if still open
-                                  if (Navigator.canPop(context)) {
-                                    Navigator.pop(context);
-                                  }
-                                  if (!mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content:
-                                            Text('Error: ${e.toString()}')),
-                                  );
-                                }
-                              },
-                              child: const Text('Yes!'),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.chat),
-                    label: const Text('Chat'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.surface,
+                                },
+                                child: const Text('Yes!'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                    onPressed: _initiateChat,
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.poll),
-                    label: const Text('Polls'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.surface,
-                      foregroundColor: Colors.black,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.chat),
+                      label: const Text('Chat'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.surface,
+                      ),
+                      onPressed: _initiateChat,
                     ),
-                    onPressed: _navigateToPolls,
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.poll),
+                      label: const Text('Polls'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.surface,
+                        foregroundColor: Colors.black,
+                      ),
+                      onPressed: _navigateToPolls,
+                    ),
+                  ),
+                ],
+              ),
             //FEEEDBACK ABOUT EVENT
             const SizedBox(height: 18),
             const Text(
@@ -339,48 +352,46 @@ class _EventDetailViewState extends State<EventDetailView> {
                   ],
                 ),
 
-            //SPONSORING AN EVENT
+            // SPONSORING AN EVENT
             const SizedBox(height: 24),
-            if(type == 'Stakeholders')
-            ElevatedButton.icon(
-              icon: const Icon(Icons.person_add),
-              label: const Text('Sponsor Event'),
-              onPressed: () {
-                //IDK TEMPORARY FOR N0W TO SEE IF IT WORKS
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Sponsor this event'),
-                    content: TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'Enter your user email',
-                      ),
-                      //NOT WORKING
-                      onChanged: (value) async {
-                        if (value.isNotEmpty) {
-                          _userController.text = value;
-                        }
-                      },
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          await _eventController.addSponsor(
-                              _currentEvent.id, _userController.text);
-                          await _refreshEventData();
-                          Navigator.pop(context);
+            if (type == 'Stakeholders')
+              ElevatedButton.icon(
+                icon: const Icon(Icons.person_add),
+                label: const Text('Sponsor Event'),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Sponsor this event'),
+                      content: TextField(
+                        decoration: const InputDecoration(
+                          labelText: 'Enter your user email',
+                        ),
+                        onChanged: (value) async {
+                          if (value.isNotEmpty) {
+                            _userController.text = value;
+                          }
                         },
-                        child: const Text('Sponsor'),
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            await _eventController.addSponsor(
+                                _currentEvent.id, _userController.text);
+                            await _refreshEventData();
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Sponsor'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
           ],
         ),
       ),
@@ -406,7 +417,7 @@ class _EventDetailViewState extends State<EventDetailView> {
               _formatDateTime(widget.event.dateTime),
             ),
             _buildInfoRow(Icons.attach_money,
-                '\$${widget.event.price.toStringAsFixed(2)}'),
+                '\$${_currentEvent.price.toStringAsFixed(2)}'),
             _buildInfoRow(Icons.category, 'Type: ${_currentEvent.type}'),
             _buildInfoRow(
                 Icons.format_align_left, 'Format: ${_currentEvent.format}'),
@@ -430,9 +441,7 @@ class _EventDetailViewState extends State<EventDetailView> {
         children: [
           Icon(icon, size: 20),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(text),
-          ),
+          Expanded(child: Text(text)),
         ],
       ),
     );
@@ -450,7 +459,7 @@ class _EventDetailViewState extends State<EventDetailView> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            widget.event.attendees.isEmpty
+            _currentEvent.attendees.isEmpty
                 ? const Text('No attendees yet')
                 : ListView.builder(
                     shrinkWrap: true,
