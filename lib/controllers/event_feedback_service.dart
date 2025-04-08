@@ -13,13 +13,10 @@ class FeedbackService {
   }
 
   Stream<List<EventFeedback>> getFeedbackForEvent(String eventId) {
-    return _firestore
-        .collection('event_feedback')
-        .where('eventId', isEqualTo: eventId)
-        .orderBy('timestamp', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => EventFeedback.fromMap(doc.data()))
-            .toList());
+        return _firestore.collection('event_feedback').snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return EventFeedback.fromMap(doc.data());
+      }).toList();
+    });
   }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:soen343/controllers/event_feedback_service.dart';
-import 'package:soen343/models/event_feedback_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-
+import '../models/event_feedback_model.dart';
+import '../controllers/event_feedback_service.dart';
 
 class FeedbackList extends StatelessWidget {
   final String eventId;
@@ -16,19 +16,28 @@ class FeedbackList extends StatelessWidget {
     return StreamBuilder<List<EventFeedback>>(
       stream: feedbackService.getFeedbackForEvent(eventId),
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Text('Error loading feedback: ${snapshot.error}');
-        }
-
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final feedbackList = snapshot.data ?? [];
-
-        if (feedbackList.isEmpty) {
-          return const Center(child: Text('No feedback yet'));
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Center(
+                child: Text(
+                  'No reviews yet',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ),
+            ),
+          );
         }
+
+        final feedbackList = snapshot.data!;
 
         return ListView.builder(
           shrinkWrap: true,
@@ -72,7 +81,8 @@ class FeedbackList extends StatelessWidget {
                       }),
                     ),
                     const SizedBox(height: 8),
-                    Text(feedback.comment),
+                    if (feedback.comment.isNotEmpty)
+                      Text(feedback.comment),
                   ],
                 ),
               ),
