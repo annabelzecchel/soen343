@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -31,9 +32,9 @@ class _EmailFormState extends State<EmailForm> {
       _isSending = true;
     });
 
-    final serviceId = 'service_1a57wf4';
-    final templateId = 'template_vgw44vb';
-    final userId = '1IU41pMjUlpDzNsdH';
+    final serviceId = dotenv.env['SERVICEID'];
+    final templateId = dotenv.env['TEMPLATEID'];
+    final userId = dotenv.env['USERID'];
 
     final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
 
