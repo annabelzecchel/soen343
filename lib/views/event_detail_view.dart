@@ -184,21 +184,24 @@ class _EventDetailViewState extends State<EventDetailView> {
             _buildInfoCard(context),
             const SizedBox(height: 16),
             _buildAttendeesList(context),
-            // New "Update Attendees" button to navigate to the email-sending component:
             const SizedBox(height: 16),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.email),
-              label: const Text('Update Attendees'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        EmailForm(emails: _currentEvent.attendees),
-                  ),
-                );
-              },
-            ),
+            if (type != null &&
+                (type!.toLowerCase() == 'organizer' ||
+                    type!.toLowerCase() == 'administration' ||
+                    type!.toLowerCase() == 'stakeholders'))
+              ElevatedButton.icon(
+                icon: const Icon(Icons.email),
+                label: const Text('Update Attendees'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          EmailForm(emails: _currentEvent.attendees),
+                    ),
+                  );
+                },
+              ),
             const SizedBox(height: 24),
             if (type == 'organizer' ||
                 type == "administration" ||
