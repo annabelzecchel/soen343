@@ -10,17 +10,35 @@ class OpenAIService {
 
   final String _apiUrl = 'https://api.openai.com/v1/chat/completions';
   final String _model = 'gpt-3.5-turbo';
+
+  String? get apiKey => _apiKey;
   String? _apiKey;
 
   Future<void> initialize() async {
-    _apiKey = dotenv.env['OPENAI_API_KEY'];
-    if (_apiKey == null || _apiKey!.isEmpty) {
-      debugPrint('Warning: OpenAI API key not found');
+    try {
+      await dotenv.load(); // Ensure .env is loaded
+
+      _apiKey = dotenv.env['OPENAI_API_KEY'];
+
+      // VERY VERBOSE LOGGING
+      print('Raw API Key: $_apiKey');
+      print('API Key Length: ${_apiKey?.length}');
+      print('API Key Starts With sk-: ${_apiKey?.startsWith('sk-') == true}');
+
+      if (_apiKey == null || _apiKey!.isEmpty) {
+        throw Exception('API key is missing or empty');
+      }
+    } catch (e) {
+      print('API Key Initialization Error: $e');
+      rethrow;
     }
   }
 
   Future<Map<String, dynamic>> generateChatResponse(
-      List<Map<String, String>> messages) async {
+    List<Map<String, dynamic>> messages, {
+    bool enableWebSearch = false,
+    String? webSearchQuery,
+  }) async {
     if (_apiKey == null || _apiKey!.isEmpty) {
       return {
         'success': false,
@@ -29,18 +47,51 @@ class OpenAIService {
     }
 
     try {
+      // Prepare the request body
+      final requestBody = {
+        'model': _model,
+        'messages': messages,
+        'temperature': 0.7,
+        'max_tokens': 500,
+      };
+
+      // Add web search functionality if enabled
+      if (enableWebSearch && webSearchQuery != null) {
+        requestBody['tools'] = [
+          {
+            'type': 'function',
+            'function': {
+              'name': 'web_search',
+              'description': 'Search the web for current information',
+              'parameters': {
+                'type': 'object',
+                'properties': {
+                  'query': {
+                    'type': 'string',
+                    'description':
+                        'Search query to find current web information'
+                  }
+                },
+                'required': ['query']
+              }
+            }
+          }
+        ];
+
+        // Add tool choice to force web search
+        requestBody['tool_choice'] = {
+          'type': 'function',
+          'function': {'name': 'web_search'}
+        };
+      }
+
       final response = await http.post(
         Uri.parse(_apiUrl),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_apiKey',
         },
-        body: jsonEncode({
-          'model': _model,
-          'messages': messages,
-          'temperature': 0.7,
-          'max_tokens': 500,
-        }),
+        body: jsonEncode(requestBody),
       );
 
       if (response.statusCode == 200) {
@@ -69,7 +120,24 @@ class OpenAIService {
     }
   }
 
+  // Example usage method
+  Future<Map<String, dynamic>> searchWebAndRespond(
+    List<Map<String, dynamic>> conversationHistory,
+    String query,
+  ) async {
+    // Add the web search query to the conversation history
+    conversationHistory
+        .add({'role': 'user', 'content': 'Please search the web for: $query'});
+
+    return await generateChatResponse(
+      conversationHistory,
+      enableWebSearch: true,
+      webSearchQuery: query,
+    );
+  }
+
   Map<String, String> getPlaniniSystemMessage() {
+    // Keep the existing system message
     return {
       'role': 'system',
       'content': '''

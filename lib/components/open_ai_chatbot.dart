@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../services/openai_service.dart'; // Ensure this import is correct
 
 class OpenAIChatBot extends StatefulWidget {
   const OpenAIChatBot({Key? key}) : super(key: key);
@@ -16,17 +16,14 @@ class _OpenAIChatBotState extends State<OpenAIChatBot>
   final TextEditingController _textController = TextEditingController();
   final List<ChatMessage> _messages = [];
   final ScrollController _scrollController = ScrollController();
+  final OpenAIService _openAIService = OpenAIService();
+
   bool _isOpen = false;
   bool _isTyping = false;
+  bool _isInitialized = false;
+
   late AnimationController _animationController;
   late Animation<double> _animation;
-
-  // OpenAI configuration
-  final String _apiKey =
-      'YOUR_OPENAI_API_KEY'; // Replace with your actual API key
-  final String _apiUrl = 'https://api.openai.com/v1/chat/completions';
-  final String _model =
-      'gpt-3.5-turbo'; // You can use 'gpt-4' if you have access
 
   // System message that sets the context for the AI
   final String _systemMessage = '''
@@ -54,10 +51,10 @@ Available app sections:
 - Analytics: For viewing event statistics
 - Polls: For gathering attendee feedback
 
-Keep your responses concise and focused on helping the user navigate the application.
+Keep your responses concise, focused, and brief. Users prefer short, clear answers.
 ''';
 
-  final List<Map<String, String>> _conversationHistory = [];
+  final List<Map<String, dynamic>> _conversationHistory = [];
 
   @override
   void initState() {
@@ -71,11 +68,28 @@ Keep your responses concise and focused on helping the user navigate the applica
       curve: Curves.easeInOut,
     );
 
+    // Initialize OpenAI service
+    _initializeOpenAIService();
+
     // Initialize conversation history with system message
     _conversationHistory.add({
       'role': 'system',
       'content': _systemMessage,
     });
+  }
+
+  Future<void> _initializeOpenAIService() async {
+    try {
+      await _openAIService.initialize();
+      setState(() {
+        _isInitialized = true;
+      });
+    } catch (e) {
+      debugPrint('Error initializing OpenAI service: $e');
+      setState(() {
+        _isInitialized = false;
+      });
+    }
   }
 
   @override
@@ -94,7 +108,7 @@ Keep your responses concise and focused on helping the user navigate the applica
         // Add welcome message if this is the first time opening
         if (_messages.isEmpty) {
           _addBotMessage(
-            "Hi there! I'm Planini Assistant. How can I help you today? You can ask me about creating events, finding events, chat features, or any other aspect of the Planini platform.",
+            "Hi! I'm Planini Assistant. How can I help with your event planning today?",
           );
         }
       } else {
@@ -104,7 +118,7 @@ Keep your responses concise and focused on helping the user navigate the applica
   }
 
   void _handleSubmitted(String text) {
-    if (text.trim().isEmpty) return;
+    if (text.trim().isEmpty || !_isInitialized) return;
 
     setState(() {
       _messages.add(ChatMessage(
@@ -128,53 +142,46 @@ Keep your responses concise and focused on helping the user navigate the applica
   }
 
   Future<void> _getOpenAIResponse() async {
-    try {
-      final response = await http.post(
-        Uri.parse(_apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_apiKey',
-        },
-        body: jsonEncode({
-          'model': _model,
-          'messages': _conversationHistory,
-          'temperature': 0.7,
-          'max_tokens': 500,
-        }),
+    if (!_isInitialized) {
+      _addBotMessage(
+        "I'm not fully set up yet. Please try again in a moment.",
+        links: [
+          BotLink(
+            text: "Email Support",
+            onTap: () => _launchEmail("support@planini.com"),
+          ),
+        ],
       );
+      return;
+    }
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final botResponse = data['choices'][0]['message']['content'];
+    try {
+      final response =
+          await _openAIService.generateChatResponse(_conversationHistory);
 
+      if (response['success']) {
         // Add assistant response to conversation history
         _conversationHistory.add({
           'role': 'assistant',
-          'content': botResponse,
+          'content': response['message'],
         });
 
-        // Process the response to extract any navigation or email links
-        _processOpenAIResponse(botResponse);
+        // Process and add the response
+        _processOpenAIResponse(response['message']);
       } else {
         _addBotMessage(
-          "I'm having trouble connecting to my knowledge base. Please try again later or contact support@planini.com for assistance.",
+          "I'm having trouble processing your request. ${response['message']}",
           links: [
             BotLink(
-              text: "Copy Email Address",
-              onTap: () {
-                Clipboard.setData(
-                    const ClipboardData(text: "support@planini.com"));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Email copied to clipboard')),
-                );
-              },
+              text: "Contact Support",
+              onTap: () => _launchEmail("support@planini.com"),
             ),
           ],
         );
       }
     } catch (e) {
       _addBotMessage(
-        "I encountered an error while processing your request. Please try again or contact our support team.",
+        "I encountered an error processing your request. Please try again later.",
         links: [
           BotLink(
             text: "Contact Support",
@@ -183,6 +190,21 @@ Keep your responses concise and focused on helping the user navigate the applica
         ],
       );
     }
+  }
+
+// Helper method to determine if a web search is needed
+  bool _shouldPerformWebSearch(String query) {
+    // Add logic to determine when web search is appropriate
+    final searchTriggers = [
+      'current trends',
+      'latest news',
+      'recent developments',
+      'what is happening',
+      'up to date information',
+    ];
+
+    return searchTriggers
+        .any((trigger) => query.toLowerCase().contains(trigger));
   }
 
   void _processOpenAIResponse(String response) {
@@ -259,7 +281,7 @@ Keep your responses concise and focused on helping the user navigate the applica
     if (response.toLowerCase().contains('support@planini.com')) {
       links.add(
         BotLink(
-          text: "Copy Email Address",
+          text: "Copy Email",
           onTap: () {
             Clipboard.setData(const ClipboardData(text: "support@planini.com"));
             ScaffoldMessenger.of(context).showSnackBar(
@@ -282,15 +304,13 @@ Keep your responses concise and focused on helping the user navigate the applica
 
   void _navigateTo(String route) {
     // In a real implementation, this would navigate to different routes
-    // For now, just acknowledge the action
     _addBotMessage("Navigating to $route...");
 
     // Here you would implement actual navigation, for example:
     /*
     switch (route) {
       case '/event-management':
-        Navigator.push(
-          context,
+        Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => const EventManagementPage(
               title: 'Event Management',
@@ -299,8 +319,7 @@ Keep your responses concise and focused on helping the user navigate the applica
         );
         break;
       case '/events-list':
-        Navigator.push(
-          context,
+        Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => const EventsListView(),
           ),
@@ -319,10 +338,16 @@ Keep your responses concise and focused on helping the user navigate the applica
     );
 
     try {
-      await launchUrl(emailUri);
+      if (await canLaunchUrl(emailUri)) {
+        await launchUrl(emailUri);
+      } else {
+        throw 'Could not launch email client';
+      }
     } catch (e) {
-      _addBotMessage(
-          "Unable to open email client. Please manually send an email to $email");
+      if (mounted) {
+        _addBotMessage(
+            "Unable to open email client. Please manually send an email to $email");
+      }
     }
   }
 
@@ -553,6 +578,8 @@ Keep your responses concise and focused on helping the user navigate the applica
             Text(
               message.text,
               style: TextStyle(
+                fontSize: 13.0, // Smaller font size for better readability
+                height: 1.4, // Better line spacing
                 color: message.isUser ? Colors.brown[800] : Colors.black87,
               ),
             ),
@@ -574,6 +601,7 @@ Keep your responses concise and focused on helping the user navigate the applica
                         child: Text(
                           link.text,
                           style: const TextStyle(
+                            fontSize: 12.0, // Smaller button text
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
