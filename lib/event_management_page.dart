@@ -113,10 +113,6 @@ class _EventManagementState extends State<EventManagementPage> {
                   icon: Icon(Icons.analytics),
                   label: Text('Analytics & Reports'),
                 ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.info),
-                  label: Text('About'),
-                ),
               ],
               labelType: NavigationRailLabelType.all,
             ),

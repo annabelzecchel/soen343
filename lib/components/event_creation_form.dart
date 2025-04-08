@@ -344,18 +344,6 @@ class _EventCreationFormState extends State<EventCreationForm> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState?.validate() ?? false) {
-                        // Get the currently logged-in user
-                        // User? user = FirebaseAuth.instance.currentUser; this is for when user auth implemented
-                        //String userEmail = "haaha@gmail.com";
-        
-                        // if (user == null) {
-                        //   ScaffoldMessenger.of(context).showSnackBar(
-                        //     const SnackBar(
-                        //         content:
-                        //             Text('You must be logged in to create an event')),
-                        //   );
-                        //   return;
-                        // }
         
                         try {
                           // Reference to Firestore collection
@@ -384,6 +372,24 @@ class _EventCreationFormState extends State<EventCreationForm> {
                             const SnackBar(
                                 content: Text('Event stored successfully')),
                           );
+
+                          // Clear the form fields
+                          _formKey.currentState?.reset();
+
+                          setState(() {
+                          _nameController.clear();
+                          _typeController.clear();
+                          _descriptionController.clear();
+                          _formatController.clear();
+                          _dateTimeController.clear();
+                          _locationController.clear();
+                          _priceController.clear();
+                          _discountController.clear();
+                          _imageBytes = null;
+                          _fileName = null;
+                          imageURL = null;    
+                          });
+
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Error saving event: $e')),
