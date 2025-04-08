@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
   User? _currentUser;
   String? type;
   String? name;
+  String? email;
 
   @override
   void initState() {
@@ -43,28 +44,17 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  // Future<void> _fetchUserRole() async {
-  //   final user = FirebaseAuth.instance.currentUser;
-
-  //   if (user != null) {
-  //     String userRole = await _profileController.getRoleById(user.uid);
-  //      String userName = await _profileController.getNameById(user.uid);
-  //     setState(() {
-  //       type = userRole;
-  //       name = userName;
-  //     });
-  //   }
-  // }
-
   Future<void> _fetchUserRole() async {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
       String userRole = await _profileController.getRoleById(user.uid);
       String userName = await _profileController.getNameById(user.uid);
+      String thisemail = await _profileController.getEmailById(user.uid);
       setState(() {
         type = userRole;
         name = userName;
+        email = thisemail;
       });
     }
   }
@@ -91,6 +81,15 @@ class _HomePageState extends State<HomePage> {
     final eventController = EventController();
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    // Create a combined filter options list.
+    // Add "My Stakeholder Events" only if the user is a stakeholder or an admin.
+    final List<String> filterOptions = List.from(_categories);
+    if (type != null &&
+        (type!.toLowerCase() == 'stakeholders' ||
+            type!.toLowerCase() == 'administration')) {
+      filterOptions.add('My Sponsorships');
+    }
 
     return Scaffold(
       backgroundColor: colorScheme.surface, // Soft green background
@@ -170,10 +169,11 @@ class _HomePageState extends State<HomePage> {
               } else {
                 await FirebaseAuth.instance.signOut();
                 Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const HomePage(title: "HOME"),
-                    ));
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HomePage(title: "HOME"),
+                  ),
+                );
               }
             },
             child: Text(_currentUser == null ? "Sign in!" : "Sign out!"),
@@ -223,20 +223,21 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // Category Chips - Green with brown text
+          // Category Chips with extra filter button for stakeholder events if applicable
           SizedBox(
             height: 60,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _categories.length,
+              itemCount: filterOptions.length,
               itemBuilder: (context, index) {
-                final isSelected = _selectedCategory == _categories[index];
+                final option = filterOptions[index];
+                final isSelected = _selectedCategory == option;
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 6),
                   child: ChoiceChip(
                     label: Text(
-                      _categories[index],
+                      option,
                       style: TextStyle(
                         color: isSelected ? Colors.white : Colors.brown[800],
                         fontWeight: FontWeight.w500,
@@ -244,7 +245,9 @@ class _HomePageState extends State<HomePage> {
                     ),
                     selected: isSelected,
                     onSelected: (selected) => setState(() {
-                      _selectedCategory = selected ? _categories[index] : 'All';
+                      _selectedCategory = selected
+                          ? option
+                          : 'All'; // default to All if unchecked
                     }),
                     selectedColor: colorScheme.primary, // Medium green
                     backgroundColor:
@@ -307,12 +310,25 @@ class _HomePageState extends State<HomePage> {
                   );
                 }
 
-                // Filter events
+                // Filter events according to the selected category.
+                // If "My Stakeholder Events" is selected, only include events
+                // where event.stakeholder equals the user's name.
                 final filteredEvents = snapshot.data!.where((event) {
-                  final matchesCategory = _selectedCategory == 'All' ||
-                      event.name
-                          .toLowerCase()
-                          .contains(_selectedCategory.toLowerCase());
+                  bool matchesCategory;
+                  if (_selectedCategory == 'All') {
+                    matchesCategory = true;
+                  } else if (_selectedCategory == 'My Sponsorships') {
+                    print('Stakeholder: ${event.stakeholder}');
+                    print('User: ${FirebaseAuth.instance.currentUser?.email}');
+                    matchesCategory = event.stakeholder.toLowerCase().trim() ==
+                        email?.toLowerCase().trim();
+                    print('Matches: $matchesCategory');
+                  } else {
+                    matchesCategory = event.name
+                        .toLowerCase()
+                        .contains(_selectedCategory.toLowerCase());
+                  }
+
                   final matchesSearch = _searchQuery.isEmpty ||
                       event.name
                           .toLowerCase()
@@ -384,8 +400,7 @@ class _HomePageState extends State<HomePage> {
                                     width: 50,
                                     height: 50,
                                     decoration: BoxDecoration(
-                                      color:
-                                          colorScheme.primary, // Medium green
+                                      color: colorScheme.primary,
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Icon(
