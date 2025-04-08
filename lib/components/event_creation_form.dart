@@ -27,14 +27,13 @@ class _EventCreationFormState extends State<EventCreationForm> {
   final ProfileController _profileController = ProfileController(AuthService());
   final _discountController = TextEditingController();
 
-
   FilePickerResult? _filePickerResult;
   Uint8List? _imageBytes;
   String? _fileName;
   String? imageURL;
   String? _email;
 
-    @override
+  @override
   void initState() {
     super.initState();
     _setUserEmail();
@@ -51,7 +50,6 @@ class _EventCreationFormState extends State<EventCreationForm> {
     } 
   }
 
-// Behavior of Date and Time Picker
   Future<void> _selectDateTime(BuildContext context) async {
     final DateTime? pickedDateTime = await showDatePicker(
         context: context,
@@ -97,27 +95,52 @@ class _EventCreationFormState extends State<EventCreationForm> {
 
   Future<String?> _uploadFile() async {
     try {
+      print("in upload file function");
       if (_imageBytes != null && _fileName != null) {
-        firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+        print("inside if");
+        
+        // Create storage reference
+        final ref = firebase_storage.FirebaseStorage.instance
             .ref()
             .child('images')
             .child(_fileName!);
-        final metadata = firebase_storage.SettableMetadata(
-          contentType: 'image/jpeg',
-        );
-        final uploadTask = ref.putData(_imageBytes!, metadata);
-        final snapshot = await uploadTask;
-        imageURL = await snapshot.ref.getDownloadURL();
         
-        print("File uploaded successfully. URL: $imageURL");
-        return imageURL;
+        // Set metadata
+        final metadata = firebase_storage.SettableMetadata(
+          contentType: 'image/jpeg', // Make sure this matches your actual file type
+        );
+        
+        // Start upload with error handling
+        print("Starting upload...");
+        final uploadTask = ref.putData(_imageBytes!, metadata);
+        
+        // Listen for state changes
+        uploadTask.snapshotEvents.listen((snapshot) {
+          print('Upload progress: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100}%');
+        }, onError: (e) {
+          print('Upload error: $e');
+        });
+        
+        // Wait for upload to complete
+        final taskSnapshot = await uploadTask.whenComplete(() {});
+        print("Upload task completed");
+        
+        if (taskSnapshot.state == firebase_storage.TaskState.success) {
+          imageURL = await taskSnapshot.ref.getDownloadURL();
+          print("File uploaded successfully. URL: $imageURL");
+          return imageURL;
+        } else {
+          print("Upload failed with state: ${taskSnapshot.state}");
+          return null;
+        }
       } else {
         print("No file selected for upload.");
+        return null;
       }
     } catch (e) {
       print("Error uploading file: $e");
+      return null;
     }
-    return null; // Ensure a value is returned in all cases
   }
 
   @override
@@ -155,7 +178,6 @@ class _EventCreationFormState extends State<EventCreationForm> {
                       width: double.infinity,
                       decoration: const BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(5)),
-                        // color: Color.fromARGB(255, 221, 230, 238),
                       ),
                       child: _imageBytes != null
                           ? ClipRRect(
@@ -165,14 +187,14 @@ class _EventCreationFormState extends State<EventCreationForm> {
                                 fit: BoxFit.fill,
                               ),
                             )
-                          :
-                      const Column (
-                        children: [
-                          Icon(Icons.add_a_photo_outlined, size: 30),
-                          Text("Event Banner Image", 
-                            style: TextStyle(color: Colors.black, fontSize: 20)),
-                        ]
-                      ),),
+                          : const Column(
+                              children: [
+                                Icon(Icons.add_a_photo_outlined, size: 30),
+                                Text("Event Banner Image", 
+                                  style: TextStyle(color: Colors.black, fontSize: 20)),
+                              ]
+                            ),
+                    ),
                   ),
                   const SizedBox(height: 20),
                   TextFormField(
@@ -206,8 +228,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                   ),
                   const SizedBox(height: 20),
                   DropdownButtonFormField(
-                    value:
-                        _typeController.text.isEmpty ? null : _typeController.text,
+                    value: _typeController.text.isEmpty ? null : _typeController.text,
                     onChanged: (String? newValue) {
                       setState(() {
                         _typeController.text = newValue ?? '';
@@ -344,15 +365,22 @@ class _EventCreationFormState extends State<EventCreationForm> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState?.validate() ?? false) {
-        
                         try {
                           // Reference to Firestore collection
                           CollectionReference colRef =
                               FirebaseFirestore.instance.collection("events");
                           
+                          imageURL = "https://media.istockphoto.com/id/867944542/photo/blurred-background-vintage-filter-customer-in-coffee-shop-blur-background-with-bokeh.jpg?s=612x612&w=0&k=20&c=c-dctM2vjmV8TfBFd__m_bvAmtdlLlQvOA0WccOSRWw=";
                           // imageURL = await _uploadFile();
-                          imageURL = "https://meanderingwild.com/wp-content/uploads/2023/04/sunflower-personality.jpeg";
                           print(imageURL);
+        
+                          if (imageURL == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Failed to upload image')),
+                            );
+                            return;
+                          }
         
                           // Add event with creator details
                           await colRef.add({
@@ -363,8 +391,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                             "dateTime": _dateTimeController.text,
                             "location": _locationController.text,
                             "price": _priceController.text,
-                            "createdByEmail":
-                                _email,
+                            "createdByEmail": _email,
                             "image": imageURL,
                           });
         
@@ -377,17 +404,17 @@ class _EventCreationFormState extends State<EventCreationForm> {
                           _formKey.currentState?.reset();
 
                           setState(() {
-                          _nameController.clear();
-                          _typeController.clear();
-                          _descriptionController.clear();
-                          _formatController.clear();
-                          _dateTimeController.clear();
-                          _locationController.clear();
-                          _priceController.clear();
-                          _discountController.clear();
-                          _imageBytes = null;
-                          _fileName = null;
-                          imageURL = null;    
+                            _nameController.clear();
+                            _typeController.clear();
+                            _descriptionController.clear();
+                            _formatController.clear();
+                            _dateTimeController.clear();
+                            _locationController.clear();
+                            _priceController.clear();
+                            _discountController.clear();
+                            _imageBytes = null;
+                            _fileName = null;
+                            imageURL = null;    
                           });
 
                         } catch (e) {

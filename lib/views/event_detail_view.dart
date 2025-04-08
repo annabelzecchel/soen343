@@ -10,6 +10,10 @@ import '../controllers/chat_controller.dart';
 import '../models/chat_room_model.dart';
 import 'event_polls_view.dart';
 import 'payment_screen.dart';
+import 'event_feedback_form.dart';
+import '../../components/event_feedback_list.dart';
+import '../models/event_feedback_model.dart';
+import '../../controllers/event_feedback_service.dart';
 
 class EventDetailView extends StatefulWidget {
   final Event event;
@@ -206,18 +210,6 @@ class _EventDetailViewState extends State<EventDetailView> {
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // TextField(
-                              //   decoration: const InputDecoration(
-                              //     labelText: 'Enter your user email',
-                              //     hintText: 'user@example.com',
-                              //   ),
-                              //   keyboardType: TextInputType.emailAddress,
-                              //   onChanged: (value) async {
-                              //     if (value.isNotEmpty) {
-                              //       _userController.text = value;
-                              //     }
-                              //   },
-                              // ),
                               if (_currentEvent.price >
                                   0) // Only show payment option if event has a price
                                 const SizedBox(height: 16),
@@ -236,24 +228,6 @@ class _EventDetailViewState extends State<EventDetailView> {
                             ),
                             TextButton(
                               onPressed: () async {
-                                // if (_userController.text.isEmpty) {
-                                //   ScaffoldMessenger.of(context).showSnackBar(
-                                //       const SnackBar(
-                                //           content:
-                                //               Text('Please enter your email')));
-                                //   return;
-                                // }
-
-                                // Validate email format
-                                // if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                                //     .hasMatch(_userController.text)) {
-                                //   ScaffoldMessenger.of(context).showSnackBar(
-                                //       const SnackBar(
-                                //           content: Text(
-                                //               'Please enter a valid email')));
-                                //   return;
-                                // }
-
                                 try {
                                   // Show loading indicator
                                   showDialog(
@@ -342,6 +316,23 @@ class _EventDetailViewState extends State<EventDetailView> {
                 ),
               ],
             ),
+            //FEEEDBACK ABOUT EVENT
+            const SizedBox(height: 18),
+            const Text(
+              'Event Feedback',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            _buildEventFeedbackSummary(context),
+            const SizedBox(height: 16),
+              const Text(
+                'Your Feedback',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              FeedbackForm(eventId: _currentEvent.id),
+              const SizedBox(height: 24),
+
             //SPONSORING AN EVENT
             const SizedBox(height: 24),
             if(type == 'Stakeholders')
@@ -472,4 +463,104 @@ class _EventDetailViewState extends State<EventDetailView> {
       ),
     );
   }
+
+Widget _buildEventFeedbackSummary(BuildContext context) {
+  final feedbackService = FeedbackService();
+
+  return StreamBuilder<List<EventFeedback>>(
+    stream: feedbackService.getFeedbackForEvent(_currentEvent.id),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: Text(
+                'This event hasn\'t been reviewed yet',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      final feedbackList = snapshot.data!;
+      final averageRating = feedbackList
+          .map((f) => f.rating)
+          .reduce((a, b) => a + b) / feedbackList.length;
+
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              const Text(
+                'Event Rating',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    averageRating.toStringAsFixed(1),
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.star, color: Colors.amber, size: 28),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Based on ${feedbackList.length} review${feedbackList.length == 1 ? '' : 's'}',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+// And for the feedback list widget, modify your EventFeedbackList or add this:
+Widget _buildFeedbackListWidget() {
+  return StreamBuilder<List<EventFeedback>>(
+    stream: FeedbackService().getFeedbackForEvent(_currentEvent.id),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: Text(
+                'This event hasn\'t been reviewed yet',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      return FeedbackList(eventId: _currentEvent.id);
+    },
+  );
+}
 }
