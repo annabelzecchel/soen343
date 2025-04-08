@@ -396,6 +396,21 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               Row(
                                 children: [
+                                  // Container(
+                                  //   width: 50,
+                                  //   height: 50,
+                                  //   decoration: BoxDecoration(
+                                  //     color:
+                                  //         colorScheme.primary, // Medium green
+                                  //     borderRadius: BorderRadius.circular(10),
+                                  //   ),
+                                  //   child: 
+                                  //   Icon(
+                                  //     _getCategoryIcon(event.type ?? 'Event'),
+                                  //     color: Colors.white,
+                                  //     size: 30,
+                                  //   ),
+                                  // ),
                                   Container(
                                     width: 50,
                                     height: 50,
@@ -403,10 +418,12 @@ class _HomePageState extends State<HomePage> {
                                       color: colorScheme.primary,
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: Icon(
-                                      _getCategoryIcon(event.type ?? 'Event'),
-                                      color: Colors.white,
-                                      size: 30,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Image.network(
+                                        event.imageURL,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 16),
