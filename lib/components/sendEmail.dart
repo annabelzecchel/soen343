@@ -5,7 +5,6 @@ import 'dart:convert';
 class EmailForm extends StatefulWidget {
   final List<String> emails;
 
-  // Expect a list of email addresses in the constructor.
   EmailForm({Key? key, required this.emails}) : super(key: key);
 
   @override
@@ -15,8 +14,6 @@ class EmailForm extends StatefulWidget {
 class _EmailFormState extends State<EmailForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
-  // Although _emailController is still used to display the emails,
-  // the user cannot change these values.
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
 
@@ -25,7 +22,7 @@ class _EmailFormState extends State<EmailForm> {
   @override
   void initState() {
     super.initState();
-    // Populate the email field with the comma separated list.
+
     _emailController.text = widget.emails.join(', ');
   }
 
@@ -34,14 +31,12 @@ class _EmailFormState extends State<EmailForm> {
       _isSending = true;
     });
 
-    // EmailJS configuration: replace these with your actual IDs.
     final serviceId = 'service_1a57wf4';
     final templateId = 'template_vgw44vb';
     final userId = '1IU41pMjUlpDzNsdH';
 
     final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
 
-    // Build a list of POST requests, one for each recipient.
     List<Future<http.Response>> emailRequests = widget.emails.map((recipient) {
       return http.post(
         url,
@@ -62,14 +57,12 @@ class _EmailFormState extends State<EmailForm> {
       );
     }).toList();
 
-    // Execute all requests concurrently.
     List<http.Response> responses = await Future.wait(emailRequests);
 
     setState(() {
       _isSending = false;
     });
 
-    // Check if every response was successful.
     bool allSuccessful =
         responses.every((response) => response.statusCode == 200);
 
@@ -100,7 +93,6 @@ class _EmailFormState extends State<EmailForm> {
           key: _formKey,
           child: Column(
             children: [
-              // Name Field
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(labelText: 'Name'),
@@ -111,13 +103,11 @@ class _EmailFormState extends State<EmailForm> {
                   return null;
                 },
               ),
-              // Recipients Field (read-only)
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(labelText: 'Recipients'),
                 readOnly: true,
               ),
-              // Message Field
               TextFormField(
                 controller: _messageController,
                 decoration: InputDecoration(labelText: 'Message'),
@@ -130,7 +120,6 @@ class _EmailFormState extends State<EmailForm> {
                 },
               ),
               SizedBox(height: 20),
-              // Send Button or Progress Indicator
               _isSending
                   ? CircularProgressIndicator()
                   : ElevatedButton(

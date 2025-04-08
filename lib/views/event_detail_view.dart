@@ -254,10 +254,8 @@ class _EventDetailViewState extends State<EventDetailView> {
                                         _currentEvent.id, email ?? '');
                                     await _refreshEventData();
 
-                                    Navigator.pop(
-                                        context); // Close loading dialog
-                                    Navigator.pop(
-                                        context); // Close registration dialog
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
 
                                     // Navigate to payment screen if event has a price
                                     if (_currentEvent.price > 0) {
