@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Planini',
       theme: AppTheme.lightTheme,
-      home: EmailForm(),
+      home: HomePage(title: 'Planini'),
       debugShowCheckedModeBanner: false,
     );
   }
