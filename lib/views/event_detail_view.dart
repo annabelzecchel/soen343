@@ -488,7 +488,6 @@ Widget _buildEventFeedbackSummary(BuildContext context) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const Center(child: CircularProgressIndicator());
       }
-      print(feedbackService.getFeedbackForEvent(_currentEvent.id));
       if (!snapshot.hasData || snapshot.data!.isEmpty) {
         return Card(
           child: Padding(
