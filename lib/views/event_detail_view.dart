@@ -325,13 +325,19 @@ class _EventDetailViewState extends State<EventDetailView> {
             const SizedBox(height: 8),
             _buildEventFeedbackSummary(context),
             const SizedBox(height: 16),
-              const Text(
-                'Your Feedback',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              FeedbackForm(eventId: _currentEvent.id),
-              const SizedBox(height: 24),
+                if (_currentEvent.attendees.contains(email))
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                  const Text(
+                    'Your Feedback',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  FeedbackForm(eventId: _currentEvent.id),
+                  const SizedBox(height: 24),
+                  ],
+                ),
 
             //SPONSORING AN EVENT
             const SizedBox(height: 24),
@@ -534,32 +540,32 @@ Widget _buildEventFeedbackSummary(BuildContext context) {
 }
 
 // And for the feedback list widget, modify your EventFeedbackList or add this:
-Widget _buildFeedbackListWidget() {
-  return StreamBuilder<List<EventFeedback>>(
-    stream: FeedbackService().getFeedbackForEvent(_currentEvent.id),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: Text(
-                'This event hasn\'t been reviewed yet',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ),
-          ),
-        );
-      }
+// Widget _buildFeedbackListWidget() {
+//   return StreamBuilder<List<EventFeedback>>(
+//     stream: FeedbackService().getFeedbackForEvent(_currentEvent.id),
+//     builder: (context, snapshot) {
+//       if (snapshot.connectionState == ConnectionState.waiting) {
+//         return const Center(child: CircularProgressIndicator());
+//       }
+//       if (!snapshot.hasData || snapshot.data!.isEmpty) {
+//         return Card(
+//           child: Padding(
+//             padding: const EdgeInsets.all(16.0),
+//             child: Center(
+//               child: Text(
+//                 'This event hasn\'t been reviewed yet',
+//                 style: TextStyle(
+//                   fontSize: 16,
+//                   color: Colors.grey[600],
+//                 ),
+//               ),
+//             ),
+//           ),
+//         );
+//       }
 
-      return FeedbackList(eventId: _currentEvent.id);
-    },
-  );
-}
+//       return FeedbackList(eventId: _currentEvent.id);
+//     },
+//   );
+// }
 }
