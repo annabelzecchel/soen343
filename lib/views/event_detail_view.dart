@@ -12,9 +12,9 @@ import '../models/chat_room_model.dart';
 import 'event_polls_view.dart';
 import 'payment_screen.dart';
 import 'event_feedback_form.dart';
-import '../../components/event_feedback_list.dart';
 import '../models/event_feedback_model.dart';
 import '../../controllers/event_feedback_service.dart';
+import 'analytics_view.dart';
 // Import the EmailForm widget which should accept a list of emails as a parameter.
 
 class EventDetailView extends StatefulWidget {
@@ -137,6 +137,19 @@ class _EventDetailViewState extends State<EventDetailView> {
         title: Text(_currentEvent.name),
         actions: (type == 'organizer' || type == "administration")
             ? [
+                IconButton(
+                  icon: const Icon(Icons.analytics),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AnalyticsView(
+                          eventId: _currentEvent.id,
+                        ),
+                      ),
+                    );
+                  },
+                ),
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () {
@@ -546,34 +559,4 @@ Widget _buildEventFeedbackSummary(BuildContext context) {
     },
   );
 }
-
-// And for the feedback list widget, modify your EventFeedbackList or add this:
-// Widget _buildFeedbackListWidget() {
-//   return StreamBuilder<List<EventFeedback>>(
-//     stream: FeedbackService().getFeedbackForEvent(_currentEvent.id),
-//     builder: (context, snapshot) {
-//       if (snapshot.connectionState == ConnectionState.waiting) {
-//         return const Center(child: CircularProgressIndicator());
-//       }
-//       if (!snapshot.hasData || snapshot.data!.isEmpty) {
-//         return Card(
-//           child: Padding(
-//             padding: const EdgeInsets.all(16.0),
-//             child: Center(
-//               child: Text(
-//                 'This event hasn\'t been reviewed yet',
-//                 style: TextStyle(
-//                   fontSize: 16,
-//                   color: Colors.grey[600],
-//                 ),
-//               ),
-//             ),
-//           ),
-//         );
-//       }
-
-//       return FeedbackList(eventId: _currentEvent.id);
-//     },
-//   );
-// }
 }

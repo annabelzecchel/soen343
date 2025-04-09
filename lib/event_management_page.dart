@@ -6,7 +6,7 @@ import 'package:soen343/controllers/profile_controller.dart';
 import 'package:soen343/views/calendar_view.dart';
 import 'package:soen343/views/analytics_view.dart';
 import 'package:soen343/views/event_promotion.dart';
-import 'package:soen343/views/event_feedback_form.dart';
+import 'package:soen343/components/event_analytics_screen.dart';
 
 class EventManagementPage extends StatefulWidget {
   final String title;
@@ -66,15 +66,8 @@ class _EventManagementState extends State<EventManagementPage> {
       ),
       Container(
         alignment: Alignment.center,
-        child: AnalyticsView(),
-      ),
-      Container(
-        alignment: Alignment.center,
-        child: FeedbackForm(
-          eventId: "3niX0U2VnwWR4uTmZRav", // Replace with actual event ID
-        ),
-        ),
-      
+        child: AnalyticsView(eventId: '1hEQ20w04xJw6BxltasJ'),
+      ),     
     ];
 
     return Scaffold(
@@ -113,10 +106,6 @@ class _EventManagementState extends State<EventManagementPage> {
                 NavigationRailDestination(
                   icon: Icon(Icons.analytics),
                   label: Text('Analytics & Reports'),
-                ),
-                  NavigationRailDestination(
-                  icon: Icon(Icons.analytics),
-                  label: Text('feedback form'),
                 ),
               ],
               labelType: NavigationRailLabelType.all,
