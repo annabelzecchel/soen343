@@ -93,10 +93,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
     _selectedStrategy != null
         ? Column(
             children: [
-              Text(
-                'Total Amount: \$${widget.amount}',
-                style: const TextStyle(fontSize: 20),
-              ),
+              if(widget.event.discount > 0) 
+                Text(
+                  'Event ticket price: \$${widget.amount} - Discount: \$${widget.event.discount} \nTotal Amount: \$${widget.amount}',
+                  style: const TextStyle(fontSize: 20),
+                ),
+              if(!(widget.event.discount > 0)) 
+                Text(
+                  'Total Amount: \$${widget.amount}',
+                  style: const TextStyle(fontSize: 20),
+                ),
+              // Text(
+              //   'Total Amount: \$${widget.amount}',
+              //   style: const TextStyle(fontSize: 20),
+              // ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _isProcessing ? null : _processPayment,

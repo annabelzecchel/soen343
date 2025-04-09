@@ -15,6 +15,7 @@ class Event {
   final String type;
   final String stakeholder;
   final String imageURL;
+  final double discount;
 
 /* no normal constrcutor with multiple paramater only throught Event builder */
   Event._builder(EventBuilder builder)
@@ -28,6 +29,7 @@ class Event {
         name = builder.name!,
         price = builder.price!,
         type = builder.type!,
+        discount = builder.discount!,
         stakeholder = builder.stakeholder!,
         imageURL = builder.imageURL! ?? 'https://media.istockphoto.com/id/2187289068/photo/entrance-to-building-with-blurred-background.jpg?s=1024x1024&w=is&k=20&c=WAPohYXe_fiXyYmvReGDMigncO4iZBTDjrm1a6AVP2Y=';
 
@@ -46,6 +48,9 @@ class Event {
             ? double.tryParse(data['price'].toString()) ?? 0.0
             : 0.0)
         .setType(data['type'] ?? '')
+        .setDiscount(data['discount'] != null
+            ? double.tryParse(data['discount'].toString()) ?? 0.0
+            : 0.0)
         .setStakeholder(data['stakeholder'] ?? '')
         .setImageURL(data['imageURL'] ?? 'https://media.istockphoto.com/id/2187289068/photo/entrance-to-building-with-blurred-background.jpg?s=1024x1024&w=is&k=20&c=WAPohYXe_fiXyYmvReGDMigncO4iZBTDjrm1a6AVP2Y=')
         .build();
@@ -62,6 +67,7 @@ class Event {
       'name': name,
       'price': price.toString(),
       'type': type,
+      'discount': discount,
       'stakeholder': stakeholder,
       'imageURL': imageURL,
     };
@@ -110,6 +116,7 @@ class EventBuilder {
   String? type;
   String? stakeholder;
   String? imageURL;
+  double? discount;
 
   EventBuilder setId(String id) {
     this.id = id;
@@ -156,6 +163,11 @@ class EventBuilder {
     return this;
   }
 
+  EventBuilder setDiscount(double discount) {
+    this.discount = discount;
+    return this;
+  }
+
   EventBuilder setType(String type) {
     this.type = type;
     return this;
@@ -179,6 +191,7 @@ class EventBuilder {
         name == null ||
         price == null ||
         imageURL == null ||
+        discount == null ||
         type == null) {
       throw Exception("Missing required fields for Event creation");
     }
