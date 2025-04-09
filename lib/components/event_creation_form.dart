@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import "package:cloud_firestore/cloud_firestore.dart";
@@ -24,6 +24,9 @@ class _EventCreationFormState extends State<EventCreationForm> {
   final _dateTimeController = TextEditingController();
   final _priceController = TextEditingController();
   final _locationController = TextEditingController();
+  final _instagramController = TextEditingController();
+  final _facebookController = TextEditingController();
+  final _youtubeController = TextEditingController();
   final ProfileController _profileController = ProfileController(AuthService());
   final _discountController = TextEditingController();
 
@@ -333,6 +336,33 @@ class _EventCreationFormState extends State<EventCreationForm> {
                   ),
                   const SizedBox(height: 20),
                   TextFormField(
+                    controller: _instagramController,
+                    decoration: const InputDecoration(
+                      icon: Icon(FontAwesomeIcons.instagram),
+                      hintText: 'Link your event Instagram',
+                      labelText: 'Instagram',
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _facebookController,
+                    decoration: const InputDecoration(
+                      icon: Icon(FontAwesomeIcons.facebook),
+                      hintText: 'Link your event Facebook',
+                      labelText: 'Facebook',
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _youtubeController,
+                    decoration: const InputDecoration(
+                      icon: Icon(FontAwesomeIcons.youtube),
+                      hintText: 'Link your event Youtube',
+                      labelText: 'Youtube',
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
                     controller: _priceController,
                     decoration: const InputDecoration(
                       icon: Icon(Icons.attach_money_rounded),
@@ -393,6 +423,9 @@ class _EventCreationFormState extends State<EventCreationForm> {
                             "price": _priceController.text,
                             "createdByEmail": _email,
                             "image": imageURL,
+                            "instagram":_instagramController.text??'none',
+                            "facebook":_facebookController.text??'none',
+                            "youtube":_youtubeController.text??'none',
                           });
         
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -414,13 +447,17 @@ class _EventCreationFormState extends State<EventCreationForm> {
                             _discountController.clear();
                             _imageBytes = null;
                             _fileName = null;
-                            imageURL = null;    
+                            imageURL = null;  
+                            _instagramController.clear();
+                            _facebookController.clear();
+                            _youtubeController.clear();  
                           });
 
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Error saving event: $e')),
                           );
+                          print('Error saving event: $e');
                         }
                       }
                     },
