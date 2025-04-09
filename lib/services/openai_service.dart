@@ -1,36 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class OpenAIService {
   static final OpenAIService _instance = OpenAIService._internal();
   factory OpenAIService() => _instance;
   OpenAIService._internal();
-
+// API KEY GOES HERE FOR TESTING PURPOSES! .ENV FILE REF DOES NOT WORK
+  final String _apiKey = 'put-your-api-key-here';
   final String _apiUrl = 'https://api.openai.com/v1/chat/completions';
   final String _model = 'gpt-3.5-turbo';
 
-  String? get apiKey => _apiKey;
-  String? _apiKey;
-
   Future<void> initialize() async {
-    try {
-      await dotenv.load(); // Ensure .env is loaded
-
-      _apiKey = dotenv.env['OPENAI_API_KEY'];
-
-      // VERY VERBOSE LOGGING
-      print('Raw API Key: $_apiKey');
-      print('API Key Length: ${_apiKey?.length}');
-      print('API Key Starts With sk-: ${_apiKey?.startsWith('sk-') == true}');
-
-      if (_apiKey == null || _apiKey!.isEmpty) {
-        throw Exception('API key is missing or empty');
-      }
-    } catch (e) {
-      print('API Key Initialization Error: $e');
-      rethrow;
+    if (_apiKey.isEmpty || !_apiKey.startsWith('sk-')) {
+      throw Exception('Invalid API Key');
     }
   }
 
