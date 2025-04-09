@@ -95,15 +95,10 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Track attendee participation, event success metrics, and collect feedback in real-time.',
-              style: TextStyle(fontSize: 16),
-            ),
-         
             //if(user != null&& (_profileController.getRoleById(user!.uid)) == 'organizer')
             _buildMyOrganizedEventsList(context),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 20, width: 0),
             Expanded(
               child: Row(
                 children:[
@@ -113,12 +108,19 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
                         children: [
                           Expanded(
                             flex:1,
-                            child: _buildMetricCard('Attendee Participation', '75% Active'),
-                          ),
-                          Expanded(
-                            flex:2,
                             child: _buildPieChart('Attendees Participation', 'Total'), 
-                          )
+                          ),
+                          //COMMENTED OUT 
+                          // Expanded(
+                          //    //flex:1,
+                          //     child: _buildBarChart('Event Success', {
+                          //     'Loved this event': 85,
+                          //     'Enjoyed the event': 50,
+                          //     'Disliked the event': 15,
+                          //     'Hated the event': 5,
+                          //   }),
+                          // ),
+                          
                         ],
                       ),
                     ),
@@ -258,6 +260,112 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
     );
   }
 
+    Widget _buildBarChart(String title, Map<String, int> feedbackData) {
+      return Card(
+      margin: EdgeInsets.all(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          leading: const Icon(Icons.bar_chart, color: Color.fromARGB(255, 118, 157, 123)),
+          ),
+          Expanded(
+          child: BarChart(
+            BarChartData(
+            alignment: BarChartAlignment.spaceAround,
+            barGroups: feedbackData.entries.map((entry) {
+              Color barColor;
+              IconData icon;
+              switch (entry.key) {
+              case 'Loved this event':
+                barColor = Colors.green;
+                icon = Icons.sentiment_very_satisfied;
+                break;
+              case 'Enjoyed the event':
+                barColor = Colors.blue;
+                icon = Icons.sentiment_satisfied;
+                break;
+              case 'Disliked the event':
+                barColor = Colors.orange;
+                icon = Icons.sentiment_dissatisfied;
+                break;
+              case 'Hated the event':
+                barColor = Colors.red;
+                icon = Icons.sentiment_very_dissatisfied;
+                break;
+              default:
+                barColor = Colors.grey;
+                icon = Icons.sentiment_neutral;
+              }
+              return BarChartGroupData(
+              x: feedbackData.keys.toList().indexOf(entry.key),
+              barRods: [
+                BarChartRodData(
+                toY: entry.value.toDouble(),
+                color: barColor,
+                width: 16,
+                borderRadius: BorderRadius.circular(4),
+                ),
+              ],
+              showingTooltipIndicators: [0],
+              );
+            }).toList(),
+            borderData: FlBorderData(
+              show: true,
+              border: const Border(
+              left: BorderSide(color: Colors.black, width: 1),
+              bottom: BorderSide(color: Colors.black, width: 1),
+              ),
+            ),
+            gridData: FlGridData(show: false),
+            titlesData: FlTitlesData(
+              leftTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: true),
+              ),
+              bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                final feedbackKeys = feedbackData.keys.toList();
+                if (value.toInt() >= 0 && value.toInt() < feedbackKeys.length) {
+                  return Column(
+                  children: [
+                    Icon(
+                    feedbackKeys[value.toInt()] == 'Loved this event'
+                      ? Icons.sentiment_very_satisfied
+                      : feedbackKeys[value.toInt()] == 'Enjoyed the event'
+                        ? Icons.sentiment_satisfied
+                        : feedbackKeys[value.toInt()] == 'Disliked the event'
+                          ? Icons.sentiment_dissatisfied
+                          : Icons.sentiment_very_dissatisfied,
+                    size: 16,
+                    ),
+                    Text(
+                    feedbackKeys[value.toInt()],
+                    style: const TextStyle(fontSize: 10),
+                    textAlign: TextAlign.center,
+                    ),
+                  ],
+                  );
+                }
+                return const SizedBox.shrink();
+                },
+              ),
+              ),
+            ),
+            ),
+          ),
+          ),
+        ],
+        ),
+      ),
+      );
+    }
+  
     Widget _buildMyOrganizedEventsList(BuildContext context) {
     return Card(
       child: Padding(
@@ -269,7 +377,7 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
               'Events I am Organizing... ',
               style:Theme.of(context).textTheme.headlineSmall
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 20),
               StreamBuilder<List<Event>>(
               stream: _eventController.getOrganizerEvents(user?.email!??'NO EMAIL'),
               
