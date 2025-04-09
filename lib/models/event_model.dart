@@ -13,7 +13,7 @@ class Event {
   final String name;
   final double price;
   final String type;
-  final String stakeholder;
+  final Map<String, int> stakeholder;
 
 /* no normal constrcutor with multiple paramater only throught Event builder */
   Event._builder(EventBuilder builder)
@@ -44,7 +44,10 @@ class Event {
             ? double.tryParse(data['price'].toString()) ?? 0.0
             : 0.0)
         .setType(data['type'] ?? '')
-        .setStakeholder(data['stakeholder'] ?? '')
+        //.setStakeholder(data['stakeholder'] ?? {})
+        .setStakeholder(data['stakeholder'] != null 
+            ? Map<String, dynamic>.from(data['stakeholder'])
+            : {})
         .build();
   }
 
@@ -104,7 +107,7 @@ class EventBuilder {
   String? name;
   double? price;
   String? type;
-  String? stakeholder;
+  Map<String, int>? stakeholder;
 
   EventBuilder setId(String id) {
     this.id = id;
@@ -156,8 +159,14 @@ class EventBuilder {
     return this;
   }
 
-  EventBuilder setStakeholder(String stakeholder) {
-    this.stakeholder = stakeholder;
+  EventBuilder setStakeholder(Map<String, dynamic> stakeholder) {
+   //this.stakeholder = Map<String, int>.from(stakeholder);
+     this.stakeholder = Map<String, int>.from(
+    stakeholder.map((key, value) => MapEntry(
+      key, 
+      value is int ? value : int.tryParse(value.toString()) ?? 0
+    ))
+  );
     return this;
   }
 

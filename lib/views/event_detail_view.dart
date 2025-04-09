@@ -24,6 +24,7 @@ class _EventDetailViewState extends State<EventDetailView> {
   final EventController _eventController = EventController();
   final ProfileController _profileController = ProfileController(AuthService());
   final _userController = TextEditingController();
+  final _amountController = TextEditingController();
   final ChatController _chatController = ChatController();
   late Event _currentEvent;
   String? type;
@@ -356,12 +357,12 @@ class _EventDetailViewState extends State<EventDetailView> {
                     title: const Text('Sponsor this event'),
                     content: TextField(
                       decoration: const InputDecoration(
-                        labelText: 'Enter your user email',
+                        labelText: 'Enter the amount you are willing to sponsor',
                       ),
                       //NOT WORKING
                       onChanged: (value) async {
                         if (value.isNotEmpty) {
-                          _userController.text = value;
+                          _amountController.text = value;
                         }
                       },
                     ),
@@ -373,7 +374,7 @@ class _EventDetailViewState extends State<EventDetailView> {
                       TextButton(
                         onPressed: () async {
                           await _eventController.addSponsor(
-                              _currentEvent.id, _userController.text);
+                              _currentEvent.id, email??'',int.parse(_amountController.text) );
                           await _refreshEventData();
                           Navigator.pop(context);
                         },

@@ -485,8 +485,8 @@ class _HomePageState extends State<HomePage> {
                                         ],
                                       ),
                                     ),
-                                  if (event.stakeholder==
-                                      FirebaseAuth.instance.currentUser?.email)
+                                  if (event.stakeholder.containsKey(
+                                      FirebaseAuth.instance.currentUser?.email))
                                     Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 12,
