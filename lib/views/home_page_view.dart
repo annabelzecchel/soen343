@@ -118,12 +118,12 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.event, color: Colors.brown[600]), // Brown icon
             onPressed: () {
               Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const EventManagementPage(
-                    title: 'Event Management',
-                  ),
-                ),
+          context,
+          MaterialPageRoute(
+            builder: (context) => const EventManagementPage(
+              title: 'Event Management',
+            ),
+          ),
               );
             },
           ),
@@ -132,19 +132,19 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               final user = FirebaseAuth.instance.currentUser;
               if (user != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ChatRoomsView(),
-                  ),
-                );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ChatRoomsView(),
+            ),
+          );
               } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LoginPage(title: 'Login !'),
-                  ),
-                );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LoginPage(title: 'Login !'),
+            ),
+          );
               }
             },
           ),
@@ -157,26 +157,29 @@ class _HomePageState extends State<HomePage> {
               icon: Icon(Icons.account_circle, color: Colors.brown[600]),
               onPressed: () => _navigateToProfile(context),
             ),
-          ElevatedButton(
-            onPressed: () async {
-              if (_currentUser == null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LoginPage(title: 'Sign In!'),
-                  ),
-                );
-              } else {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const HomePage(title: "HOME"),
-                  ),
-                );
-              }
-            },
-            child: Text(_currentUser == null ? "Sign in!" : "Sign out!"),
+          Padding(
+            padding: const EdgeInsets.only(right: 20.0), // Add space to the right
+            child: ElevatedButton(
+              onPressed: () async {
+          if (_currentUser == null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const LoginPage(title: 'Sign In!'),
+              ),
+            );
+          } else {
+            await FirebaseAuth.instance.signOut();
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HomePage(title: "PLANINI"),
+              ),
+            );
+          }
+              },
+              child: Text(_currentUser == null ? "Sign in!" : "Sign out!"),
+            ),
           ),
         ],
       ),
@@ -269,8 +272,202 @@ class _HomePageState extends State<HomePage> {
           ),
 
           // Event List
-          Expanded(
+            Expanded(
             child: StreamBuilder<List<Event>>(
+              stream: eventController.getEvents(),
+              builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                child: CircularProgressIndicator(
+                  color: Colors.brown[600],
+                ),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return Center(
+                child: Text(
+                  'Error loading events',
+                  style: TextStyle(color: Colors.brown[800]),
+                ),
+                );
+              }
+
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                  Icon(Icons.event_available,
+                    size: 50, color: Colors.brown[600]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No events available',
+                    style: TextStyle(
+                    color: Colors.brown[800],
+                    fontSize: 18,
+                    ),
+                  ),
+                  ],
+                ),
+                );
+              }
+
+              // Filter events according to the selected category.
+              final filteredEvents = snapshot.data!.where((event) {
+                bool matchesCategory;
+                if (_selectedCategory == 'All') {
+                matchesCategory = true;
+                } else if (_selectedCategory == 'My Sponsorships') {
+                matchesCategory = event.stakeholder.toLowerCase().trim() ==
+                  email?.toLowerCase().trim();
+                } else {
+                matchesCategory = event.name
+                  .toLowerCase()
+                  .contains(_selectedCategory.toLowerCase());
+                }
+
+                final matchesSearch = _searchQuery.isEmpty ||
+                  event.name
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase()) ||
+                  event.location
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase());
+                return matchesCategory && matchesSearch;
+              }).toList();
+
+              if (filteredEvents.isEmpty) {
+                return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                  Icon(Icons.search_off,
+                    size: 50, color: Colors.brown[600]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No matching events found',
+                    style: TextStyle(
+                    color: Colors.brown[800],
+                    fontSize: 18,
+                    ),
+                  ),
+                  Text(
+                    'Try different search terms',
+                    style: TextStyle(
+                    color: Colors.brown[600],
+                    ),
+                  ),
+                  ],
+                ),
+                );
+              }
+
+              return GridView.builder(
+                padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 0.8,
+                ),
+                itemCount: filteredEvents.length,
+                itemBuilder: (context, index) {
+                final event = filteredEvents[index];
+                return Card(
+                  color: colorScheme.inversePrimary, // Light green
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () {
+                    Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                        EventDetailView(event: event),
+                    ),
+                    );
+                  },
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                    Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(12),
+                      ),
+                      ),
+                      child: Center(
+                        child: event.image.isNotEmpty
+                          ? ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(12)),
+                            child: Image.network(
+                            event.image!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            ),
+                          )
+                          : Icon(
+                            _getCategoryIcon(event.type ?? 'Event'),
+                            color: Colors.white,
+                            size: 50,
+                          ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                        event.name,
+                        style: TextStyle(
+                          color: Colors.brown[800],
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                        event.location,
+                        style: TextStyle(
+                          color: Colors.brown[600],
+                          fontSize: 14,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                        _formatDateTime(event.dateTime),
+                        style: TextStyle(
+                          color: Colors.brown[600],
+                          fontSize: 12,
+                        ),
+                        ),
+                      ],
+                      ),
+                    ),
+                    ],
+                  ),
+                  ),
+                );
+                },
+              );
+              },
+            ),
+            ),
+            /*child: StreamBuilder<List<Event>>(
               stream: eventController.getEvents(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -540,7 +737,7 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
-          ),
+          ),*/
         ],
       ),
     );

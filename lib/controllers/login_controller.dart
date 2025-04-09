@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/users_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/auth_model.dart';
 import 'package:soen343/components/auth_service.dart';
 
@@ -27,10 +28,18 @@ class LoginController {
         role: '',
         loggedIn: false,
       );
-        }catch (e){
+        } on FirebaseAuthException catch (e) {
+    // Handle FirebaseAuth errors properly
+    if (e.code == 'wrong-password') {
+      throw Exception('Incorrect password. Please try again.');
+    } else if (e.code == 'user-not-found') {
+      throw Exception('No user found with this email.');
+    } else {
+      throw Exception(e.message ?? 'Authentication failed');
+    }
+    }catch (e){
             throw Exception('LOGIN FAILED');
-
-        }
+    }
 
     }
 }

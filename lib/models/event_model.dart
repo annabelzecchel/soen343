@@ -14,6 +14,7 @@ class Event {
   final double price;
   final String type;
   final String stakeholder;
+  final String image;
 
 /* no normal constrcutor with multiple paramater only throught Event builder */
   Event._builder(EventBuilder builder)
@@ -27,7 +28,8 @@ class Event {
         name = builder.name!,
         price = builder.price!,
         type = builder.type!,
-        stakeholder = builder.stakeholder!;
+        stakeholder = builder.stakeholder!,
+        image = builder.imageUrl!;
 
 /* set each properties */
   factory Event.fromFirestore(Map<String, dynamic> data, String documentId) {
@@ -45,6 +47,7 @@ class Event {
             : 0.0)
         .setType(data['type'] ?? '')
         .setStakeholder(data['stakeholder'] ?? '')
+        .setImageUrl(data['imageUrl'] ?? '')
         .build();
   }
 
@@ -161,8 +164,16 @@ class EventBuilder {
     return this;
   }
 
+  String? imageUrl;
+
+  EventBuilder setImageUrl(String imageUrl) {
+    this.imageUrl = imageUrl;
+    return this;
+  }
+
   Event build() {
     if (id == null ||
+        imageUrl == null ||
         createdByEmail == null ||
         dateTime == null ||
         format == null ||

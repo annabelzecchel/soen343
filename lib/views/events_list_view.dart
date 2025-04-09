@@ -55,6 +55,9 @@ class _EventListViewState extends State<EventsListView> {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(event.image),
+                  ),
                   title: Text(event.name),
                   subtitle: Text(
                     '${_formatDateTime(event.dateTime)} • ${event.location}',

@@ -139,6 +139,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                 ),
               ],
             ),
+            margin: const EdgeInsets.symmetric(vertical: 20),
             child: Form(
               key: _formKey,
               child: Column(
@@ -151,7 +152,10 @@ class _EventCreationFormState extends State<EventCreationForm> {
                   GestureDetector(
                     onTap: () => _openFilePicker(),
                     child: Container(
-                      height: MediaQuery.of(context).size.height * 0.2,
+                        constraints: const BoxConstraints(
+                        maxHeight: 200, // Set a maximum height
+                        maxWidth: double.infinity, // Allow full width
+                        ),
                       width: double.infinity,
                       decoration: const BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -168,9 +172,22 @@ class _EventCreationFormState extends State<EventCreationForm> {
                           :
                       const Column (
                         children: [
-                          Icon(Icons.add_a_photo_outlined, size: 30),
-                          Text("Event Banner Image", 
-                            style: TextStyle(color: Colors.black, fontSize: 20)),
+                            Expanded(
+                              child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                Icon(Icons.add_a_photo_outlined, size: 30),
+                                SizedBox(height: 10),
+                                Text(
+                                  "Event Banner Image",
+                                  style: TextStyle(
+                                    color: Colors.black, fontSize: 20),
+                                ),
+                                ],
+                              ),
+                              ),
+                            ),
                         ]
                       ),),
                   ),
@@ -341,54 +358,54 @@ class _EventCreationFormState extends State<EventCreationForm> {
                     },
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton(
+                    ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState?.validate() ?? false) {
-                        // Get the currently logged-in user
-                        // User? user = FirebaseAuth.instance.currentUser; this is for when user auth implemented
-                        //String userEmail = "haaha@gmail.com";
-        
-                        // if (user == null) {
-                        //   ScaffoldMessenger.of(context).showSnackBar(
-                        //     const SnackBar(
-                        //         content:
-                        //             Text('You must be logged in to create an event')),
-                        //   );
-                        //   return;
-                        // }
-        
-                        try {
-                          // Reference to Firestore collection
-                          CollectionReference colRef =
-                              FirebaseFirestore.instance.collection("events");
-                          
-                          // imageURL = await _uploadFile();
-                          imageURL = "https://meanderingwild.com/wp-content/uploads/2023/04/sunflower-personality.jpeg";
-                          print(imageURL);
-        
-                          // Add event with creator details
-                          await colRef.add({
-                            "name": _nameController.text,
-                            "description": _descriptionController.text,
-                            "type": _typeController.text,
-                            "format": _formatController.text,
-                            "dateTime": _dateTimeController.text,
-                            "location": _locationController.text,
-                            "price": _priceController.text,
-                            "createdByEmail":
-                                _email,
-                            "image": imageURL,
-                          });
-        
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Event stored successfully')),
-                          );
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error saving event: $e')),
-                          );
-                        }
+                      try {
+                        // Reference to Firestore collection
+                        CollectionReference colRef =
+                          FirebaseFirestore.instance.collection("events");
+                        
+                        // imageURL = await _uploadFile();
+                        imageURL = "https://meanderingwild.com/wp-content/uploads/2023/04/sunflower-personality.jpeg";
+                        print(imageURL);
+              
+                        // Add event with creator details
+                        await colRef.add({
+                        "name": _nameController.text,
+                        "description": _descriptionController.text,
+                        "type": _typeController.text,
+                        "format": _formatController.text,
+                        "dateTime": _dateTimeController.text,
+                        "location": _locationController.text,
+                        "price": _priceController.text,
+                        "createdByEmail": _email,
+                        "image": imageURL,
+                        });
+              
+                        ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Event stored successfully')),
+                        );
+
+                        // Clear the form fields
+                        _nameController.clear();
+                        _descriptionController.clear();
+                        _typeController.clear();
+                        _formatController.clear();
+                        _dateTimeController.clear();
+                        _locationController.clear();
+                        _priceController.clear();
+                        _discountController.clear();
+                        setState(() {
+                        _imageBytes = null;
+                        _fileName = null;
+                        });
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error saving event: $e')),
+                        );
+                      }
                       }
                     },
                     child: const Text('Submit'),

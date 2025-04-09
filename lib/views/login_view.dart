@@ -75,14 +75,14 @@ Widget build(BuildContext context) {
                   labelText: 'Password',
                 ),
                 obscureText: true,
-                // validator: (value) {
-                //   if (value == null || value.isEmpty) {
-                //     return 'Please enter your password';
-                //   } if (value != FirebaseAuth.instance.currentUser?.email) {
-                //     return 'Password is incorrect';
-                //   }
-                //   return null;
-                // },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password';
+                  }  /*if (value != FirebaseAuth.instance.currentUser?.email) {
+                    return 'Password is incorrect';
+                  }*/
+                  //return null;
+                },
               ),
               const SizedBox(height: 20), 
               _isLoading ? const CircularProgressIndicator():
@@ -90,18 +90,41 @@ Widget build(BuildContext context) {
                 onPressed: ()async{
                     if (_formKey.currentState?.validate() ??false){
                         setState(()=>_isLoading=true);
+                      
                       try{
                         final auth = await _controller.login(
                             _emailController.text.trim(),
                             _passwordController.text.trim()
                         );
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder:(_)=>ProfilePage()),
-
+                        if (auth != null) {
+                          Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => ProfilePage()),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Invalid email or password'),
+                            backgroundColor: Colors.red,
+                          ),
+                          );
+                        }
+                      } on FirebaseAuthException catch (e) {
+                        // Handle Firebase-specific errors
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(e.message ?? 'An error occurred'),
+                            backgroundColor: Colors.red,
+                          ),
                         );
-                      }catch (e){
-                        throw Exception("ERROR"+e.toString());
+                      } catch (e) {
+                        // Handle other errors
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(e.toString()),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
                       }finally {
                         setState(()=>_isLoading=false);
                       }

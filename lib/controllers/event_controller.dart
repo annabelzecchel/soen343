@@ -112,7 +112,7 @@ class EventController {
     }
   }
 
-   Stream<List<Event>> getSponsorEvents(String email) {
+  Stream<List<Event>> getSponsorEvents(String email) {
     return FirebaseFirestore.instance
         .collection(collectionPath)
         .where('stakeholder', isEqualTo: email)
