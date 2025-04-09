@@ -423,6 +423,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                             "price": _priceController.text,
                             "createdByEmail": _email,
                             "image": imageURL,
+                            "discount": _discountController.text,
                             "instagram":_instagramController.text??'none',
                             "facebook":_facebookController.text??'none',
                             "youtube":_youtubeController.text??'none',
