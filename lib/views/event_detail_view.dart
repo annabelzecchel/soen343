@@ -15,6 +15,8 @@ import 'event_feedback_form.dart';
 import '../models/event_feedback_model.dart';
 import '../../controllers/event_feedback_service.dart';
 import 'event_analytics_view.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EventDetailView extends StatefulWidget {
   final Event event;
@@ -126,6 +128,20 @@ class _EventDetailViewState extends State<EventDetailView> {
       ),
     );
   }
+
+  void _launchUrl(BuildContext context, Uri url) async {
+  try {
+    if (!await launchUrl(url)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open link: ${url.toString()}')),
+      );
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error opening link: $e')),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -437,6 +453,50 @@ class _EventDetailViewState extends State<EventDetailView> {
                 Icons.format_align_left, 'Format: ${_currentEvent.format}'),
             _buildInfoRow(
                 Icons.email, 'Created by: ${_currentEvent.createdByEmail}'),
+              Row(   
+                mainAxisAlignment: MainAxisAlignment.center,
+                children:[
+                if (_currentEvent.instagram != '' && _currentEvent.instagram!.isNotEmpty)
+                  GestureDetector(
+                    onTap: () {
+                      final Uri link = Uri.parse(_currentEvent.instagram!);
+                      _launchUrl(context, link);
+                    },
+                    child: Icon(
+                      FontAwesomeIcons.instagram,
+                      size: 20,
+                    ),
+                  ),
+                if (_currentEvent.instagram != '' && _currentEvent.instagram!.isNotEmpty)
+                  SizedBox(width: 16),
+      
+                if (_currentEvent.facebook != '' && _currentEvent.facebook!.isNotEmpty)
+                  GestureDetector(
+                    onTap: () {
+                      final Uri link = Uri.parse(_currentEvent.facebook!);
+                      _launchUrl(context, link);
+                    },
+                    child: Icon(
+                      FontAwesomeIcons.facebook,
+                      size: 20,
+                    ),
+                  ),
+                if (_currentEvent.facebook != '' && _currentEvent.facebook!.isNotEmpty)
+                  SizedBox(width: 16),
+      
+                if (_currentEvent.youtube != '' && _currentEvent.youtube!.isNotEmpty)
+                  GestureDetector(
+                    onTap: () {
+                      final Uri link = Uri.parse(_currentEvent.youtube!);
+                      _launchUrl(context, link);
+                    },
+                    child: Icon(
+                      FontAwesomeIcons.youtube,
+                      size: 20,
+                    ),
+                  ),
+              ] ,           
+            ),
           ],
         ),
       ),

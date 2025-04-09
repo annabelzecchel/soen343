@@ -16,6 +16,9 @@ class Event {
   final Map<String, int> stakeholder;
   final String imageURL;
   final double discount;
+  final String instagram;
+  final String facebook;
+  final String youtube;
 
 /* no normal constrcutor with multiple paramater only throught Event builder */
   Event._builder(EventBuilder builder)
@@ -31,7 +34,11 @@ class Event {
         type = builder.type!,
         discount = builder.discount!,
         stakeholder = builder.stakeholder!,
-        imageURL = builder.imageURL! ?? 'https://media.istockphoto.com/id/2187289068/photo/entrance-to-building-with-blurred-background.jpg?s=1024x1024&w=is&k=20&c=WAPohYXe_fiXyYmvReGDMigncO4iZBTDjrm1a6AVP2Y=';
+        imageURL = builder.imageURL! ?? 'https://media.istockphoto.com/id/2187289068/photo/entrance-to-building-with-blurred-background.jpg?s=1024x1024&w=is&k=20&c=WAPohYXe_fiXyYmvReGDMigncO4iZBTDjrm1a6AVP2Y=',
+        instagram = builder.instagram! ?? 'none',
+        facebook = builder.facebook! ?? 'none',
+        youtube = builder.youtube! ?? 'none'
+        ;
 
 /* set each properties */
   factory Event.fromFirestore(Map<String, dynamic> data, String documentId) {
@@ -56,6 +63,9 @@ class Event {
             ? Map<String, dynamic>.from(data['stakeholder'])
             : {})
         .setImageURL(data['imageURL'] ?? 'https://media.istockphoto.com/id/2187289068/photo/entrance-to-building-with-blurred-background.jpg?s=1024x1024&w=is&k=20&c=WAPohYXe_fiXyYmvReGDMigncO4iZBTDjrm1a6AVP2Y=')
+        .setInstagram(data['instagram']??'none')
+        .setFacebook(data['facebook']??'none')
+        .setYoutube(data['youtube']??'none')
         .build();
 
   }
@@ -74,6 +84,9 @@ class Event {
       'discount': discount,
       'stakeholder': stakeholder,
       'imageURL': imageURL,
+      'instagram':instagram,
+      'facebook':facebook,
+      'youtube':youtube,
     };
   }
 
@@ -121,6 +134,9 @@ class EventBuilder {
   double? discount;
   Map<String, int>? stakeholder;
   String? imageURL;
+  String? instagram;
+  String? facebook;
+  String? youtube;
  
 
   EventBuilder setId(String id) {
@@ -194,6 +210,21 @@ class EventBuilder {
     return this;
   }
 
+   EventBuilder setInstagram(String instagram) {
+    this.instagram = instagram;
+    return this;
+  }
+
+   EventBuilder setFacebook(String facebook) {
+    this.facebook = facebook;
+    return this;
+  }
+
+   EventBuilder setYoutube(String youtube) {
+    this.youtube = youtube;
+    return this;
+  }
+
   Event build() {
     if (id == null ||
         createdByEmail == null ||
@@ -204,7 +235,11 @@ class EventBuilder {
         price == null ||
         imageURL == null ||
         discount == null ||
-        type == null) {
+        type == null ||
+        instagram ==null ||
+        facebook == null ||
+        youtube == null 
+        ) {
       throw Exception("Missing required fields for Event creation");
     }
     return Event._builder(this);
