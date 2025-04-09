@@ -90,33 +90,39 @@ class _PaymentScreenState extends State<PaymentScreen> {
             const Spacer(),
             
             // Pay button
-    _selectedStrategy != null
-        ? Column(
-            children: [
-              if(widget.event.discount > 0) 
-                Text(
-                  'Event ticket price: \$${widget.amount} - Discount: \$${widget.event.discount} \nTotal Amount: \$${widget.amount}',
-                  style: const TextStyle(fontSize: 20),
-                ),
-              if(!(widget.event.discount > 0)) 
-                Text(
-                  'Total Amount: \$${widget.amount}',
-                  style: const TextStyle(fontSize: 20),
-                ),
-              // Text(
-              //   'Total Amount: \$${widget.amount}',
-              //   style: const TextStyle(fontSize: 20),
-              // ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _isProcessing ? null : _processPayment,
-                child: _isProcessing
-                    ? const CircularProgressIndicator()
-                    : const Text('Pay Now'),
+_selectedStrategy != null
+    ? Column(
+        children: [
+          if (widget.event.discount > 0) ...[
+            Text(
+              'Original Price: \$${widget.amount}',
+              style: const TextStyle(fontSize: 16),
+            ),
+            Text(
+              'Discount: -\$${widget.event.discount}',
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.green,
               ),
-            ],
-          )
-        : const SizedBox.shrink(), // Shows nothing when null
+            ),
+          ],
+          Text(
+            'Total Amount: \$${(widget.amount - widget.event.discount).toStringAsFixed(2)}',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: _isProcessing ? null : _processPayment,
+            child: _isProcessing
+                ? const CircularProgressIndicator()
+                : const Text('Pay Now'),
+          ),
+        ],
+      )
+    : const SizedBox.shrink(), // Shows nothing when null
           ],
         ),
       ),
