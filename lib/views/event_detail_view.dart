@@ -29,6 +29,7 @@ class _EventDetailViewState extends State<EventDetailView> {
   final EventController _eventController = EventController();
   final ProfileController _profileController = ProfileController(AuthService());
   final _userController = TextEditingController();
+  final _amountController = TextEditingController();
   final ChatController _chatController = ChatController();
   late Event _currentEvent;
   String? type;
@@ -365,44 +366,46 @@ class _EventDetailViewState extends State<EventDetailView> {
 
             // SPONSORING AN EVENT
             const SizedBox(height: 24),
-            if (type == 'Stakeholders')
-              ElevatedButton.icon(
-                icon: const Icon(Icons.person_add),
-                label: const Text('Sponsor Event'),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Sponsor this event'),
-                      content: TextField(
-                        decoration: const InputDecoration(
-                          labelText: 'Enter your user email',
-                        ),
-                        onChanged: (value) async {
-                          if (value.isNotEmpty) {
-                            _userController.text = value;
-                          }
-                        },
+            if(type == 'Stakeholders')
+            ElevatedButton.icon(
+              icon: const Icon(Icons.person_add),
+              label: const Text('Sponsor Event'),
+              onPressed: () {
+                //IDK TEMPORARY FOR N0W TO SEE IF IT WORKS
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Sponsor this event'),
+                    content: TextField(
+                      decoration: const InputDecoration(
+                        labelText: 'Enter the amount you are willing to sponsor',
                       ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            await _eventController.addSponsor(
-                                _currentEvent.id, _userController.text);
-                            await _refreshEventData();
-                            Navigator.pop(context);
-                          },
-                          child: const Text('Sponsor'),
-                        ),
-                      ],
+                      //NOT WORKING
+                      onChanged: (value) async {
+                        if (value.isNotEmpty) {
+                          _amountController.text = value;
+                        }
+                      },
                     ),
-                  );
-                },
-              ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          await _eventController.addSponsor(
+                              _currentEvent.id, email??'',int.parse(_amountController.text) );
+                          await _refreshEventData();
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Sponsor'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),

@@ -13,7 +13,7 @@ class Event {
   final String name;
   final double price;
   final String type;
-  final String stakeholder;
+  final Map<String, int> stakeholder;
   final String imageURL;
   final double discount;
 
@@ -51,9 +51,13 @@ class Event {
         .setDiscount(data['discount'] != null
             ? double.tryParse(data['discount'].toString()) ?? 0.0
             : 0.0)
-        .setStakeholder(data['stakeholder'] ?? '')
+        // .setStakeholder(data['stakeholder'] ?? {})
+        .setStakeholder(data['stakeholder'] != null 
+            ? Map<String, dynamic>.from(data['stakeholder'])
+            : {})
         .setImageURL(data['imageURL'] ?? 'https://media.istockphoto.com/id/2187289068/photo/entrance-to-building-with-blurred-background.jpg?s=1024x1024&w=is&k=20&c=WAPohYXe_fiXyYmvReGDMigncO4iZBTDjrm1a6AVP2Y=')
         .build();
+
   }
 
   Map<String, dynamic> toFirestore() {
@@ -114,9 +118,10 @@ class EventBuilder {
   String? name;
   double? price;
   String? type;
-  String? stakeholder;
-  String? imageURL;
   double? discount;
+  Map<String, int>? stakeholder;
+  String? imageURL;
+ 
 
   EventBuilder setId(String id) {
     this.id = id;
@@ -173,10 +178,17 @@ class EventBuilder {
     return this;
   }
 
-  EventBuilder setStakeholder(String stakeholder) {
-    this.stakeholder = stakeholder;
-    return this;
+    EventBuilder setStakeholder(Map<String, dynamic> stakeholder) {
+   //this.stakeholder = Map<String, int>.from(stakeholder);
+     this.stakeholder = Map<String, int>.from(
+    stakeholder.map((key, value) => MapEntry(
+      key, 
+      value is int ? value : int.tryParse(value.toString()) ?? 0
+    ))
+  );
+   return this;
   }
+
     EventBuilder setImageURL(String imageURL) {
     this.imageURL = imageURL;
     return this;
