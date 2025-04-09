@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class PayPalStrategy implements PaymentStrategy {
   @override
   String get name => "PayPal";
-  
+
   @override
   String get icon => "🔵";
 
@@ -25,7 +25,6 @@ class PayPalStrategy implements PaymentStrategy {
 
   @override
   Future<bool> processPayment(Map<String, dynamic> paymentDetails) async {
-    // Simulate API call
     await Future.delayed(const Duration(seconds: 1));
     return true;
   }

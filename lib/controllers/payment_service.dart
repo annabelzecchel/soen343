@@ -21,17 +21,18 @@ class PaymentService {
     if (_currentStrategy == null) {
       throw Exception('No payment strategy selected');
     }
-    
+
     final validationError = validateCurrentInput();
     if (validationError != null && validationError.isNotEmpty) {
       throw Exception(validationError);
     }
-    
-    final paymentSuccess = await _currentStrategy!.processPayment(_paymentDetails);
+
+    final paymentSuccess =
+        await _currentStrategy!.processPayment(_paymentDetails);
     if (paymentSuccess) {
-      // Save payment details to Firebase
       try {
-        final paymentCollection = FirebaseFirestore.instance.collection('payments');
+        final paymentCollection =
+            FirebaseFirestore.instance.collection('payments');
         await paymentCollection.add({
           'paymentDetails': _paymentDetails,
           'timestamp': FieldValue.serverTimestamp(),
@@ -41,7 +42,7 @@ class PaymentService {
         throw Exception('Failed to save payment information: $e');
       }
     }
-    
+
     return paymentSuccess;
   }
 

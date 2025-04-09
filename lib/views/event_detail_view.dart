@@ -11,7 +11,6 @@ import '../controllers/chat_controller.dart';
 import '../models/chat_room_model.dart';
 import 'event_polls_view.dart';
 import 'payment_screen.dart';
-// Import the EmailForm widget which should accept a list of emails as a parameter.
 
 class EventDetailView extends StatefulWidget {
   final Event event;
@@ -163,8 +162,8 @@ class _EventDetailViewState extends State<EventDetailView> {
                             onPressed: () async {
                               await _eventController
                                   .deleteEvent(_currentEvent.id);
-                              Navigator.pop(context); // Close dialog
-                              Navigator.pop(context); // Return to previous view
+                              Navigator.pop(context);
+                              Navigator.pop(context);
                             },
                             child: const Text('Delete'),
                           ),
@@ -243,7 +242,6 @@ class _EventDetailViewState extends State<EventDetailView> {
                               TextButton(
                                 onPressed: () async {
                                   try {
-                                    // Show loading indicator
                                     showDialog(
                                       context: context,
                                       barrierDismissible: false,
@@ -252,7 +250,6 @@ class _EventDetailViewState extends State<EventDetailView> {
                                       ),
                                     );
 
-                                    // Register attendee
                                     await _eventController.addAttendee(
                                         _currentEvent.id, email ?? '');
                                     await _refreshEventData();
@@ -260,7 +257,6 @@ class _EventDetailViewState extends State<EventDetailView> {
                                     Navigator.pop(context);
                                     Navigator.pop(context);
 
-                                    // Navigate to payment screen if event has a price
                                     if (_currentEvent.price > 0) {
                                       if (!mounted) return;
                                       Navigator.push(

@@ -27,14 +27,13 @@ class _EventCreationFormState extends State<EventCreationForm> {
   final ProfileController _profileController = ProfileController(AuthService());
   final _discountController = TextEditingController();
 
-
   FilePickerResult? _filePickerResult;
   Uint8List? _imageBytes;
   String? _fileName;
   String? imageURL;
   String? _email;
 
-    @override
+  @override
   void initState() {
     super.initState();
     _setUserEmail();
@@ -48,10 +47,9 @@ class _EventCreationFormState extends State<EventCreationForm> {
       setState(() {
         _email = email;
       });
-    } 
+    }
   }
 
-// Behavior of Date and Time Picker
   Future<void> _selectDateTime(BuildContext context) async {
     final DateTime? pickedDateTime = await showDatePicker(
         context: context,
@@ -98,7 +96,8 @@ class _EventCreationFormState extends State<EventCreationForm> {
   Future<String?> _uploadFile() async {
     try {
       if (_imageBytes != null && _fileName != null) {
-        firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+        firebase_storage.Reference ref = firebase_storage
+            .FirebaseStorage.instance
             .ref()
             .child('images')
             .child(_fileName!);
@@ -108,7 +107,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
         final uploadTask = ref.putData(_imageBytes!, metadata);
         final snapshot = await uploadTask;
         imageURL = await snapshot.ref.getDownloadURL();
-        
+
         print("File uploaded successfully. URL: $imageURL");
         return imageURL;
       } else {
@@ -117,7 +116,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
     } catch (e) {
       print("Error uploading file: $e");
     }
-    return null; // Ensure a value is returned in all cases
+    return null;
   }
 
   @override
@@ -165,14 +164,13 @@ class _EventCreationFormState extends State<EventCreationForm> {
                                 fit: BoxFit.fill,
                               ),
                             )
-                          :
-                      const Column (
-                        children: [
-                          Icon(Icons.add_a_photo_outlined, size: 30),
-                          Text("Event Banner Image", 
-                            style: TextStyle(color: Colors.black, fontSize: 20)),
-                        ]
-                      ),),
+                          : const Column(children: [
+                              Icon(Icons.add_a_photo_outlined, size: 30),
+                              Text("Event Banner Image",
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: 20)),
+                            ]),
+                    ),
                   ),
                   const SizedBox(height: 20),
                   TextFormField(
@@ -206,8 +204,9 @@ class _EventCreationFormState extends State<EventCreationForm> {
                   ),
                   const SizedBox(height: 20),
                   DropdownButtonFormField(
-                    value:
-                        _typeController.text.isEmpty ? null : _typeController.text,
+                    value: _typeController.text.isEmpty
+                        ? null
+                        : _typeController.text,
                     onChanged: (String? newValue) {
                       setState(() {
                         _typeController.text = newValue ?? '';
@@ -347,7 +346,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                         // Get the currently logged-in user
                         // User? user = FirebaseAuth.instance.currentUser; this is for when user auth implemented
                         //String userEmail = "haaha@gmail.com";
-        
+
                         // if (user == null) {
                         //   ScaffoldMessenger.of(context).showSnackBar(
                         //     const SnackBar(
@@ -356,16 +355,17 @@ class _EventCreationFormState extends State<EventCreationForm> {
                         //   );
                         //   return;
                         // }
-        
+
                         try {
                           // Reference to Firestore collection
                           CollectionReference colRef =
                               FirebaseFirestore.instance.collection("events");
-                          
+
                           // imageURL = await _uploadFile();
-                          imageURL = "https://meanderingwild.com/wp-content/uploads/2023/04/sunflower-personality.jpeg";
+                          imageURL =
+                              "https://meanderingwild.com/wp-content/uploads/2023/04/sunflower-personality.jpeg";
                           print(imageURL);
-        
+
                           // Add event with creator details
                           await colRef.add({
                             "name": _nameController.text,
@@ -375,11 +375,10 @@ class _EventCreationFormState extends State<EventCreationForm> {
                             "dateTime": _dateTimeController.text,
                             "location": _locationController.text,
                             "price": _priceController.text,
-                            "createdByEmail":
-                                _email,
+                            "createdByEmail": _email,
                             "image": imageURL,
                           });
-        
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                                 content: Text('Event stored successfully')),

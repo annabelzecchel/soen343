@@ -71,7 +71,7 @@ class _EmailFormState extends State<EmailForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Emails sent successfully to all recipients!')),
       );
-      // Clear only the fields the user can edit.
+
       _nameController.clear();
       _messageController.clear();
     } else {
