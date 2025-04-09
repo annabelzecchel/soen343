@@ -121,15 +121,15 @@ class _ProfilePageState extends State<ProfilePage>{
               // //  );
               //     },
               //   ),
-                IconButton(
-                  icon: const Icon(Icons.analytics),
-                  onPressed: () {
-                  Navigator.push(
-                 context,
-                MaterialPageRoute(builder: (context) => AnalyticsView()),
-                );
-                  },
-                ),
+                // IconButton(
+                //   icon: const Icon(Icons.analytics),
+                //   onPressed: () {
+                //   Navigator.push(
+                //  context,
+                // MaterialPageRoute(builder: (context) => AnalyticsView(eventId: '1hEQ20w04xJw6BxltasJ')),
+                // );
+                //   },
+                // ),
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () {
