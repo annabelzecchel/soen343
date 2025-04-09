@@ -35,56 +35,29 @@ class Event {
 
 /* set each properties */
   factory Event.fromFirestore(Map<String, dynamic> data, String documentId) {
-    // return EventBuilder()
-    //     .setId(documentId)
-    //     .setAttendees(_parseAttendees(data['attendees']))
-    //     .setCreatedByEmail(data['createdByEmail'] ?? '')
-    //     .setDateTime(_parseDateTime(data['dateTime']))
-    //     .setDescription(data['description'] ?? '')
-    //     .setFormat(data['format'] ?? '')
-    //     .setLocation(data['location'] ?? '')
-    //     .setName(data['name'] ?? '')
-    //     .setPrice(data['price'] != null
-    //         ? double.tryParse(data['price'].toString()) ?? 0.0
-    //         : 0.0)
-    //     .setType(data['type'] ?? '')
-    //     .setDiscount(data['discount'] != null
-    //         ? double.tryParse(data['discount'].toString()) ?? 0.0
-    //         : 0.0)
-    //     // .setStakeholder(data['stakeholder'] ?? {})
-    //     .setStakeholder(data['stakeholder'] != null 
-    //         ? Map<String, dynamic>.from(data['stakeholder'])
-    //         : {})
-    //     .setImageURL(data['imageURL'] ?? 'https://media.istockphoto.com/id/2187289068/photo/entrance-to-building-with-blurred-background.jpg?s=1024x1024&w=is&k=20&c=WAPohYXe_fiXyYmvReGDMigncO4iZBTDjrm1a6AVP2Y=')
-    //     .build();
-      try {
     return EventBuilder()
-      .setId(documentId)
-      .setAttendees(_parseAttendees(data['attendees']))
-      .setCreatedByEmail(data['createdByEmail'] ?? '')
-      .setDateTime(_parseDateTime(data['dateTime']))
-      .setDescription(data['description'] ?? '')
-      .setFormat(data['format'] ?? '')
-      .setLocation(data['location'] ?? '')
-      .setName(data['name'] ?? '')
-      .setPrice(data['price'] != null
-          ? double.tryParse(data['price'].toString()) ?? 0.0
-          : 0.0)
-      .setType(data['type'] ?? '')
-      .setDiscount(data['discount'] != null
-          ? double.tryParse(data['discount'].toString()) ?? 0.0
-          : 0.0)
-      .setStakeholder(data['stakeholder'] != null 
-          ? Map<String, dynamic>.from(data['stakeholder'])
-          : {})
-      .setImageURL(data['imageURL'] ?? 'https://media.istockphoto.com/id/2187289068/photo/entrance-to-building-with-blurred-background.jpg?s=1024x1024&w=is&k=20&c=WAPohYXe_fiXyYmvReGDMigncO4iZBTDjrm1a6AVP2Y=')
-      .build();
-  } catch (e) {
-    print('Error creating Event from Firestore data: $e');
-    print('Document ID: $documentId');
-    print('Data: $data');
-    throw e;  // Re-throw to see the error in your app logs
-  }
+        .setId(documentId)
+        .setAttendees(_parseAttendees(data['attendees']))
+        .setCreatedByEmail(data['createdByEmail'] ?? '')
+        .setDateTime(_parseDateTime(data['dateTime']))
+        .setDescription(data['description'] ?? '')
+        .setFormat(data['format'] ?? '')
+        .setLocation(data['location'] ?? '')
+        .setName(data['name'] ?? '')
+        .setPrice(data['price'] != null
+            ? double.tryParse(data['price'].toString()) ?? 0.0
+            : 0.0)
+        .setType(data['type'] ?? '')
+        .setDiscount(data['discount'] != null
+            ? double.tryParse(data['discount'].toString()) ?? 0.0
+            : 0.0)
+        // .setStakeholder(data['stakeholder'] ?? {})
+        .setStakeholder(data['stakeholder'] != null 
+            ? Map<String, dynamic>.from(data['stakeholder'])
+            : {})
+        .setImageURL(data['imageURL'] ?? 'https://media.istockphoto.com/id/2187289068/photo/entrance-to-building-with-blurred-background.jpg?s=1024x1024&w=is&k=20&c=WAPohYXe_fiXyYmvReGDMigncO4iZBTDjrm1a6AVP2Y=')
+        .build();
+
   }
 
   Map<String, dynamic> toFirestore() {
