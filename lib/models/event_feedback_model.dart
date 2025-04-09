@@ -2,7 +2,7 @@ class EventFeedback {
   final String eventId;
   final String userId;
   final String? userName;
-  final int rating; // 1-5 scale
+  final int rating; 
   final String comment;
   final DateTime timestamp;
 

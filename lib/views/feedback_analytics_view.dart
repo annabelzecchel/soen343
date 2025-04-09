@@ -99,7 +99,7 @@ class FeedbackAnalyticsView extends StatelessWidget {
   Widget _buildWordCloud(FeedbackAnalytics analytics) {
     final topWords = analytics.commonWords.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value))
-      ..take(15); // Show top 15 words
+      ..take(10); //Show the top 10 words
 
     return Card(
       child: Padding(
