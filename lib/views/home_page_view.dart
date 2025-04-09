@@ -320,8 +320,7 @@ class _HomePageState extends State<HomePage> {
                   } else if (_selectedCategory == 'My Sponsorships') {
                     print('Stakeholder: ${event.stakeholder}');
                     print('User: ${FirebaseAuth.instance.currentUser?.email}');
-                    matchesCategory = event.stakeholder.toLowerCase().trim() ==
-                        email?.toLowerCase().trim();
+                    matchesCategory = event.stakeholder.containsKey(email?.toLowerCase().trim());
                     print('Matches: $matchesCategory');
                   } else {
                     matchesCategory = event.name

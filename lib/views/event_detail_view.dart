@@ -14,8 +14,7 @@ import 'payment_screen.dart';
 import 'event_feedback_form.dart';
 import '../models/event_feedback_model.dart';
 import '../../controllers/event_feedback_service.dart';
-import 'analytics_view.dart';
-// Import the EmailForm widget which should accept a list of emails as a parameter.
+import 'event_analytics_view.dart';
 
 class EventDetailView extends StatefulWidget {
   final Event event;
@@ -144,7 +143,7 @@ class _EventDetailViewState extends State<EventDetailView> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AnalyticsView(
+                        builder: (context) => FeedbackAnalyticsSummaryView(
                           eventId: _currentEvent.id,
                         ),
                       ),
@@ -261,7 +260,6 @@ class _EventDetailViewState extends State<EventDetailView> {
                               TextButton(
                                 onPressed: () async {
                                   try {
-                                    // Show loading indicator
                                     showDialog(
                                       context: context,
                                       barrierDismissible: false,

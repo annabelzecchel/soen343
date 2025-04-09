@@ -66,7 +66,7 @@ class _EventManagementState extends State<EventManagementPage> {
       ),
       Container(
         alignment: Alignment.center,
-        child: AnalyticsView(eventId: '1hEQ20w04xJw6BxltasJ'),
+        child: const AnalyticsView(),
       ),     
     ];
 
