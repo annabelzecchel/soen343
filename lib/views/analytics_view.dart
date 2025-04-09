@@ -1,43 +1,50 @@
 import 'package:flutter/material.dart';
-import '../models/event_feedback_model.dart';
-import '../views/feedback_analytics_view.dart';
-import '../controllers/event_feedback_service.dart';
+import 'package:flutter/foundation.dart';
 
 class AnalyticsView extends StatelessWidget {
-  final String eventId;
-  final FeedbackService feedbackService = FeedbackService();
-
-  AnalyticsView({super.key, required this.eventId});
-
+  const AnalyticsView({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Event Analytics')),
-      body: StreamBuilder<List<EventFeedback>>(
-        stream: feedbackService.getFeedbackForEvent(eventId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Real-time Insights',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Track attendee participation, event success metrics, and collect feedback in real-time.',
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: ListView(
+                children: [
+                  _buildMetricCard('Attendee Participation', '75% Active'),
+                  _buildMetricCard('Event Success', '85% Positive Feedback'),
+                  _buildMetricCard('Feedback Collected', '120 Responses'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No feedback data available'));
-          }
-
-          return FeedbackAnalyticsView(feedbackList: snapshot.data!);
-        },
+  Widget _buildMetricCard(String title, String value) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: ListTile(
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(value),
+        leading: const Icon(Icons.analytics,
+            color: Color.fromARGB(255, 118, 157, 123)),
       ),
     );
   }
 }
-
-  // Widget _buildMetricCard(String title, String value) {
-  //   return Card(
-  //     margin: const EdgeInsets.symmetric(vertical: 8),
-  //     child: ListTile(
-  //       title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-  //       subtitle: Text(value),
-  //       leading: const Icon(Icons.analytics, color: Color.fromARGB(255, 118, 157, 123)),
-  //     ),
-  //   );
-  // }
