@@ -5,12 +5,12 @@ class AppTheme {
   static ThemeData get lightTheme {
     final ColorScheme colorScheme = ColorScheme.fromSeed(
       seedColor: const Color.fromARGB(255, 235, 246, 236), // Soft green
-      primary: const Color(0xFFABC5AE), // Primary color
-      secondary: const Color(0xFFCA946F), // Secondary (light beige)
+      primary: const Color.fromARGB(255, 96, 124, 100), // Primary color
+      secondary: const Color.fromARGB(255, 185, 132, 96), // Secondary (light beige)
       tertiary: const Color(0xFFA74D0F), // Dark orange
       surface: const Color(0xFFCBDBCD), // Background color
       inversePrimary: const Color.fromARGB(255, 235, 246, 236), // App bar
-      secondaryContainer: const Color(0xFFEDDBCF), // Light beige
+      secondaryContainer: const Color.fromARGB(255, 255, 244, 180), // Light beige
       error: const Color(0xFFD60707), // Error color (dark orange)
       onPrimary: Colors.black, // Text on primary
       onSecondary: Colors.white, // Text on secondary
