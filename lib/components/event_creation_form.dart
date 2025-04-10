@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import "package:cloud_firestore/cloud_firestore.dart";
@@ -24,9 +24,12 @@ class _EventCreationFormState extends State<EventCreationForm> {
   final _dateTimeController = TextEditingController();
   final _priceController = TextEditingController();
   final _locationController = TextEditingController();
+  final _instagramController = TextEditingController();
+  final _facebookController = TextEditingController();
+  final _youtubeController = TextEditingController();
   final ProfileController _profileController = ProfileController(AuthService());
   final _discountController = TextEditingController();
-
+  bool _isProcessing = false; // Variable to track processing state
 
   FilePickerResult? _filePickerResult;
   Uint8List? _imageBytes;
@@ -34,7 +37,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
   String? imageURL;
   String? _email;
 
-    @override
+  @override
   void initState() {
     super.initState();
     _setUserEmail();
@@ -48,10 +51,9 @@ class _EventCreationFormState extends State<EventCreationForm> {
       setState(() {
         _email = email;
       });
-    } 
+    }
   }
 
-// Behavior of Date and Time Picker
   Future<void> _selectDateTime(BuildContext context) async {
     final DateTime? pickedDateTime = await showDatePicker(
         context: context,
@@ -79,45 +81,114 @@ class _EventCreationFormState extends State<EventCreationForm> {
 
   void _openFilePicker() async {
     try {
+      // Ensure file picker is available for the platform
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.image,
         allowMultiple: false,
+        withData: true, // Important for web/mobile compatibility
       );
 
-      if (result != null) {
-        setState(() {
-          _imageBytes = result.files.first.bytes;
-          _fileName = result.files.first.name;
-        });
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+
+        // Debug print to check file details
+        print('Selected file: ${file.name}');
+        print('File size: ${file.size} bytes');
+        print('File bytes: ${file.bytes != null ? "exists" : "null"}');
+
+        if (file.bytes != null) {
+          setState(() {
+            _imageBytes = file.bytes;
+            _fileName = file.name;
+          });
+        } else {
+          print('Error: File bytes are null');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not read file contents')),
+          );
+        }
+      } else {
+        print('No file selected or selection canceled');
       }
     } catch (e) {
-      print("Error picking file: $e");
+      print('File picker error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error selecting file: ${e.toString()}')),
+      );
     }
   }
 
   Future<String?> _uploadFile() async {
     try {
-      if (_imageBytes != null && _fileName != null) {
-        firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
-            .ref()
-            .child('images')
-            .child(_fileName!);
-        final metadata = firebase_storage.SettableMetadata(
-          contentType: 'image/jpeg',
-        );
-        final uploadTask = ref.putData(_imageBytes!, metadata);
-        final snapshot = await uploadTask;
-        imageURL = await snapshot.ref.getDownloadURL();
-        
-        print("File uploaded successfully. URL: $imageURL");
-        return imageURL;
+      if (_imageBytes == null) {
+        print('No image bytes to upload');
+        return null;
+      }
+
+      if (_fileName == null) {
+        print('No filename specified');
+        return null;
+      }
+
+      print('Starting upload of $_fileName (${_imageBytes!.length} bytes)');
+
+      final ref = firebase_storage.FirebaseStorage.instance
+          .ref()
+          .child('event_images')
+          .child('${DateTime.now().millisecondsSinceEpoch}_$_fileName');
+
+      final metadata = firebase_storage.SettableMetadata(
+        contentType: _getMimeType(_fileName!),
+      );
+
+      // Create the upload task
+      final uploadTask = ref.putData(_imageBytes!, metadata);
+
+      // Listen to progress changes
+      uploadTask.snapshotEvents.listen((snapshot) {
+        final progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        print('Upload progress: ${progress.toStringAsFixed(1)}%');
+      }, onError: (e) {
+        print('Upload error: $e');
+      });
+
+      // Wait for task to complete (important change here)
+      final taskSnapshot = await uploadTask;
+
+      if (taskSnapshot.state == firebase_storage.TaskState.success) {
+        final downloadUrl = await taskSnapshot.ref.getDownloadURL();
+        print('File uploaded successfully. URL: $downloadUrl');
+        return downloadUrl;
       } else {
-        print("No file selected for upload.");
+        print('Upload failed with state: ${taskSnapshot.state}');
+        return null;
       }
     } catch (e) {
-      print("Error uploading file: $e");
+      print('Upload error: $e');
+      if (e is firebase_storage.FirebaseException) {
+        print('Error code: ${e.code}');
+        print('Error message: ${e.message}');
+      }
+      return null;
     }
-    return null; // Ensure a value is returned in all cases
+  }
+
+  String _getMimeType(String filename) {
+    final extension = filename.split('.').last.toLowerCase();
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'gif':
+        return 'image/gif';
+      case 'webp':
+        return 'image/webp';
+      default:
+        return 'application/octet-stream';
+    }
   }
 
   @override
@@ -155,7 +226,6 @@ class _EventCreationFormState extends State<EventCreationForm> {
                       width: double.infinity,
                       decoration: const BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(5)),
-                        // color: Color.fromARGB(255, 221, 230, 238),
                       ),
                       child: _imageBytes != null
                           ? ClipRRect(
@@ -165,14 +235,13 @@ class _EventCreationFormState extends State<EventCreationForm> {
                                 fit: BoxFit.fill,
                               ),
                             )
-                          :
-                      const Column (
-                        children: [
-                          Icon(Icons.add_a_photo_outlined, size: 30),
-                          Text("Event Banner Image", 
-                            style: TextStyle(color: Colors.black, fontSize: 20)),
-                        ]
-                      ),),
+                          : const Column(children: [
+                              Icon(Icons.add_a_photo_outlined, size: 30),
+                              Text("Event Banner Image",
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: 20)),
+                            ]),
+                    ),
                   ),
                   const SizedBox(height: 20),
                   TextFormField(
@@ -206,8 +275,9 @@ class _EventCreationFormState extends State<EventCreationForm> {
                   ),
                   const SizedBox(height: 20),
                   DropdownButtonFormField(
-                    value:
-                        _typeController.text.isEmpty ? null : _typeController.text,
+                    value: _typeController.text.isEmpty
+                        ? null
+                        : _typeController.text,
                     onChanged: (String? newValue) {
                       setState(() {
                         _typeController.text = newValue ?? '';
@@ -312,6 +382,33 @@ class _EventCreationFormState extends State<EventCreationForm> {
                   ),
                   const SizedBox(height: 20),
                   TextFormField(
+                    controller: _instagramController,
+                    decoration: const InputDecoration(
+                      icon: Icon(FontAwesomeIcons.instagram),
+                      hintText: 'Link your event Instagram',
+                      labelText: 'Instagram',
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _facebookController,
+                    decoration: const InputDecoration(
+                      icon: Icon(FontAwesomeIcons.facebook),
+                      hintText: 'Link your event Facebook',
+                      labelText: 'Facebook',
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _youtubeController,
+                    decoration: const InputDecoration(
+                      icon: Icon(FontAwesomeIcons.youtube),
+                      hintText: 'Link your event Youtube',
+                      labelText: 'Youtube',
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
                     controller: _priceController,
                     decoration: const InputDecoration(
                       icon: Icon(Icons.attach_money_rounded),
@@ -344,30 +441,33 @@ class _EventCreationFormState extends State<EventCreationForm> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState?.validate() ?? false) {
-                        // Get the currently logged-in user
-                        // User? user = FirebaseAuth.instance.currentUser; this is for when user auth implemented
-                        //String userEmail = "haaha@gmail.com";
-        
-                        // if (user == null) {
-                        //   ScaffoldMessenger.of(context).showSnackBar(
-                        //     const SnackBar(
-                        //         content:
-                        //             Text('You must be logged in to create an event')),
-                        //   );
-                        //   return;
-                        // }
-        
                         try {
-                          // Reference to Firestore collection
-                          CollectionReference colRef =
-                              FirebaseFirestore.instance.collection("events");
-                          
-                          // imageURL = await _uploadFile();
-                          imageURL = "https://meanderingwild.com/wp-content/uploads/2023/04/sunflower-personality.jpeg";
-                          print(imageURL);
-        
-                          // Add event with creator details
-                          await colRef.add({
+                          setState(() {
+                            _isProcessing = true;
+                          });
+
+                          // First upload the image if one was selected
+                          if (_imageBytes != null) {
+                            // imageURL = await _uploadFile();
+                            imageURL =
+                                "https://media.istockphoto.com/id/867944542/photo/blurred-background-vintage-filter-customer-in-coffee-shop-blur-background-with-bokeh.jpg";
+                            if (imageURL == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Image upload failed')),
+                              );
+                              return;
+                            }
+                          } else {
+                            // Use default image if none selected
+                            imageURL =
+                                "https://media.istockphoto.com/id/867944542/photo/blurred-background-vintage-filter-customer-in-coffee-shop-blur-background-with-bokeh.jpg";
+                          }
+
+                          // Then save the event data
+                          await FirebaseFirestore.instance
+                              .collection("events")
+                              .add({
                             "name": _nameController.text,
                             "description": _descriptionController.text,
                             "type": _typeController.text,
@@ -375,19 +475,55 @@ class _EventCreationFormState extends State<EventCreationForm> {
                             "dateTime": _dateTimeController.text,
                             "location": _locationController.text,
                             "price": _priceController.text,
-                            "createdByEmail":
-                                _email,
+                            "createdByEmail": _email,
                             "image": imageURL,
+                            "discount": _discountController.text,
+                            "instagram": _instagramController.text.isNotEmpty
+                                ? _instagramController.text
+                                : 'none',
+                            "facebook": _facebookController.text.isNotEmpty
+                                ? _facebookController.text
+                                : 'none',
+                            "youtube": _youtubeController.text.isNotEmpty
+                                ? _youtubeController.text
+                                : 'none',
+                            "createdAt": FieldValue.serverTimestamp(),
                           });
-        
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text('Event stored successfully')),
+                                content: Text('Event created successfully!')),
                           );
+
+                          // Reset form
+                          _formKey.currentState?.reset();
+                          setState(() {
+                            _imageBytes = null;
+                            _fileName = null;
+                            _isProcessing = false;
+                            _nameController.clear();
+                            _typeController.clear();
+                            _descriptionController.clear();
+                            _formatController.clear();
+                            _dateTimeController.clear();
+                            _locationController.clear();
+                            _priceController.clear();
+                            _discountController.clear();
+                            _instagramController.clear();
+                            _facebookController.clear();
+                            _youtubeController.clear();
+                          });
                         } catch (e) {
+                          print('Error creating event: $e');
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error saving event: $e')),
+                            SnackBar(content: Text('Error: ${e.toString()}')),
                           );
+                        } finally {
+                          if (mounted) {
+                            setState(() {
+                              _isProcessing = false;
+                            });
+                          }
                         }
                       }
                     },

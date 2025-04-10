@@ -1,7 +1,31 @@
 import 'package:flutter/material.dart';
 import 'payment_strategy.dart';
+import 'package:flutter/services.dart';
+
+class CardNumberInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text.replaceAll(' ', '');
+    var formatted = '';
+    
+    for (var i = 0; i < text.length; i++) {
+      if (i > 0 && i % 4 == 0) formatted += ' ';
+      formatted += text[i];
+    }
+    
+    return newValue.copyWith(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
 
 class CreditCardStrategy implements PaymentStrategy {
+  final TextEditingController _expiryDateController = TextEditingController();
+
   @override
   String get name => "Credit Card";
 
@@ -10,99 +34,172 @@ class CreditCardStrategy implements PaymentStrategy {
 
   @override
   String validateInput(Map<String, dynamic> paymentDetails) {
+    // Validate card number
     if (paymentDetails['cardNumber']?.isEmpty ?? true) {
       return 'Card number is required';
     }
-    if (paymentDetails['cardNumber']?.length != 16) {
+    final cardNumber = paymentDetails['cardNumber'].replaceAll(' ', '');
+    if (cardNumber.length != 16) {
       return 'Card number must be 16 digits';
     }
+    if (!_isValidLuhn(cardNumber)) {
+      return 'Invalid card number';
+    }
+
+    // Validate expiry date
     if (paymentDetails['expiryDate']?.isEmpty ?? true) {
       return 'Expiry date is required';
     }
+    if (_isCardExpired(paymentDetails['expiryDate'])) {
+      return 'Card has expired';
+    }
+
+    // Validate CVV
     if (paymentDetails['cvv']?.isEmpty ?? true) {
       return 'CVV is required';
     }
     if (paymentDetails['cvv']?.length != 3) {
       return 'CVV must be 3 digits';
     }
+    if (!RegExp(r'^[0-9]{3}$').hasMatch(paymentDetails['cvv'])) {
+      return 'CVV must be numeric';
+    }
+
+    // Validate card holder
     if (paymentDetails['cardHolder']?.isEmpty ?? true) {
       return 'Card holder name is required';
     }
+
     return '';
+  }
+
+  bool _isCardExpired(String expiryDate) {
+    final parts = expiryDate.split('/');
+    if (parts.length != 2) return true;
+
+    final month = int.tryParse(parts[0]) ?? 0;
+    final year = 2000 + (int.tryParse(parts[1]) ?? 0);
+    final now = DateTime.now();
+    
+    return year < now.year || (year == now.year && month < now.month);
+  }
+
+  bool _isValidLuhn(String input) {
+    final number = input.replaceAll(RegExp(r'[^0-9]'), '');
+    int sum = 0;
+    bool alternate = false;
+    
+    for (var i = number.length - 1; i >= 0; i--) {
+      var digit = int.parse(number[i]);
+      if (alternate) {
+        digit *= 2;
+        if (digit > 9) {
+          digit = (digit % 10) + 1;
+        }
+      }
+      sum += digit;
+      alternate = !alternate;
+    }
+    
+    return sum % 10 == 0;
   }
 
   @override
   Future<bool> processPayment(Map<String, dynamic> paymentDetails) async {
+    if (validateInput(paymentDetails).isNotEmpty) {
+      return false;
+    }
+    if (_isCardExpired(paymentDetails['expiryDate'])) {
+      return false;
+    }
+    
     // Simulate API call
     await Future.delayed(const Duration(seconds: 1));
     return true;
   }
 
+  @override
   Widget buildInputForm(ValueChanged<Map<String, dynamic>> onChanged) {
-    final controller = TextEditingController();
     return Column(
       children: [
+        // Card Number Field
         TextFormField(
-          decoration: const InputDecoration(labelText: 'Card Number'),
+          decoration: const InputDecoration(
+            labelText: 'Card Number',
+            hintText: '4242 4242 4242 4242',
+            prefixIcon: Icon(Icons.credit_card),
+            counterText: '',
+          ),
           keyboardType: TextInputType.number,
+          maxLength: 19,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            CardNumberInputFormatter(),
+          ],
           onChanged: (value) => onChanged({'cardNumber': value}),
           validator: (value) {
-            final emailPattern = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-            if (value == null || value.isEmpty) {
-              return 'Card number is required';
-            }
-            if (!emailPattern.hasMatch(value)) {
-              return 'Card number must match the required pattern';
-            }
+            if (value == null || value.isEmpty) return 'Card number is required';
+            final cleanValue = value.replaceAll(' ', '');
+            if (cleanValue.length != 16) return 'Must be 16 digits';
+            if (!_isValidLuhn(cleanValue)) return 'Invalid card number';
             return null;
           },
         ),
+
+        // Expiry Date Field
         TextFormField(
-          decoration: const InputDecoration(labelText: 'Expiry Date (MM/YY)'),
+          controller: _expiryDateController,
+          decoration: const InputDecoration(
+            labelText: 'Expiry Date (MM/YY)',
+            hintText: '12/25',
+            prefixIcon: Icon(Icons.calendar_today),
+          ),
+          keyboardType: TextInputType.datetime,
           onChanged: (value) => onChanged({'expiryDate': value}),
           validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Expiry date is required';
+            if (value == null || value.isEmpty) return 'Required';
+            if (!RegExp(r'^(0[1-9]|1[0-2])\/\d{2}$').hasMatch(value)) {
+              return 'MM/YY format';
             }
-            final expiryDatePattern = RegExp(r'^(0[1-9]|1[0-2])\/\d{2}$');
-            if (!expiryDatePattern.hasMatch(value)) {
-              return 'Expiry date must be in MM/YY format';
-            }
-            final parts = value.split('/');
-            final month = int.parse(parts[0]);
-            final year = int.parse('20${parts[1]}');
-            final now = DateTime.now();
-            final expiry = DateTime(year, month + 1, 0);
-            if (expiry.isBefore(now)) {
-              return 'Expiry date must be in the future';
-            }
+            if (_isCardExpired(value)) return 'Card expired';
             return null;
           },
         ),
+
+        // CVV Field (Fixed)
         TextFormField(
-          decoration: const InputDecoration(labelText: 'CVV'),
+          decoration: const InputDecoration(
+            labelText: 'CVV',
+            hintText: '123',
+            prefixIcon: Icon(Icons.lock),
+            counterText: '',
+          ),
           keyboardType: TextInputType.number,
           obscureText: true,
+          maxLength: 3,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(3),
+          ],
+          validator: (value) {
+            if (value == null || value.isEmpty) return 'Required';
+            if (value.length != 3) return 'Must be 3 digits';
+            if (!RegExp(r'^[0-9]{3}$').hasMatch(value)) return 'Numbers only';
+            return null;
+          },
           onChanged: (value) => onChanged({'cvv': value}),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'CVV is required';
-            }
-            if (value.length != 3 || int.tryParse(value) == null) {
-              return 'CVV must be a 3-digit number';
-            }
-            return null;
-          },
         ),
+
+        // Card Holder Field
         TextFormField(
-          decoration: const InputDecoration(labelText: 'Card Holder Name'),
+          decoration: const InputDecoration(
+            labelText: 'Card Holder Name',
+            prefixIcon: Icon(Icons.person),
+          ),
+          textCapitalization: TextCapitalization.words,
+          validator: (value) => 
+              value?.isEmpty ?? true ? 'Required' : null,
           onChanged: (value) => onChanged({'cardHolder': value}),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Card number is required';
-            }
-            return null;
-          },
         ),
       ],
     );

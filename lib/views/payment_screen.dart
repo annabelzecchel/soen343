@@ -90,12 +90,39 @@ class _PaymentScreenState extends State<PaymentScreen> {
             const Spacer(),
             
             // Pay button
-            ElevatedButton(
-              onPressed: _isProcessing ? null : _processPayment,
-              child: _isProcessing
-                  ? const CircularProgressIndicator()
-                  : const Text('Pay Now'),
+_selectedStrategy != null
+    ? Column(
+        children: [
+          if (widget.event.discount > 0) ...[
+            Text(
+              'Original Price: \$${widget.amount}',
+              style: const TextStyle(fontSize: 16),
             ),
+            Text(
+              'Discount: -\$${widget.event.discount}',
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.green,
+              ),
+            ),
+          ],
+          Text(
+            'Total Amount: \$${(widget.amount - widget.event.discount).toStringAsFixed(2)}',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: _isProcessing ? null : _processPayment,
+            child: _isProcessing
+                ? const CircularProgressIndicator()
+                : const Text('Pay Now'),
+          ),
+        ],
+      )
+    : const SizedBox.shrink(), // Shows nothing when null
           ],
         ),
       ),
@@ -112,7 +139,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       // final validationError = _paymentService.validateCurrentInput();
       final validationError = null;
       if (validationError != null) {
-        throw Exception('Validation Error:&& $validationError');
+        throw Exception('Validation Error: $validationError');
       }
 
       final success = await _paymentService.processCurrentPayment();

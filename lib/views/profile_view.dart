@@ -17,47 +17,44 @@ import 'package:soen343/views/event_detail_view.dart';
 import '../models/event_model.dart';
 import 'package:soen343/views/calendar_view.dart';
 
-class ProfilePage extends StatefulWidget{
-    final Users? users;
-    
-    const ProfilePage({Key?key, this.users}): super (key: key);
-    
-    @override 
-    State<ProfilePage> createState()=> _ProfilePageState();
+class ProfilePage extends StatefulWidget {
+  final Users? users;
 
+  const ProfilePage({Key? key, this.users}) : super(key: key);
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage>{
-    
-    final ProfileController _controller= ProfileController(AuthService());
-    final EventController _eventController = EventController();
-    Auth ?_user;
-    bool _isLoading=false;
-    final user= FirebaseAuth.instance.currentUser!;
-    final firestore=FirebaseFirestore.instance;
-    String? userName;
-    User ? userModel;
-    String? uName;
-    String?role;
-    String?userRole;
-    String? type;
-    String? _email;
-    late TextEditingController _emailController;
-    late TextEditingController _nameController;
-    late TextEditingController _roleController;
-    final _formKey = GlobalKey<FormState>();
-
+class _ProfilePageState extends State<ProfilePage> {
+  final ProfileController _controller = ProfileController(AuthService());
+  final EventController _eventController = EventController();
+  Auth? _user;
+  bool _isLoading = false;
+  final user = FirebaseAuth.instance.currentUser!;
+  final firestore = FirebaseFirestore.instance;
+  String? userName;
+  User? userModel;
+  String? uName;
+  String? role;
+  String? userRole;
+  String? type;
+  String? _email;
+  late TextEditingController _emailController;
+  late TextEditingController _nameController;
+  late TextEditingController _roleController;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
     _loadUserProfile();
-      _fetchUserRole();
-       _setUserEmail();
-        final users = widget.users;
+    _fetchUserRole();
+    _setUserEmail();
+    final users = widget.users;
   }
 
-   Future<void> _setUserEmail() async {
+  Future<void> _setUserEmail() async {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
@@ -65,27 +62,31 @@ class _ProfilePageState extends State<ProfilePage>{
       setState(() {
         _email = email;
       });
-    } 
+    }
   }
 
   Future<void> _loadUserProfile() async {
     try {
-      setState(()=>_isLoading=true);
-      final user=FirebaseAuth.instance.currentUser;
+      setState(() => _isLoading = true);
+      final user = FirebaseAuth.instance.currentUser;
 
-      if (user!=null){
+      if (user != null) {
         final userModel = await _controller.getProfile(user?.uid ?? '');
-         final uName = await _controller.getNameById(user?.uid ?? '');
-         final role = await _controller.getRoleById(user?.uid ?? '');
+        final uName = await _controller.getNameById(user?.uid ?? '');
+        final role = await _controller.getRoleById(user?.uid ?? '');
 
-        setState((){_user=userModel;userName=uName;userRole=role;});
+        setState(() {
+          _user = userModel;
+          userName = uName;
+          userRole = role;
+        });
       }
     } catch (e) {
       print('Error loading user name: $e');
     }
   }
 
-    Future<void> _fetchUserRole() async {
+  Future<void> _fetchUserRole() async {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
@@ -97,8 +98,8 @@ class _ProfilePageState extends State<ProfilePage>{
     }
   }
 
-    @override
-    Widget build(BuildContext context){
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     _nameController = TextEditingController(text: userName);
@@ -107,309 +108,340 @@ class _ProfilePageState extends State<ProfilePage>{
     return Scaffold(
       appBar: AppBar(
         title: Text('Welcome to your Profile Page ${userName ?? 'User'}'),
-        actions:[ if (type == 'organizer' ||
-                type == "Stakeholders" ||
-                type == "administration"||
-                type =="attendee")
-              ...[
-              //   IconButton(
-              //     icon: const Icon(Icons.payment),
-              //     onPressed: () {
-              // //       Navigator.push(
-              // //  context,
-              // //  MaterialPageRoute(builder: (context) => const PaymentScreen()),
-              // //  );
-              //     },
-              //   ),
-                IconButton(
-                  icon: const Icon(Icons.analytics),
-                  onPressed: () {
-                  Navigator.push(
-                 context,
-                MaterialPageRoute(builder: (context) => AnalyticsView()),
+        actions: [
+          if (type == 'organizer' ||
+              type == "Stakeholders" ||
+              type == "administration" ||
+              type == "attendee") ...[
+            //   IconButton(
+            //     icon: const Icon(Icons.payment),
+            //     onPressed: () {
+            // //       Navigator.push(
+            // //  context,
+            // //  MaterialPageRoute(builder: (context) => const PaymentScreen()),
+            // //  );
+            //     },
+            //   ),
+            IconButton(
+              icon: const Icon(Icons.analytics),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const AnalyticsView()),
                 );
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    //NEED TO ADD THE EDIT METHOD
-                    // Navigator.push(
-                    //   context,
-                    //   // MaterialPageRoute(
-                    //   //   builder: (context) =>,
-                    //   // ),
-                    // );
-                    showDialog(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                            title: const Text('You are now updating your credentials.'),
-                                            content: 
-                                            Container(
-                                            child:Form(
-                                              key: _formKey,
-                                              child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  TextFormField(
-                                                            controller: _nameController,
-                                                            decoration: const InputDecoration(
-                                                              icon: Icon(Icons.email),
-                                                              hintText: 'Enter the new name',
-                                                              labelText: 'Name',
-                                                            ),
-                                                            validator: (value) {
-                                                              if (value == null || value.isEmpty) {
-                                                                return 'Please enter NEW name';
-                                                              }
-                                                              return null;
-                                                            },
-                                                          ),
-               
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(context),
-                                                child: const Text('Cancel'),
-                                              ),
-                                             TextButton(
-                                                  onPressed: () async{
-                                                         try {
-                                                              if (user != null) {
-                                                                final updatedUser = UsersBuilder()
-                                                                    .setId(user?.uid ??'')
-                                                                    .setEmail(user.email??'')
-                                                                    .setName(_nameController.text)
-                                                                    .setRole(userRole??'')
-                                                                    .build();
-                                                                  await _controller.updateUser(updatedUser);
-                                                                }   Navigator.pushReplacement(context,
-                                                                MaterialPageRoute(builder: (context) => const ProfilePage())
-                                                                );
-                                                                } catch (e) {
-                                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                                  SnackBar(content: Text('Error: $e')),
-                                                                );
-                                                              }
-                                                          },
-                                                  
-                                                  child: const Text("Update your UserName"),
-                                                ),
-                                            ])
-                                            ),),
-                                          ),
-                                        );
-                  },
-                ),
-              
-          
-              ]]
-      ,
-        ),
-       body: Column(
-        children: [
-
-          // Search Bar - Styled with green and brown
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            //child: 
-          ),
-           _buildInfoCard(context),
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
+                //NEED TO ADD THE EDIT METHOD
+                // Navigator.push(
+                //   context,
+                //   // MaterialPageRoute(
+                //   //   builder: (context) =>,
+                //   // ),
+                // );
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('You are now updating your credentials.'),
+                    content: Container(
+                      child: Form(
+                          key: _formKey,
+                          child:
+                              Column(mainAxisSize: MainAxisSize.min, children: [
+                            TextFormField(
+                              controller: _nameController,
+                              decoration: const InputDecoration(
+                                icon: Icon(Icons.email),
+                                hintText: 'Enter the new name',
+                                labelText: 'Name',
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter NEW name';
+                                }
+                                return null;
+                              },
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                try {
+                                  if (user != null) {
+                                    final updatedUser = UsersBuilder()
+                                        .setId(user?.uid ?? '')
+                                        .setEmail(user.email ?? '')
+                                        .setName(_nameController.text)
+                                        .setRole(userRole ?? '')
+                                        .build();
+                                    await _controller.updateUser(updatedUser);
+                                  }
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const ProfilePage()));
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Error: $e')),
+                                  );
+                                }
+                              },
+                              child: const Text("Update your UserName"),
+                            ),
+                          ])),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ]
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Search Bar - Styled with green and brown
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              //child:
+            ),
+            _buildInfoCard(context),
             const SizedBox(height: 16),
             _buildMyEventsList(context),
             const SizedBox(height: 24),
-            if(type == 'organizer')
-            _buildMyOrganizedEventsList(context),
-            if(type == 'Stakeholders')
-            _buildMySponsorsList(context),
+            if (type == 'organizer') _buildMyOrganizedEventsList(context),
+            if (type == 'Stakeholders') _buildMySponsorsList(context),
             const SizedBox(height: 24),
-            
-            
-            if(type == 'administration')
-            Text('All Users'),
-            if(type == 'administration')
-               Expanded(
-            child: StreamBuilder<List<Users>>(
-              stream: _controller.getUsers(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      color: Colors.brown[600],
-                    ),
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'Error loading users',
-                      style: TextStyle(color: Colors.brown[800]),
-                    ),
-                  );
-                }
-
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.star, size: 50, color: Colors.brown[600]),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No users available',
-                          style: TextStyle(
-                            color: Colors.brown[800],
-                            fontSize: 18,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-               final users = snapshot.data!;
-
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  itemCount: users.length,
-                  itemBuilder: (context, index) {
-                    final user = users[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      color: colorScheme.inversePrimary, // Light green
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+        
+            if (type == 'administration') Text('All Users'),
+            if (type == 'administration')
+              Expanded(
+                  child: StreamBuilder<List<Users>>(
+                stream: _controller.getUsers(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.brown[600],
                       ),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 50,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.primary, // Medium green
-                                      borderRadius: BorderRadius.circular(10),
+                    );
+                  }
+        
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Error loading users',
+                        style: TextStyle(color: Colors.brown[800]),
+                      ),
+                    );
+                  }
+        
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.star, size: 50, color: Colors.brown[600]),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No users available',
+                            style: TextStyle(
+                              color: Colors.brown[800],
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  final users = snapshot.data!;
+        
+                  return ListView.builder(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    itemCount: users.length,
+                    itemBuilder: (context, index) {
+                      final user = users[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        color: colorScheme.inversePrimary, // Light green
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color:
+                                            colorScheme.primary, // Medium green
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Icon(
+                                        Icons.account_circle,
+                                        size: 30,
+                                      ),
                                     ),
-                                    child: Icon(Icons.account_circle,
-                                      size: 30,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          user.name,
-                                          style: TextStyle(
-                                            color: Colors.brown[800],
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            user.name,
+                                            style: TextStyle(
+                                              color: Colors.brown[800],
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          user.role,
-                                          style: TextStyle(
-                                            color: Colors.brown[600],
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            user.role,
+                                            style: TextStyle(
+                                              color: Colors.brown[600],
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ), IconButton(
+                                    IconButton(
                                       icon: const Icon(Icons.edit),
-                                        onPressed: () {
-                                          showDialog(
+                                      onPressed: () {
+                                        showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
-                                            title: const Text('You are now updating this user.'),
-                                            content: 
-                                            Container(
-                                            child:Form(
-                                              key: _formKey,
-                                              child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  TextFormField(
-                                                            controller: _nameController,
-                                                            decoration: const InputDecoration(
-                                                              icon: Icon(Icons.email),
-                                                              hintText: 'Enter the new name',
-                                                              labelText: 'Name',
-                                                            ),
-                                                            validator: (value) {
-                                                              if (value == null || value.isEmpty) {
-                                                                return 'Please enter NEW name';
-                                                              }
-                                                              return null;
-                                                            },
+                                            title: const Text(
+                                                'You are now updating this user.'),
+                                            content: Container(
+                                              child: Form(
+                                                  key: _formKey,
+                                                  child: Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        TextFormField(
+                                                          controller:
+                                                              _nameController,
+                                                          decoration:
+                                                              const InputDecoration(
+                                                            icon:
+                                                                Icon(Icons.email),
+                                                            hintText:
+                                                                'Enter the new name',
+                                                            labelText: 'Name',
                                                           ),
-                                                          TextFormField(
-                                                            controller: _emailController,
-                                                            decoration: const InputDecoration(
-                                                              icon: Icon(Icons.email),
-                                                              hintText: 'Enter the NEW email',
-                                                              labelText: 'Email',
-                                                            ),
-                                                            validator: (value) {
-                                                              if (value == null || value.isEmpty) {
-                                                                return 'Please enter NEW email';
-                                                              }
-                                                              return null;
-                                                            },
+                                                          validator: (value) {
+                                                            if (value == null ||
+                                                                value.isEmpty) {
+                                                              return 'Please enter NEW name';
+                                                            }
+                                                            return null;
+                                                          },
+                                                        ),
+                                                        TextFormField(
+                                                          controller:
+                                                              _emailController,
+                                                          decoration:
+                                                              const InputDecoration(
+                                                            icon:
+                                                                Icon(Icons.email),
+                                                            hintText:
+                                                                'Enter the NEW email',
+                                                            labelText: 'Email',
                                                           ),
-                                                          TextFormField(
-                                                            controller: _roleController,
-                                                            decoration: const InputDecoration(
-                                                              icon: Icon(Icons.email),
-                                                              hintText: 'Enter the NEW Role',
-                                                              labelText: 'Role',
-                                                            ),
-                                                            validator: (value) {
-                                                              if (value == null || value.isEmpty) {
-                                                                return 'Please enter NEW Role';
-                                                              }
-                                                              return null;
-                                                            },
+                                                          validator: (value) {
+                                                            if (value == null ||
+                                                                value.isEmpty) {
+                                                              return 'Please enter NEW email';
+                                                            }
+                                                            return null;
+                                                          },
+                                                        ),
+                                                        TextFormField(
+                                                          controller:
+                                                              _roleController,
+                                                          decoration:
+                                                              const InputDecoration(
+                                                            icon:
+                                                                Icon(Icons.email),
+                                                            hintText:
+                                                                'Enter the NEW Role',
+                                                            labelText: 'Role',
                                                           ),
-                                            
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(context),
-                                                child: const Text('Cancel'),
-                                              ),
-                                             TextButton(
-                                                  onPressed: () async{
-                                                         try {
+                                                          validator: (value) {
+                                                            if (value == null ||
+                                                                value.isEmpty) {
+                                                              return 'Please enter NEW Role';
+                                                            }
+                                                            return null;
+                                                          },
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                  context),
+                                                          child: const Text(
+                                                              'Cancel'),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () async {
+                                                            try {
                                                               if (user != null) {
                                                                 final updatedUser = UsersBuilder()
-                                                                    .setId(user.id)
-                                                                    .setEmail(_emailController.text)
-                                                                    .setName(_nameController.text)
-                                                                    .setRole(_roleController.text)
+                                                                    .setId(
+                                                                        user.id)
+                                                                    .setEmail(
+                                                                        _emailController
+                                                                            .text)
+                                                                    .setName(
+                                                                        _nameController
+                                                                            .text)
+                                                                    .setRole(
+                                                                        _roleController
+                                                                            .text)
                                                                     .build();
-                                                                  await _controller.updateUser(updatedUser);
-                                                          
-                                                                }   Navigator.pop(context);
-                                                                } catch (e) {
-                                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                                  SnackBar(content: Text('Error: $e')),
-                                                                );
+                                                                await _controller
+                                                                    .updateUser(
+                                                                        updatedUser);
                                                               }
+                                                              Navigator.pop(
+                                                                  context);
+                                                            } catch (e) {
+                                                              ScaffoldMessenger
+                                                                      .of(context)
+                                                                  .showSnackBar(
+                                                                SnackBar(
+                                                                    content: Text(
+                                                                        'Error: $e')),
+                                                              );
+                                                            }
                                                           },
-                                                  
-                                                  child: const Text("Update a User"),
-                                                ),
-                                            ])
-                                            ),),
+                                                          child: const Text(
+                                                              "Update a User"),
+                                                        ),
+                                                      ])),
+                                            ),
                                           ),
                                         );
-                                        },
-                                      ),
+                                      },
+                                    ),
                                     IconButton(
                                       icon: const Icon(Icons.delete),
                                       onPressed: () {
@@ -421,7 +453,8 @@ class _ProfilePageState extends State<ProfilePage>{
                                                 'Are you SURE you want to DELETE this user?'),
                                             actions: [
                                               TextButton(
-                                                onPressed: () => Navigator.pop(context),
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
                                                 child: const Text('Cancel'),
                                               ),
                                               TextButton(
@@ -429,7 +462,7 @@ class _ProfilePageState extends State<ProfilePage>{
                                                   await _controller
                                                       .deleteUser(user.id);
                                                   Navigator.pop(context); //Dialog
-                                                 // Navigator.pop(context); //List
+                                                  // Navigator.pop(context); //List
                                                 },
                                                 child: const Text('Delete'),
                                               ),
@@ -438,38 +471,37 @@ class _ProfilePageState extends State<ProfilePage>{
                                         );
                                       },
                                     ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.alternate_email,
-                                    size: 18,
-                                    color: Colors.brown[600],
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                   user.email,
-                                    style: TextStyle(
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.alternate_email,
+                                      size: 18,
                                       color: Colors.brown[600],
                                     ),
-                                  ),
-                                  const Spacer(),
-
-           
-                                ],
-                              ),
-                            ],
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      user.email,
+                                      style: TextStyle(
+                                        color: Colors.brown[600],
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
-            )),
-        ],
+                      );
+                    },
+                  );
+                },
+              )),
+          ],
+        ),
       ),
     );
   }
@@ -481,19 +513,21 @@ class _ProfilePageState extends State<ProfilePage>{
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Account Settings", style: Theme.of(context).textTheme.headlineSmall,
+            Text(
+              "Account Settings",
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
-            _buildInfoRow("Name : ${userName}" ),
+            _buildInfoRow("Name : ${userName}"),
             _buildInfoRow('Email : ${user.email ?? 'User Unavailale'}'),
             _buildInfoRow('Account Type : ${userRole ?? 'Role Unavailable'}'),
           ],
         ),
       ),
     );
-    }
+  }
 
-    Widget _buildInfoRow(String text) {
+  Widget _buildInfoRow(String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -508,9 +542,7 @@ class _ProfilePageState extends State<ProfilePage>{
     );
   }
 
-   Widget _buildMyEventsList(BuildContext context) {
-    
-
+  Widget _buildMyEventsList(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -522,30 +554,31 @@ class _ProfilePageState extends State<ProfilePage>{
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
-                 StreamBuilder<List<Event>>(
-                  stream: _eventController.getUserEvents(user.email!),
-                  builder: (context, snapshot){
-                    if (!snapshot.hasData){
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                    if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    }
-                    final events=snapshot.data!;
-                    if(events.isEmpty){
-                      return ListTile(
-                        title: Text("You have not registered for any events yet!"),
-                        dense: true,
-                      );
-                    }
-                     return ListView.builder(
+            StreamBuilder<List<Event>>(
+                stream: _eventController.getUserEvents(user.email!),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  }
+                  final events = snapshot.data!;
+                  if (events.isEmpty) {
+                    return ListTile(
+                      title:
+                          Text("You have not registered for any events yet!"),
+                      dense: true,
+                    );
+                  }
+                  return ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: events.length,
                     itemBuilder: (context, index) {
-                      final event= events[index];
+                      final event = events[index];
                       return ListTile(
                         leading: const Icon(Icons.star),
                         title: Text(event.name),
@@ -553,50 +586,47 @@ class _ProfilePageState extends State<ProfilePage>{
                       );
                     },
                   );
-                  }
-                ),
+                }),
           ],
         ),
       ),
     );
   }
 
-     Widget _buildMyOrganizedEventsList(BuildContext context) {
+  Widget _buildMyOrganizedEventsList(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Events I am Organizing... ',
-              style:Theme.of(context).textTheme.headlineSmall
-            ),
+            Text('Events I am Organizing... ',
+                style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
-                 StreamBuilder<List<Event>>(
-                  stream: _eventController.getOrganizerEvents(user.email!),
-                  builder: (context, snapshot){
-                    if (!snapshot.hasData){
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                    if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    }
-                    final events=snapshot.data!;
-                    if(events.isEmpty){
-                      return ListTile(
-                        title: Text("You have not created any events yet!"),
-                        dense: true,
-                      );
-                    }
-                     return ListView.builder(
+            StreamBuilder<List<Event>>(
+                stream: _eventController.getOrganizerEvents(user.email!),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  }
+                  final events = snapshot.data!;
+                  if (events.isEmpty) {
+                    return ListTile(
+                      title: Text("You have not created any events yet!"),
+                      dense: true,
+                    );
+                  }
+                  return ListView.builder(
                     shrinkWrap: true,
                     //physics: const NeverScrollableScrollPhysics(),
                     itemCount: events.length,
                     itemBuilder: (context, index) {
-                      final event= events[index];
+                      final event = events[index];
                       return ListTile(
                         leading: const Icon(Icons.star),
                         title: Text(event.name),
@@ -604,51 +634,47 @@ class _ProfilePageState extends State<ProfilePage>{
                       );
                     },
                   );
-                  }
-                )
-               
+                })
           ],
         ),
       ),
     );
   }
 
-       Widget _buildMySponsorsList(BuildContext context) {
+  Widget _buildMySponsorsList(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Events I am Sponsoring...',
-              style:Theme.of(context).textTheme.headlineSmall
-            ),
+            Text('Events I am Sponsoring...',
+                style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
-                 StreamBuilder<List<Event>>(
-                  stream: _eventController.getSponsorEvents(user.email!),
-                  builder: (context, snapshot){
-                    if (!snapshot.hasData){
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                    if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    }
-                    final events=snapshot.data!;
-                    if(events.isEmpty){
-                      return ListTile(
-                        title: Text("You have not created any events yet!"),
-                        dense: true,
-                      );
-                    }
-                     return ListView.builder(
+            StreamBuilder<List<Event>>(
+                stream: _eventController.getSponsorEvents(user.email!),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  }
+                  final events = snapshot.data!;
+                  if (events.isEmpty) {
+                    return ListTile(
+                      title: Text("You have not created any events yet!"),
+                      dense: true,
+                    );
+                  }
+                  return ListView.builder(
                     shrinkWrap: true,
                     //physics: const NeverScrollableScrollPhysics(),
                     itemCount: events.length,
                     itemBuilder: (context, index) {
-                      final event= events[index];
+                      final event = events[index];
                       return ListTile(
                         leading: const Icon(Icons.star),
                         title: Text(event.name),
@@ -656,9 +682,7 @@ class _ProfilePageState extends State<ProfilePage>{
                       );
                     },
                   );
-                  }
-                )
-               
+                })
           ],
         ),
       ),

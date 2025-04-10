@@ -6,6 +6,7 @@ import 'package:soen343/controllers/profile_controller.dart';
 import 'package:soen343/views/calendar_view.dart';
 import 'package:soen343/views/analytics_view.dart';
 import 'package:soen343/views/event_promotion.dart';
+import 'package:soen343/components/event_analytics_screen.dart';
 
 class EventManagementPage extends StatefulWidget {
   final String title;
@@ -65,15 +66,8 @@ class _EventManagementState extends State<EventManagementPage> {
       ),
       Container(
         alignment: Alignment.center,
-        child: AnalyticsView(),
-      ),
-      Container(
-        alignment: Alignment.center,
-        child: const Text(
-          'About',
-          style: TextStyle(fontSize: 40),
-        ),
-      )
+        child: const AnalyticsView(),
+      ),     
     ];
 
     return Scaffold(
@@ -112,10 +106,6 @@ class _EventManagementState extends State<EventManagementPage> {
                 NavigationRailDestination(
                   icon: Icon(Icons.analytics),
                   label: Text('Analytics & Reports'),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.info),
-                  label: Text('About'),
                 ),
               ],
               labelType: NavigationRailLabelType.all,

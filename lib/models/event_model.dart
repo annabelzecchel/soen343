@@ -13,7 +13,12 @@ class Event {
   final String name;
   final double price;
   final String type;
-  final String stakeholder;
+  final Map<String, int> stakeholder;
+  final String imageURL;
+  final double discount;
+  final String instagram;
+  final String facebook;
+  final String youtube;
 
 /* no normal constrcutor with multiple paramater only throught Event builder */
   Event._builder(EventBuilder builder)
@@ -27,7 +32,13 @@ class Event {
         name = builder.name!,
         price = builder.price!,
         type = builder.type!,
-        stakeholder = builder.stakeholder!;
+        discount = builder.discount!,
+        stakeholder = builder.stakeholder!,
+        imageURL = builder.imageURL! ?? 'https://media.istockphoto.com/id/2187289068/photo/entrance-to-building-with-blurred-background.jpg?s=1024x1024&w=is&k=20&c=WAPohYXe_fiXyYmvReGDMigncO4iZBTDjrm1a6AVP2Y=',
+        instagram = builder.instagram! ?? 'none',
+        facebook = builder.facebook! ?? 'none',
+        youtube = builder.youtube! ?? 'none'
+        ;
 
 /* set each properties */
   factory Event.fromFirestore(Map<String, dynamic> data, String documentId) {
@@ -44,8 +55,19 @@ class Event {
             ? double.tryParse(data['price'].toString()) ?? 0.0
             : 0.0)
         .setType(data['type'] ?? '')
-        .setStakeholder(data['stakeholder'] ?? '')
+        .setDiscount(data['discount'] != null
+            ? double.tryParse(data['discount'].toString()) ?? 0.0
+            : 0.0)
+        // .setStakeholder(data['stakeholder'] ?? {})
+        .setStakeholder(data['stakeholder'] != null 
+            ? Map<String, dynamic>.from(data['stakeholder'])
+            : {})
+        .setImageURL(data['imageURL'] ?? 'https://media.istockphoto.com/id/2187289068/photo/entrance-to-building-with-blurred-background.jpg?s=1024x1024&w=is&k=20&c=WAPohYXe_fiXyYmvReGDMigncO4iZBTDjrm1a6AVP2Y=')
+        .setInstagram(data['instagram']??'none')
+        .setFacebook(data['facebook']??'none')
+        .setYoutube(data['youtube']??'none')
         .build();
+
   }
 
   Map<String, dynamic> toFirestore() {
@@ -59,7 +81,12 @@ class Event {
       'name': name,
       'price': price.toString(),
       'type': type,
+      'discount': discount,
       'stakeholder': stakeholder,
+      'imageURL': imageURL,
+      'instagram':instagram,
+      'facebook':facebook,
+      'youtube':youtube,
     };
   }
 
@@ -104,7 +131,13 @@ class EventBuilder {
   String? name;
   double? price;
   String? type;
-  String? stakeholder;
+  double? discount;
+  Map<String, int>? stakeholder;
+  String? imageURL;
+  String? instagram;
+  String? facebook;
+  String? youtube;
+ 
 
   EventBuilder setId(String id) {
     this.id = id;
@@ -151,13 +184,44 @@ class EventBuilder {
     return this;
   }
 
+  EventBuilder setDiscount(double discount) {
+    this.discount = discount;
+    return this;
+  }
+
   EventBuilder setType(String type) {
     this.type = type;
     return this;
   }
 
-  EventBuilder setStakeholder(String stakeholder) {
-    this.stakeholder = stakeholder;
+    EventBuilder setStakeholder(Map<String, dynamic> stakeholder) {
+   //this.stakeholder = Map<String, int>.from(stakeholder);
+     this.stakeholder = Map<String, int>.from(
+    stakeholder.map((key, value) => MapEntry(
+      key, 
+      value is int ? value : int.tryParse(value.toString()) ?? 0
+    ))
+  );
+   return this;
+  }
+
+    EventBuilder setImageURL(String imageURL) {
+    this.imageURL = imageURL;
+    return this;
+  }
+
+   EventBuilder setInstagram(String instagram) {
+    this.instagram = instagram;
+    return this;
+  }
+
+   EventBuilder setFacebook(String facebook) {
+    this.facebook = facebook;
+    return this;
+  }
+
+   EventBuilder setYoutube(String youtube) {
+    this.youtube = youtube;
     return this;
   }
 
@@ -169,7 +233,13 @@ class EventBuilder {
         location == null ||
         name == null ||
         price == null ||
-        type == null) {
+        imageURL == null ||
+        discount == null ||
+        type == null ||
+        instagram ==null ||
+        facebook == null ||
+        youtube == null 
+        ) {
       throw Exception("Missing required fields for Event creation");
     }
     return Event._builder(this);
