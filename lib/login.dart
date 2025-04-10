@@ -49,25 +49,31 @@ class _LoginState extends State<LoginPage> {
               border: Border(right: BorderSide(color: Colors.grey, width: 1)), // Border for separation
             ),
             child: NavigationRail(
+              backgroundColor: const Color.fromARGB(255, 96, 124, 100),
               onDestinationSelected: (int index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
+          setState(() {
+            _selectedIndex = index;
+          });
               },
               selectedIndex: _selectedIndex,
               destinations: const [
-                NavigationRailDestination(
-                  icon: Icon(Icons.login),
-                  label: Text('Log in'),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.add_circle_outline),
-                  label: Text('Sign up'),
-                ),
+          NavigationRailDestination(
+            icon: Icon(Icons.login, color: Colors.white),
+            selectedIcon: Icon(Icons.login, color: const Color.fromARGB(255, 96, 124, 100)), // Selected icon color
+            label: Text('Log in', style: TextStyle(color: Colors.white)),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.add_circle_outline, color: Colors.white),
+            selectedIcon: Icon(Icons.add_circle_outline, color: const Color.fromARGB(255, 96, 124, 100)), // Selected icon color
+            label: Text('Sign up', style: TextStyle(color: Colors.white)),
+          ),
               ],
               labelType: NavigationRailLabelType.all,
               selectedLabelTextStyle: const TextStyle(
-                color: Colors.black,
+          color: Colors.white,
+              ),
+              unselectedLabelTextStyle: const TextStyle(
+          color: Colors.white,
               ),
             ),
           ),
