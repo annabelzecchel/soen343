@@ -75,14 +75,15 @@ Widget build(BuildContext context) {
                   labelText: 'Password',
                 ),
                 obscureText: true,
-                // validator: (value) {
-                //   if (value == null || value.isEmpty) {
-                //     return 'Please enter your password';
-                //   } if (value != FirebaseAuth.instance.currentUser?.email) {
-                //     return 'Password is incorrect';
-                //   }
-                //   return null;
-                // },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password';
+                  }
+                  // if (value != FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password)) {
+                  //   return 'Password is incorrect';
+                  // }
+                  return null;
+                },
               ),
               const SizedBox(height: 20), 
               _isLoading ? const CircularProgressIndicator():

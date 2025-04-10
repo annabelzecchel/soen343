@@ -18,7 +18,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
   final _formKey = GlobalKey<FormState>();
   final _feedbackService = FeedbackService();
   final _commentController = TextEditingController();
-  int _rating = 3;
+  int _rating = 0;
   bool _isSubmitting = false;
 
   @override
@@ -90,16 +90,20 @@ class _FeedbackFormState extends State<FeedbackForm> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
-              Row(
+                Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(5, (index) {
-                  return IconButton(
+                  return MouseRegion(
+                  onEnter: (_) => setState(() => _rating = index + 1),
+                  onExit: (_) => setState(() => _rating = 0),
+                  child: IconButton(
                     icon: Icon(
-                      index < _rating ? Icons.star : Icons.star_border,
-                      color: Colors.amber,
-                      size: 32,
+                    index < _rating ? Icons.star : Icons.star_border,
+                    color: Colors.amber,
+                    size: 32,
                     ),
                     onPressed: () => setState(() => _rating = index + 1),
+                  ),
                   );
                 }),
               ),
@@ -112,9 +116,9 @@ class _FeedbackFormState extends State<FeedbackForm> {
                 ),
                 maxLines: 3,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please provide some feedback';
-                  }
+                  // if (value == null || value.isEmpty) {
+                  //   return 'Please provide some feedback';
+                  // }
                   return null;
                 },
               ),
