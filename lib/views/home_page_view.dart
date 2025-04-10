@@ -148,10 +148,6 @@ class _HomePageState extends State<HomePage> {
               }
             },
           ),
-          IconButton(
-            icon: Icon(Icons.notifications, color: Colors.brown[600]),
-            onPressed: () {},
-          ),
           if (_currentUser != null)
             IconButton(
               icon: Icon(Icons.account_circle, color: Colors.brown[600]),

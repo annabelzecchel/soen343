@@ -9,12 +9,12 @@ import '../models/event_model.dart';
 
 class PaymentScreen extends StatefulWidget {
   final Event event;
-  final String attendeeEmail;
+  final String role;
   final double amount;
 
     const PaymentScreen({
     required this.event,
-    required this.attendeeEmail,
+    required this.role,
     required this.amount,
     Key? key,
   }) : super(key: key);
@@ -98,6 +98,7 @@ _selectedStrategy != null
               'Original Price: \$${widget.amount}',
               style: const TextStyle(fontSize: 16),
             ),
+            if(widget.role != 'Stakeholders')
             Text(
               'Discount: -\$${widget.event.discount}',
               style: const TextStyle(
