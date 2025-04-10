@@ -113,25 +113,16 @@ class _ProfilePageState extends State<ProfilePage> {
               type == "Stakeholders" ||
               type == "administration" ||
               type == "attendee") ...[
-            //   IconButton(
-            //     icon: const Icon(Icons.payment),
-            //     onPressed: () {
-            // //       Navigator.push(
-            // //  context,
-            // //  MaterialPageRoute(builder: (context) => const PaymentScreen()),
-            // //  );
-            //     },
-            //   ),
-            IconButton(
-              icon: const Icon(Icons.analytics),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const AnalyticsView()),
-                );
-              },
-            ),
+            // IconButton(
+            //   icon: const Icon(Icons.analytics),
+            //   onPressed: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //           builder: (context) => const AnalyticsView()),
+            //     );
+            //   },
+            // ),
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () {
@@ -206,7 +197,6 @@ class _ProfilePageState extends State<ProfilePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Search Bar - Styled with green and brown
             Padding(
               padding: const EdgeInsets.all(16.0),
               //child:
@@ -579,10 +569,22 @@ class _ProfilePageState extends State<ProfilePage> {
                     itemCount: events.length,
                     itemBuilder: (context, index) {
                       final event = events[index];
-                      return ListTile(
-                        leading: const Icon(Icons.star),
-                        title: Text(event.name),
-                        dense: true,
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        child: ListTile(
+                          leading: Icon(Icons.event, color: Theme.of(context).primaryColor),
+                          title: Text(event.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text('Date: ${event.dateTime.toLocal()}'), // Ensure proper formatting
+                          trailing: Icon(Icons.arrow_forward, color: Theme.of(context).primaryColor),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EventDetailView(event: event),
+                              ),
+                            );
+                          },
+                        ),
                       );
                     },
                   );
@@ -623,14 +625,26 @@ class _ProfilePageState extends State<ProfilePage> {
                   }
                   return ListView.builder(
                     shrinkWrap: true,
-                    //physics: const NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     itemCount: events.length,
                     itemBuilder: (context, index) {
                       final event = events[index];
-                      return ListTile(
-                        leading: const Icon(Icons.star),
-                        title: Text(event.name),
-                        dense: true,
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        child: ListTile(
+                          leading: Icon(Icons.event, color: Theme.of(context).primaryColor),
+                          title: Text(event.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text('Date: ${event.dateTime}'),
+                          trailing: Icon(Icons.arrow_forward, color: Theme.of(context).primaryColor),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EventDetailView(event: event),
+                              ),
+                            );
+                          },
+                        ),
                       );
                     },
                   );
@@ -665,20 +679,32 @@ class _ProfilePageState extends State<ProfilePage> {
                   final events = snapshot.data!;
                   if (events.isEmpty) {
                     return ListTile(
-                      title: Text("You have not created any events yet!"),
+                      title: Text("You have not sponsored any events yet!"),
                       dense: true,
                     );
                   }
                   return ListView.builder(
                     shrinkWrap: true,
-                    //physics: const NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     itemCount: events.length,
                     itemBuilder: (context, index) {
                       final event = events[index];
-                      return ListTile(
-                        leading: const Icon(Icons.star),
-                        title: Text(event.name),
-                        dense: true,
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        child: ListTile(
+                          leading: Icon(Icons.event, color: Theme.of(context).primaryColor),
+                          title: Text(event.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text('Date: ${event.dateTime}'),
+                          trailing: Icon(Icons.arrow_forward, color: Theme.of(context).primaryColor),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EventDetailView(event: event),
+                              ),
+                            );
+                          },
+                        ),
                       );
                     },
                   );

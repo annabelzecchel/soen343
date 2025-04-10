@@ -118,12 +118,12 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.event, color: Colors.brown[600]), // Brown icon
             onPressed: () {
               Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const EventManagementPage(
-                    title: 'Event Management',
-                  ),
-                ),
+          context,
+          MaterialPageRoute(
+            builder: (context) => const EventManagementPage(
+              title: 'Event Management',
+            ),
+          ),
               );
             },
           ),
@@ -132,19 +132,19 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               final user = FirebaseAuth.instance.currentUser;
               if (user != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ChatRoomsView(),
-                  ),
-                );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ChatRoomsView(),
+            ),
+          );
               } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LoginPage(title: 'Login !'),
-                  ),
-                );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LoginPage(title: 'Login !'),
+            ),
+          );
               }
             },
           ),
@@ -153,26 +153,29 @@ class _HomePageState extends State<HomePage> {
               icon: Icon(Icons.account_circle, color: Colors.brown[600]),
               onPressed: () => _navigateToProfile(context),
             ),
-          ElevatedButton(
-            onPressed: () async {
-              if (_currentUser == null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LoginPage(title: 'Sign In!'),
-                  ),
-                );
-              } else {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const HomePage(title: "HOME"),
-                  ),
-                );
-              }
-            },
-            child: Text(_currentUser == null ? "Sign in!" : "Sign out!"),
+          Padding(
+            padding: const EdgeInsets.only(left: 10.0, right: 20.0),
+            child: ElevatedButton(
+              onPressed: () async {
+          if (_currentUser == null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const LoginPage(title: 'Sign In!'),
+              ),
+            );
+          } else {
+            await FirebaseAuth.instance.signOut();
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HomePage(title: "HOME"),
+              ),
+            );
+          }
+              },
+              child: Text(_currentUser == null ? "Sign in!" : "Sign out!"),
+            ),
           ),
         ],
       ),

@@ -79,7 +79,10 @@ Widget build(BuildContext context) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';
                   }
-                  // if (value != FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password)) {
+                  // if (value != FirebaseAuth.instance.signInWithEmailAndPassword(
+                  //         email: _emailController.text.trim(),
+                  //         password: _passwordController.text.trim(),
+                  //       ).password) {
                   //   return 'Password is incorrect';
                   // }
                   return null;
