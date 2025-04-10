@@ -300,7 +300,7 @@ class _EventDetailViewState extends State<EventDetailView> {
                                         MaterialPageRoute(
                                           builder: (context) => PaymentScreen(
                                             event: _currentEvent,
-                                            attendeeEmail: email ?? '',
+                                            role: type ?? '',
                                             amount: _currentEvent.price,
                                           ),
                                         ),
@@ -414,7 +414,17 @@ class _EventDetailViewState extends State<EventDetailView> {
                               _currentEvent.id, email??'',int.parse(_amountController.text) );
                           await _refreshEventData();
                           Navigator.pop(context);
-                        },
+                          Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => PaymentScreen(
+                                          event: _currentEvent,
+                                          role : type ?? '',
+                                          amount: double.parse(_amountController.text),
+                                        ),
+                                      ),
+                                    );
+                          },
                         child: const Text('Sponsor'),
                       ),
                     ],

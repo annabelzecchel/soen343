@@ -19,11 +19,13 @@ class EventManagementPage extends StatefulWidget {
 class _EventManagementState extends State<EventManagementPage> {
   String? _email;
   final ProfileController _profileController = ProfileController(AuthService());
+  String? type;
 
   @override
   void initState() {
     super.initState();
     _fetchUserEmail();
+    _fetchUserRole();
   }
 
   Future<void> _fetchUserEmail() async {
@@ -42,11 +44,27 @@ class _EventManagementState extends State<EventManagementPage> {
     }
   }
 
+    Future<void> _fetchUserRole() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      String userRole = await _profileController.getRoleById(user.uid);
+      print(userRole);
+      setState(() {
+        type = userRole;
+      });
+    }
+  }
+
   int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
+    if (type != null &&
+          (type!.toLowerCase() == 'organizer' ||
+              type!.toLowerCase() == 'administration' ||
+              type!.toLowerCase() == 'stakeholders'))
       Container(
         alignment: Alignment.center,
         child: const EventCreationForm(),
@@ -60,10 +78,18 @@ class _EventManagementState extends State<EventManagementPage> {
               )
             : const CircularProgressIndicator(),
       ),
+      if (type != null &&
+            (type!.toLowerCase() == 'organizer' ||
+                type!.toLowerCase() == 'administration' ||
+                type!.toLowerCase() == 'stakeholders'))
       Container(
         alignment: Alignment.center,
         child: const EventPromotionPage(),
       ),
+      if (type != null &&
+            (type!.toLowerCase() == 'organizer' ||
+                type!.toLowerCase() == 'administration' ||
+                type!.toLowerCase() == 'stakeholders'))
       Container(
         alignment: Alignment.center,
         child: const AnalyticsView(),
@@ -90,19 +116,23 @@ class _EventManagementState extends State<EventManagementPage> {
                 });
               },
               selectedIndex: _selectedIndex,
-              destinations: const [
+              destinations:  [
+               if (type == 'organizer'||type == 'Stakeholders'||type == 'administration')
                 NavigationRailDestination(
                   icon: Icon(Icons.event),
                   label: Text('Events Creation'),
                 ),
+          
                 NavigationRailDestination(
                   icon: Icon(Icons.person),
                   label: Text('Event Management'),
                 ),
+                if (type == 'organizer'||type == 'Stakeholders'||type == 'administration')
                 NavigationRailDestination(
                   icon: Icon(Icons.share),
                   label: Text('Event Promotion'),
                 ),
+                if (type == 'organizer'||type == 'Stakeholders'||type == 'administration')
                 NavigationRailDestination(
                   icon: Icon(Icons.analytics),
                   label: Text('Analytics & Reports'),
