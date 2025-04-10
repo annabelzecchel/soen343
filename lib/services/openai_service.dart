@@ -18,10 +18,7 @@ class OpenAIService {
   }
 
   Future<Map<String, dynamic>> generateChatResponse(
-    List<Map<String, dynamic>> messages, {
-    bool enableWebSearch = false,
-    String? webSearchQuery,
-  }) async {
+      List<Map<String, String>> messages) async {
     if (_apiKey == null || _apiKey!.isEmpty) {
       return {
         'success': false,
@@ -30,51 +27,18 @@ class OpenAIService {
     }
 
     try {
-      // Prepare the request body
-      final requestBody = {
-        'model': _model,
-        'messages': messages,
-        'temperature': 0.7,
-        'max_tokens': 500,
-      };
-
-      // Add web search functionality if enabled
-      if (enableWebSearch && webSearchQuery != null) {
-        requestBody['tools'] = [
-          {
-            'type': 'function',
-            'function': {
-              'name': 'web_search',
-              'description': 'Search the web for current information',
-              'parameters': {
-                'type': 'object',
-                'properties': {
-                  'query': {
-                    'type': 'string',
-                    'description':
-                        'Search query to find current web information'
-                  }
-                },
-                'required': ['query']
-              }
-            }
-          }
-        ];
-
-        // Add tool choice to force web search
-        requestBody['tool_choice'] = {
-          'type': 'function',
-          'function': {'name': 'web_search'}
-        };
-      }
-
       final response = await http.post(
         Uri.parse(_apiUrl),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_apiKey',
         },
-        body: jsonEncode(requestBody),
+        body: jsonEncode({
+          'model': _model,
+          'messages': messages,
+          'temperature': 0.7,
+          'max_tokens': 500,
+        }),
       );
 
       if (response.statusCode == 200) {
@@ -103,24 +67,7 @@ class OpenAIService {
     }
   }
 
-  // Example usage method
-  Future<Map<String, dynamic>> searchWebAndRespond(
-    List<Map<String, dynamic>> conversationHistory,
-    String query,
-  ) async {
-    // Add the web search query to the conversation history
-    conversationHistory
-        .add({'role': 'user', 'content': 'Please search the web for: $query'});
-
-    return await generateChatResponse(
-      conversationHistory,
-      enableWebSearch: true,
-      webSearchQuery: query,
-    );
-  }
-
   Map<String, String> getPlaniniSystemMessage() {
-    // Keep the existing system message
     return {
       'role': 'system',
       'content': '''
