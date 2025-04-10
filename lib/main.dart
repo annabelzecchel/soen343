@@ -1,19 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:soen343/views/profile_view.dart';
-import 'package:soen343/login.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:soen343/components/openai_chatbot.dart';
 import 'package:soen343/views/home_page_view.dart';
 import 'package:soen343/components/app_theme.dart';
-import 'package:soen343/event_management_page.dart';
-import 'package:soen343/views/events_list_view.dart';
-import 'package:soen343/views/chat_rooms_view.dart';
+import 'package:logging/logging.dart';
+import 'package:soen343/service/openai_service.dart';
 
 void main() async {
-  await dotenv.load();
   WidgetsFlutterBinding.ensureInitialized();
+  _setupLogging();
+  final logger = Logger('main');
+
+  try {
+    await dotenv.load();
+    if (kIsWeb) {
+      await dotenv.load(fileName: ".env");
+    }
+    logger.info("Environment variables loaded successfully");
+
+    final openaiKey = dotenv.env['OPENAI_API_KEY'];
+    if (openaiKey != null && openaiKey.isNotEmpty) {
+      logger.info("OpenAI API key found: ${_redactApiKey(openaiKey)}");
+    } else {
+      logger.warning("OpenAI API key not found in environment variables");
+    }
+
+    final openAIService = OpenAIService();
+    try {
+      await openAIService.initialize();
+      logger.info("OpenAI service initialized successfully");
+    } catch (e) {
+      logger.severe("Failed to initialize OpenAI service: $e");
+    }
+  } catch (e) {
+    logger.severe("Error loading environment variables: $e");
+  }
+
   if (kIsWeb) {
     await Firebase.initializeApp(
         options: FirebaseOptions(
@@ -24,11 +48,26 @@ void main() async {
             messagingSenderId: dotenv.env['MESSAGESENDERID'] ?? '',
             appId: dotenv.env['APPID'] ?? '',
             measurementId: dotenv.env['MEASUREMENTID'] ?? ''));
-    await dotenv.load(fileName: ".env");
   } else {
     await Firebase.initializeApp();
   }
+
   runApp(MyApp());
+}
+
+void _setupLogging() {
+  hierarchicalLoggingEnabled = true;
+  Logger.root.level = kReleaseMode ? Level.INFO : Level.ALL;
+  Logger.root.onRecord.listen((record) {
+    if (kDebugMode) {
+      debugPrint('${record.level.name}: ${record.time}: ${record.message}');
+    }
+  });
+}
+
+String _redactApiKey(String key) {
+  if (key.length <= 6) return '***';
+  return '${key.substring(0, 3)}...${key.substring(key.length - 3)}';
 }
 
 class MyApp extends StatelessWidget {
@@ -42,134 +81,28 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Planini',
       theme: AppTheme.lightTheme,
-      home: const HomePage(title: 'PLANINI'),
+      home: const ChatBotWrapper(child: HomePage(title: 'PLANINI')),
       debugShowCheckedModeBanner: false,
     );
   }
 }
-// Ensure Flutter bindings are initialized before running the app
-// void ensureFlutterBinding() {
-//   WidgetsFlutterBinding.ensureInitialized();
-// }
-// class MyHomePage extends StatefulWidget {
-//   const MyHomePage({super.key, required this.title});
 
-//   final String title;
-
-//   @override
-//   State<MyHomePage> createState() => _MyHomePageState();
-// }
-
-// class _MyHomePageState extends State<MyHomePage> {
-//   final nameController = TextEditingController();
-//   final typeController = TextEditingController();
-//   String ? logIn_Out;
-//   final FirebaseAuth _auth =FirebaseAuth.instance;
-//   User?_currentUser;
-  
-  
-//   @override
-//   void initState() {
-//     super.initState();
-//     _auth.authStateChanges().listen((user){
-//       setState((){
-//         _currentUser=user;
-//       });
-//     });
-    
-//   }
-
-  
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         toolbarHeight: 251.0, // Increase the height of the AppBar
-//       title: Row(
-//         children: [
-//         Image.asset(
-//           '../../assets/Planini_NoBackground.png', // Replace with your image path
-//           height: 250, // Adjust the height as needed
-//         ),
-//         //const SizedBox(width: 10), // Add spacing between image and title
-//         /*Text(
-//           widget.title,
-//           style: const TextStyle(
-//             fontWeight: FontWeight.bold,
-//             fontSize: 40
-//           ),
-//         ),*/
-//         ],
-//       ),
-//       actions: [
-//         IconButton(
-//         icon: const Icon(Icons.event), // Event icon
-//         onPressed: () {
-//           Navigator.push(
-//           context,
-//           MaterialPageRoute(
-//             builder: (context) => const EventManagementPage(
-//               title: 'Event Management for Organizers')),
-//           );
-//         },
-//         ),
-//           IconButton(
-//             icon: const Icon(Icons.login), // Login icon
-//             onPressed: () {
-//               Navigator.push(
-//                 context,
-//                 MaterialPageRoute(
-//                     builder: (context) => const LoginPage(title: 'Login !')),
-//               );
-//             },
-//           ),
-//           const SizedBox(height: 20),
-//           // if (_currentUser != null){
-//             IconButton(
-//             icon: const Icon(Icons.child_care), // Profile icon
-//             onPressed: () async {
-//               final user = await FirebaseAuth.instance.currentUser;
-//               if (user != null) {
-//                 Navigator.push(
-//                   context,
-//                   MaterialPageRoute(
-//                     builder: (context) => const ProfilePage(),
-//                   ),
-//                 );
-//               } else {
-//                 Navigator.push(
-//                   context,
-//                   MaterialPageRoute(
-//                     builder: (context) => const LoginPage(title: 'Login !'),
-//                   ),
-//                 );
-//               }
-//             },
-//           ),
-          
-//             ElevatedButton(
-//             onPressed: () async {
-//               if (_currentUser == null) {
-//                 Navigator.push(
-//                   context,
-//                   MaterialPageRoute(
-//                     builder: (context) => const LoginPage(title:'Sign In!'),
-//                   ),
-//                 );
-//               } else {
-//                 await FirebaseAuth.instance.signOut();
-//                     Navigator.pushReplacement(context,
-//                      MaterialPageRoute(
-//                     builder: (context) => const MyHomePage(title: "HOME"),
-//                      )
-//                   );
-//               }
-//             },child:Text(_currentUser==null?"Sign in!": "Sign out!"),
-//             ),
-          
-//         ],
-//       ),
-//       body: const EventsListView(),
-//     );
-//   }
-// }
+class ChatBotWrapper extends StatelessWidget {
+  final Widget child;
+  const ChatBotWrapper({super.key, required this.child});
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: Stack(
+        children: [
+          child,
+          const Positioned(
+            bottom: 16.0,
+            right: 16.0,
+            child: OpenAIChatBot(),
+          ),
+        ],
+      ),
+    );
+  }
+}
