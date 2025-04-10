@@ -196,340 +196,350 @@ class _EventCreationFormState extends State<EventCreationForm> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Center(
-          child: Container(
-            width: 400,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  const Text(
-                    'Register New Event',
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: () => _openFilePicker(),
-                    child: Container(
-                      height: MediaQuery.of(context).size.height * 0.2,
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                      ),
-                      child: _imageBytes != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.memory(
-                                _imageBytes!,
-                                fit: BoxFit.fill,
-                              ),
-                            )
-                          : const Column(children: [
-                              Icon(Icons.add_a_photo_outlined, size: 30),
-                              Text("Event Banner Image",
-                                  style: TextStyle(
-                                      color: Colors.black, fontSize: 20)),
-                            ]),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.event_available_rounded),
-                      hintText: 'Enter Event Name',
-                      labelText: 'Event Name',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter event name';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _descriptionController,
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.description_rounded),
-                      hintText: 'Enter Event Description',
-                      labelText: 'Description',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter event description';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  DropdownButtonFormField(
-                    value: _typeController.text.isEmpty
-                        ? null
-                        : _typeController.text,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _typeController.text = newValue ?? '';
-                      });
-                    },
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.category_rounded),
-                      hintText: 'Select Event Type',
-                      labelText: 'Type',
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'conference',
-                        child: Text('Conference'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'workshop',
-                        child: Text('Workshop'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'seminar',
-                        child: Text('Seminar'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'webinar',
-                        child: Text('Webinar'),
-                      ),
-                    ],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter event type';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  DropdownButtonFormField(
-                    value: _formatController.text.isEmpty
-                        ? null
-                        : _formatController.text,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _formatController.text = newValue ?? '';
-                      });
-                    },
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.view_agenda_rounded),
-                      hintText: 'Select Event Format',
-                      labelText: 'Format',
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'in-person',
-                        child: Text('In person'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'online',
-                        child: Text('Online'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'hybrid',
-                        child: Text('Hybrid'),
-                      ),
-                    ],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter event format';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _dateTimeController,
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.date_range_rounded),
-                      hintText: 'Select Date and Time',
-                      labelText: 'Date & Time',
-                    ),
-                    onTap: () => _selectDateTime(context),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter event description';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _locationController,
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.location_on_rounded),
-                      hintText: 'Enter Event Location',
-                      labelText: 'Location',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter event location';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _instagramController,
-                    decoration: const InputDecoration(
-                      icon: Icon(FontAwesomeIcons.instagram),
-                      hintText: 'Link your event Instagram',
-                      labelText: 'Instagram',
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _facebookController,
-                    decoration: const InputDecoration(
-                      icon: Icon(FontAwesomeIcons.facebook),
-                      hintText: 'Link your event Facebook',
-                      labelText: 'Facebook',
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _youtubeController,
-                    decoration: const InputDecoration(
-                      icon: Icon(FontAwesomeIcons.youtube),
-                      hintText: 'Link your event Youtube',
-                      labelText: 'Youtube',
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _priceController,
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.attach_money_rounded),
-                      hintText: 'Enter Event Ticket Price',
-                      labelText: 'Ticket Price (enter value in CAD)',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter ticket price';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _discountController,
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.attach_money_sharp),
-                      hintText: 'Enter Event Ticket Discount',
-                      labelText: 'Ticket Discount Value (enter value in CAD)',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter ticket discount value';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        try {
-                          setState(() {
-                            _isProcessing = true;
-                          });
-
-                          // First upload the image if one was selected
-                          if (_imageBytes != null) {
-                            // imageURL = await _uploadFile();
-                            imageURL =
-                                "https://media.istockphoto.com/id/867944542/photo/blurred-background-vintage-filter-customer-in-coffee-shop-blur-background-with-bokeh.jpg";
-                            if (imageURL == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('Image upload failed')),
-                              );
-                              return;
-                            }
-                          } else {
-                            // Use default image if none selected
-                            imageURL =
-                                "https://media.istockphoto.com/id/867944542/photo/blurred-background-vintage-filter-customer-in-coffee-shop-blur-background-with-bokeh.jpg";
-                          }
-
-                          // Then save the event data
-                          await FirebaseFirestore.instance
-                              .collection("events")
-                              .add({
-                            "name": _nameController.text,
-                            "description": _descriptionController.text,
-                            "type": _typeController.text,
-                            "format": _formatController.text,
-                            "dateTime": _dateTimeController.text,
-                            "location": _locationController.text,
-                            "price": _priceController.text,
-                            "createdByEmail": _email,
-                            "image": imageURL,
-                            "discount": _discountController.text,
-                            "instagram": _instagramController.text.isNotEmpty
-                                ? _instagramController.text
-                                : 'none',
-                            "facebook": _facebookController.text.isNotEmpty
-                                ? _facebookController.text
-                                : 'none',
-                            "youtube": _youtubeController.text.isNotEmpty
-                                ? _youtubeController.text
-                                : 'none',
-                            "createdAt": FieldValue.serverTimestamp(),
-                          });
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Event created successfully!')),
-                          );
-
-                          // Reset form
-                          _formKey.currentState?.reset();
-                          setState(() {
-                            _imageBytes = null;
-                            _fileName = null;
-                            _isProcessing = false;
-                            _nameController.clear();
-                            _typeController.clear();
-                            _descriptionController.clear();
-                            _formatController.clear();
-                            _dateTimeController.clear();
-                            _locationController.clear();
-                            _priceController.clear();
-                            _discountController.clear();
-                            _instagramController.clear();
-                            _facebookController.clear();
-                            _youtubeController.clear();
-                          });
-                        } catch (e) {
-                          print('Error creating event: $e');
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error: ${e.toString()}')),
-                          );
-                        } finally {
-                          if (mounted) {
-                            setState(() {
-                              _isProcessing = false;
-                            });
-                          }
-                        }
-                      }
-                    },
-                    child: const Text('Submit'),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20.0),
+            child: Container(
+              width: 400,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    spreadRadius: 2,
                   ),
                 ],
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    const Text(
+                      'Register New Event',
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () => _openFilePicker(),
+                      child: Container(
+                        height: MediaQuery.of(context).size.height * 0.2,
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                        ),
+                        child: _imageBytes != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.memory(
+                                  _imageBytes!,
+                                  fit: BoxFit.fill,
+                                ),
+                              )
+                            : const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                Icon(Icons.add_a_photo_outlined, size: 30),
+                                Text(
+                                  "Event Banner Image",
+                                  style: TextStyle(
+                                    color: Colors.black, fontSize: 20),
+                                ),
+                                ],
+                              ),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.event_available_rounded),
+                        hintText: 'Enter Event Name',
+                        labelText: 'Event Name',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter event name';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _descriptionController,
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.description_rounded),
+                        hintText: 'Enter Event Description',
+                        labelText: 'Description',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter event description';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    DropdownButtonFormField(
+                      value: _typeController.text.isEmpty
+                          ? null
+                          : _typeController.text,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _typeController.text = newValue ?? '';
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.category_rounded),
+                        hintText: 'Select Event Type',
+                        labelText: 'Type',
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'conference',
+                          child: Text('Conference'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'workshop',
+                          child: Text('Workshop'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'seminar',
+                          child: Text('Seminar'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'webinar',
+                          child: Text('Webinar'),
+                        ),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter event type';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    DropdownButtonFormField(
+                      value: _formatController.text.isEmpty
+                          ? null
+                          : _formatController.text,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _formatController.text = newValue ?? '';
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.view_agenda_rounded),
+                        hintText: 'Select Event Format',
+                        labelText: 'Format',
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'in-person',
+                          child: Text('In person'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'online',
+                          child: Text('Online'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'hybrid',
+                          child: Text('Hybrid'),
+                        ),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter event format';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _dateTimeController,
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.date_range_rounded),
+                        hintText: 'Select Date and Time',
+                        labelText: 'Date & Time',
+                      ),
+                      onTap: () => _selectDateTime(context),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter event description';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _locationController,
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.location_on_rounded),
+                        hintText: 'Enter Event Location',
+                        labelText: 'Location',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter event location';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _instagramController,
+                      decoration: const InputDecoration(
+                        icon: Icon(FontAwesomeIcons.instagram),
+                        hintText: 'Link your event Instagram',
+                        labelText: 'Instagram',
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _facebookController,
+                      decoration: const InputDecoration(
+                        icon: Icon(FontAwesomeIcons.facebook),
+                        hintText: 'Link your event Facebook',
+                        labelText: 'Facebook',
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _youtubeController,
+                      decoration: const InputDecoration(
+                        icon: Icon(FontAwesomeIcons.youtube),
+                        hintText: 'Link your event Youtube',
+                        labelText: 'Youtube',
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _priceController,
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.attach_money_rounded),
+                        hintText: 'Enter Event Ticket Price',
+                        labelText: 'Ticket Price (enter value in CAD)',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter ticket price';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _discountController,
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.attach_money_sharp),
+                        hintText: 'Enter Event Ticket Discount',
+                        labelText: 'Ticket Discount Value (enter value in CAD)',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter ticket discount value';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (_formKey.currentState?.validate() ?? false) {
+                          try {
+                            setState(() {
+                              _isProcessing = true;
+                            });
+
+                            // First upload the image if one was selected
+                            if (_imageBytes != null) {
+                              // imageURL = await _uploadFile();
+                              imageURL =
+                                  "https://media.istockphoto.com/id/867944542/photo/blurred-background-vintage-filter-customer-in-coffee-shop-blur-background-with-bokeh.jpg";
+                              if (imageURL == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Image upload failed')),
+                                );
+                                return;
+                              }
+                            } else {
+                              // Use default image if none selected
+                              imageURL =
+                                  "https://media.istockphoto.com/id/867944542/photo/blurred-background-vintage-filter-customer-in-coffee-shop-blur-background-with-bokeh.jpg";
+                            }
+
+                            // Then save the event data
+                            await FirebaseFirestore.instance
+                                .collection("events")
+                                .add({
+                              "name": _nameController.text,
+                              "description": _descriptionController.text,
+                              "type": _typeController.text,
+                              "format": _formatController.text,
+                              "dateTime": _dateTimeController.text,
+                              "location": _locationController.text,
+                              "price": _priceController.text,
+                              "createdByEmail": _email,
+                              "image": imageURL,
+                              "discount": _discountController.text,
+                              "instagram": _instagramController.text.isNotEmpty
+                                  ? _instagramController.text
+                                  : 'none',
+                              "facebook": _facebookController.text.isNotEmpty
+                                  ? _facebookController.text
+                                  : 'none',
+                              "youtube": _youtubeController.text.isNotEmpty
+                                  ? _youtubeController.text
+                                  : 'none',
+                              "createdAt": FieldValue.serverTimestamp(),
+                            });
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Event created successfully!')),
+                            );
+
+                            // Reset form
+                            _formKey.currentState?.reset();
+                            setState(() {
+                              _imageBytes = null;
+                              _fileName = null;
+                              _isProcessing = false;
+                              _nameController.clear();
+                              _typeController.clear();
+                              _descriptionController.clear();
+                              _formatController.clear();
+                              _dateTimeController.clear();
+                              _locationController.clear();
+                              _priceController.clear();
+                              _discountController.clear();
+                              _instagramController.clear();
+                              _facebookController.clear();
+                              _youtubeController.clear();
+                            });
+                          } catch (e) {
+                            print('Error creating event: $e');
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: ${e.toString()}')),
+                            );
+                          } finally {
+                            if (mounted) {
+                              setState(() {
+                                _isProcessing = false;
+                              });
+                            }
+                          }
+                        }
+                      },
+                      child: const Text('Submit'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
