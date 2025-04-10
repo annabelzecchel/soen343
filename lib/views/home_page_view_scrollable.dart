@@ -489,7 +489,7 @@ class _HomePageState extends State<HomePage> {
                   crossAxisCount: 4, // 4 columns
                   crossAxisSpacing: 8,
                   mainAxisSpacing: 8,
-                  childAspectRatio: 1, // Adjust for card proportions
+                  childAspectRatio: 1.4, // Adjust for card proportions
                 ),
                 itemCount: filteredEvents.length,
                 itemBuilder: (context, index) {
