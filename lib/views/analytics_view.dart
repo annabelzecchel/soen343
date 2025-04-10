@@ -31,6 +31,7 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
   String?role;
   Event?selectedEvent;
   bool isLoading=false;
+  Map<String, int> _feedbackData = {};
 
   Map<String, int> attendeeType={
     'organizer':0,
@@ -53,7 +54,7 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
     });
       try {
         List<Map<String, dynamic>> attendees = await _eventController.getEventAttendees(event.id);
-         Map<String, int> counts={
+        Map<String, int> counts={
             'organizer':0,
             'Stakeholders':0,
             'administration':0,
@@ -69,6 +70,14 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
             }
           }
 
+          final feedback = await _fetchFeedbackAnalytics(event.id);
+
+          setState(() {
+            attendeeType = counts;
+            _feedbackData = feedback;
+            isLoading = false;
+          });
+
           setState((){
             attendeeType=counts;
             isLoading=false;
@@ -81,11 +90,118 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
       }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Future<Map<String, int>> _fetchFeedbackAnalytics(String eventId) async {
+  final feedbackSnapshot = await FirebaseFirestore.instance
+      .collection('event_feedback')
+      .where('eventId', isEqualTo: eventId)
+      .get();
 
-    return Scaffold(
-      body: Padding(
+  // Initialize all rating levels
+  Map<int, int> ratingCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+
+  for (var doc in feedbackSnapshot.docs) {
+    final rating = doc['rating'] as int;
+    if (ratingCounts.containsKey(rating)) {
+      ratingCounts[rating] = ratingCounts[rating]! + 1;
+    }
+  }
+
+  // Label for chart display
+  return {
+    '1 Star': ratingCounts[1]!,
+    '2 Stars': ratingCounts[2]!,
+    '3 Stars': ratingCounts[3]!,
+    '4 Stars': ratingCounts[4]!,
+    '5 Stars': ratingCounts[5]!,
+  };
+}
+
+  // @override
+  // Widget build(BuildContext context) {
+
+  //   return Scaffold(
+  //     body: Padding(
+  //       padding: const EdgeInsets.all(16.0),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           const Text(
+  //             'Real-time Insights',
+  //             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  //           ),
+  //           const SizedBox(height: 10),
+  //           //if(user != null&& (_profileController.getRoleById(user!.uid)) == 'organizer')
+  //           _buildMyOrganizedEventsList(context),
+
+  //           const SizedBox(height: 20, width: 0),
+  //           Expanded(
+  //             child: Row(
+  //               children:[
+  //                 Expanded(
+  //                   flex:1,
+  //                     child:Column(
+  //                       children: [
+  //                         Expanded(
+  //                           flex:1,
+  //                           child: _buildPieChart('Attendees Participation', 'Total'), 
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                 Expanded(
+  //                   flex:1,
+  //                   child: Card(
+  //                     margin:EdgeInsets.all(8),
+  //                     child:Padding(
+  //                       padding: const EdgeInsets.all(16),
+  //                       child: Column(
+  //                         crossAxisAlignment:CrossAxisAlignment.start,
+  //                         children:[
+  //                           // Text('Event Analytics',
+  //                           // style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+  //                           // ),
+  //                           SizedBox(height:10),
+  //                           //Text('TESTING')
+  //                           Expanded(
+  //                           child: selectedEvent == null
+  //                               ? Center(child: Text('Select an event to view sponsor analytics'))
+  //                               : _buildSponsorGraph(selectedEvent!),
+  //                           )
+  //                         ]
+  //                       ),
+                        
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ]
+  //             ),
+              
+  //           ),
+  //           Expanded(
+  //                           child: Row(
+  //                             children: [
+  //                             Expanded(
+  //                               child: _buildBarChart('Event Success', {
+  //                               'Loved this event': 85,
+  //                               'Enjoyed the event': 50,
+  //                               'Disliked the event': 15,
+  //                               'Hated the event': 5,
+  //                               }),
+  //                             ),
+  //                             ],
+  //                           ),
+  //                           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: SingleChildScrollView(
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,71 +211,58 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            //if(user != null&& (_profileController.getRoleById(user!.uid)) == 'organizer')
             _buildMyOrganizedEventsList(context),
-
-            const SizedBox(height: 20, width: 0),
-            Expanded(
+            const SizedBox(height: 20),
+            SizedBox(
+              height: 400,
               child: Row(
-                children:[
+                children: [
                   Expanded(
-                    flex:1,
-                      child:Column(
-                        children: [
-                          Expanded(
-                            flex:1,
-                            child: _buildPieChart('Attendees Participation', 'Total'), 
-                          ),
-                          //COMMENTED OUT 
-                          // Expanded(
-                          //    //flex:1,
-                          //     child: _buildBarChart('Event Success', {
-                          //     'Loved this event': 85,
-                          //     'Enjoyed the event': 50,
-                          //     'Disliked the event': 15,
-                          //     'Hated the event': 5,
-                          //   }),
-                          // ),
-                          
-                        ],
-                      ),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: _buildPieChart('Attendees Participation', 'Total'),
+                        ),
+                      ],
                     ),
+                  ),
                   Expanded(
-                    flex:1,
                     child: Card(
-                      margin:EdgeInsets.all(8),
-                      child:Padding(
+                      margin: const EdgeInsets.all(8),
+                      child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
-                          crossAxisAlignment:CrossAxisAlignment.start,
-                          children:[
-                            Text('Event Analytics',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 10),
+                            Expanded(
+                              child: selectedEvent == null
+                                  ? Center(child: Text('Select an event to view sponsor analytics'))
+                                  : _buildSponsorGraph(selectedEvent!),
                             ),
-                            SizedBox(height:10),
-                            //Text('TESTING')
-                             Expanded(
-                            child: selectedEvent == null
-                                ? Center(child: Text('Select an event to view sponsor analytics'))
-                                : _buildSponsorGraph(selectedEvent!),
-                            )
-                          ]
+                          ],
                         ),
                       ),
                     ),
                   ),
-                ]
+                ],
               ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              height: 300,
+              child: _buildBarChart('Event Success', _feedbackData),
             ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildMetricCard(String title, String value) {
     return Card(
-      margin: EdgeInsets.all(8),
+      margin: const EdgeInsets.all(8),
       child:
       Padding(
         padding:const EdgeInsets.symmetric(vertical:20, horizontal:16),
@@ -177,10 +280,10 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
 
 
       Map<String, Color> roleColors={
-        'organizer':Colors.green,
-        'Stakeholders':Colors.red,
-        'administration':Colors.yellow,
-        'attendee':Colors.blue,
+        'organizer':Color.fromARGB(255, 118, 157, 123),
+        'Stakeholders': Color(0xFFA74D0F),
+        'administration':const Color.fromARGB(255, 239, 227, 119),
+        'attendee':Color(0xFFca946f),
       };
 
       if (isLoading || selectedEvent ==null){
@@ -201,7 +304,7 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
       if(total==0){
         return Card(
           margin:EdgeInsets.all(8),
-           child:Container(
+          child:Container(
             height:double.infinity,
             child:Center(
               child:Text('No attendees data is available. Choose another event!'),
@@ -242,7 +345,7 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
                   contentPadding: EdgeInsets.zero,
                   title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text('$subtitle - $total attendees'),
-                  leading: const Icon(Icons.analytics, color: Color.fromARGB(255, 118, 157, 123)),
+                  leading: const Icon(Icons.pie_chart, color: Color.fromARGB(255, 118, 157, 123)),
                   ),
                   Expanded(
                     child: PieChart(
@@ -261,107 +364,136 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
   }
 
     Widget _buildBarChart(String title, Map<String, int> feedbackData) {
+      
+      if (isLoading || selectedEvent ==null){
+        return Card(
+          margin:EdgeInsets.all(8),
+          child:Container(
+            height:double.infinity,
+            child:Center(
+              child:selectedEvent==null? Text('Select one of the events to view analytics!'):CircularProgressIndicator(),
+            ),
+          ),
+        );
+      }
+
+      List<Feedback> sections=[];
+      int total=attendeeType.values.fold(0,(sum,count)=> sum+count);
+
+      if(total==0){
+        return Card(
+          margin:EdgeInsets.all(8),
+          child:Container(
+            height:double.infinity,
+            child:Center(
+              child:Text('No attendees data is available. Choose another event!'),
+            ),
+          ),
+        );
+      }
+
       return Card(
       margin: EdgeInsets.all(8),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-        child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-          leading: const Icon(Icons.bar_chart, color: Color.fromARGB(255, 118, 157, 123)),
-          ),
-          Expanded(
-          child: BarChart(
-            BarChartData(
-            alignment: BarChartAlignment.spaceAround,
-            barGroups: feedbackData.entries.map((entry) {
-              Color barColor;
-              IconData icon;
-              switch (entry.key) {
-              case 'Loved this event':
-                barColor = Colors.green;
-                icon = Icons.sentiment_very_satisfied;
-                break;
-              case 'Enjoyed the event':
-                barColor = Colors.blue;
-                icon = Icons.sentiment_satisfied;
-                break;
-              case 'Disliked the event':
-                barColor = Colors.orange;
-                icon = Icons.sentiment_dissatisfied;
-                break;
-              case 'Hated the event':
-                barColor = Colors.red;
-                icon = Icons.sentiment_very_dissatisfied;
-                break;
-              default:
-                barColor = Colors.grey;
-                icon = Icons.sentiment_neutral;
-              }
-              return BarChartGroupData(
-              x: feedbackData.keys.toList().indexOf(entry.key),
-              barRods: [
-                BarChartRodData(
-                toY: entry.value.toDouble(),
-                color: barColor,
-                width: 16,
-                borderRadius: BorderRadius.circular(4),
-                ),
-              ],
-              showingTooltipIndicators: [0],
-              );
-            }).toList(),
-            borderData: FlBorderData(
-              show: true,
-              border: const Border(
-              left: BorderSide(color: Colors.black, width: 1),
-              bottom: BorderSide(color: Colors.black, width: 1),
-              ),
-            ),
-            gridData: FlGridData(show: false),
-            titlesData: FlTitlesData(
-              leftTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: true),
-              ),
-              bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                final feedbackKeys = feedbackData.keys.toList();
-                if (value.toInt() >= 0 && value.toInt() < feedbackKeys.length) {
-                  return Column(
-                  children: [
-                    Icon(
-                    feedbackKeys[value.toInt()] == 'Loved this event'
-                      ? Icons.sentiment_very_satisfied
-                      : feedbackKeys[value.toInt()] == 'Enjoyed the event'
-                        ? Icons.sentiment_satisfied
-                        : feedbackKeys[value.toInt()] == 'Disliked the event'
-                          ? Icons.sentiment_dissatisfied
-                          : Icons.sentiment_very_dissatisfied,
-                    size: 16,
-                    ),
-                    Text(
-                    feedbackKeys[value.toInt()],
-                    style: const TextStyle(fontSize: 10),
-                    textAlign: TextAlign.center,
-                    ),
-                  ],
-                  );
-                }
-                return const SizedBox.shrink();
-                },
-              ),
-              ),
-            ),
-            ),
-          ),
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        leading: const Icon(Icons.bar_chart, color: Color.fromARGB(255, 118, 157, 123)),
         ),
+        Expanded(
+        child: BarChart(
+        BarChartData(
+        alignment: BarChartAlignment.spaceAround,
+        barGroups: feedbackData.entries.map((entry) {
+          Color barColor;
+          barColor = Color.fromARGB(255, 118, 157, 123);
+          return BarChartGroupData(
+          x: feedbackData.keys.toList().indexOf(entry.key),
+          barRods: [
+          BarChartRodData(
+          toY: entry.value.toDouble(),
+          color: barColor,
+          width: 16,
+          rodStackItems: [
+          BarChartRodStackItem(
+            0,
+            entry.value.toDouble(),
+            barColor,
+          ),
+          ],
+          // borderRadius: BorderRadius.circular(4),
+          ),
+          ],
+          // showingTooltipIndicators: [0],
+          // barsSpace: 4,
+          );
+        }).toList(),
+        borderData: FlBorderData(
+          show: true,
+          border: const Border(
+          left: BorderSide(color: Colors.black, width: 1),
+          bottom: BorderSide(color: Colors.black, width: 1),
+          ),
+        ),
+        gridData: FlGridData(show: false),
+        titlesData: FlTitlesData(
+          leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+          showTitles: true,
+          getTitlesWidget: (value, meta) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Text(
+            value.toInt().toString(),
+            style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 10,
+            ),
+            textAlign: TextAlign.right,
+            ),
+          );
+          },
+          reservedSize: 40,
+          ),
+          ),
+          bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+          showTitles: true,
+          getTitlesWidget: (value, meta) {
+          final feedbackKeys = feedbackData.keys.toList();
+          if (value.toInt() >= 0 && value.toInt() < feedbackKeys.length) {
+            int starCount = value.toInt() + 1;
+            return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(
+            starCount,
+            (index) => Icon(
+            Icons.star,
+            size: 16,
+            color: Colors.amber,
+            ),
+            ),
+            );
+          }
+
+          return const SizedBox.shrink();
+          },
+          ),
+          ),
+          rightTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+          ),
+        ),
+        ),
+        ),
+        ),
+      ],
+      ),
       ),
       );
     }
@@ -404,7 +536,7 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
                 itemBuilder: (context, index) {
                   final event= events[index];
                   return ListTile(
-                    leading: const Icon(Icons.star),
+                    leading: const Icon(Icons.event),
                     title: Text(event.name),
                     dense: true,
                     selected: selectedEvent?.id == event.id,
@@ -426,12 +558,12 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
       return Center (child:
       Text('No one has sponsored this event yet. Market your event to attract more sponsors!'));
     }
-     List<MapEntry<String, int>> sortedSponsors = event.stakeholder.entries.toList()
+    List<MapEntry<String, int>> sortedSponsors = event.stakeholder.entries.toList()
     ..sort((a, b) => b.value.compareTo(a.value));
 
-     int maxContribution = sortedSponsors.first.value;
+    int maxContribution = sortedSponsors.first.value;
 
-     return Column(
+    return Column(
       crossAxisAlignment:CrossAxisAlignment.start,
       children:[
         Text(
@@ -512,7 +644,7 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
                     BarChartRodData(
                     toY: sortedSponsors[index].value.toDouble(),
                     color: Colors.red,
-                       gradient: const LinearGradient(
+                      gradient: const LinearGradient(
                       colors: [Color.fromARGB(255, 235, 246, 236),Color(0xFFCBDBCD)],
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
@@ -527,6 +659,6 @@ class _AnalyticsViewState extends  State<AnalyticsView> {
           ),
         ),
       ],
-     );
+    );
   }
 }
