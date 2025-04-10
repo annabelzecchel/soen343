@@ -5,7 +5,6 @@ import 'package:soen343/components/event_creation_form.dart';
 import 'package:soen343/controllers/profile_controller.dart';
 import 'package:soen343/views/calendar_view.dart';
 import 'package:soen343/views/analytics_view.dart';
-import 'package:soen343/views/event_promotion.dart';
 import 'package:soen343/components/event_analytics_screen.dart';
 
 class EventManagementPage extends StatefulWidget {
@@ -84,14 +83,6 @@ class _EventManagementState extends State<EventManagementPage> {
                 type!.toLowerCase() == 'stakeholders'))
       Container(
         alignment: Alignment.center,
-        child: const EventPromotionPage(),
-      ),
-      if (type != null &&
-            (type!.toLowerCase() == 'organizer' ||
-                type!.toLowerCase() == 'administration' ||
-                type!.toLowerCase() == 'stakeholders'))
-      Container(
-        alignment: Alignment.center,
         child: const AnalyticsView(),
       ),     
     ];
@@ -117,7 +108,7 @@ class _EventManagementState extends State<EventManagementPage> {
               },
               selectedIndex: _selectedIndex,
               destinations:  [
-               if (type == 'organizer'||type == 'Stakeholders'||type == 'administration')
+              if (type == 'organizer'||type == 'Stakeholders'||type == 'administration')
                 NavigationRailDestination(
                   icon: Icon(Icons.event),
                   label: Text('Events Creation'),
@@ -126,11 +117,6 @@ class _EventManagementState extends State<EventManagementPage> {
                 NavigationRailDestination(
                   icon: Icon(Icons.person),
                   label: Text('Event Management'),
-                ),
-                if (type == 'organizer'||type == 'Stakeholders'||type == 'administration')
-                NavigationRailDestination(
-                  icon: Icon(Icons.share),
-                  label: Text('Event Promotion'),
                 ),
                 if (type == 'organizer'||type == 'Stakeholders'||type == 'administration')
                 NavigationRailDestination(

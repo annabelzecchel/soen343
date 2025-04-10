@@ -284,7 +284,6 @@ class _EventDetailViewState extends State<EventDetailView> {
                                       ),
                                     );
 
-                                    // Register attendee
                                     await _eventController.addAttendee(
                                         _currentEvent.id, email ?? '');
                                     await _refreshEventData();
@@ -292,19 +291,16 @@ class _EventDetailViewState extends State<EventDetailView> {
                                     Navigator.pop(context);
                                     Navigator.pop(context);
 
-                                    // Navigate to payment screen if event has a price
                                     if (_currentEvent.price > 0) {
                                       if (!mounted) return;
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => PaymentScreen(
-                                            event: _currentEvent,
-                                            role: type ?? '',
-                                            amount: _currentEvent.price,
-                                          ),
+                                      final result = await showDialog<bool>(
+                                        context: context,
+                                        builder: (context) => PaymentDialog(
+                                          event: _currentEvent,
+                                          role: type ?? '',
+                                          amount: _currentEvent.price,
                                         ),
-                                      );
+  );
                                     } else {
                                       if (!mounted) return;
                                       ScaffoldMessenger.of(context)
@@ -417,7 +413,7 @@ class _EventDetailViewState extends State<EventDetailView> {
                           Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => PaymentScreen(
+                                        builder: (context) => PaymentDialog(
                                           event: _currentEvent,
                                           role : type ?? '',
                                           amount: double.parse(_amountController.text),

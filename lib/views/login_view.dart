@@ -26,7 +26,7 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
 Widget build(BuildContext context) {
-  return Scaffold(  // Wrap in Scaffold to provide Material widget
+  return Scaffold(
     body: Center(
       child: Container(
         width: 400,
@@ -91,20 +91,40 @@ Widget build(BuildContext context) {
                 onPressed: ()async{
                     if (_formKey.currentState?.validate() ??false){
                         setState(()=>_isLoading=true);
-                      try{
-                        final auth = await _controller.login(
-                            _emailController.text.trim(),
-                            _passwordController.text.trim()
-                        );
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder:(_)=>ProfilePage()),
+                      // try{
+                      //   final auth = await _controller.login(
+                      //       _emailController.text.trim(),
+                      //       _passwordController.text.trim()
+                      //   );
+                      //   Navigator.pushReplacement(
+                      //       context,
+                      //       MaterialPageRoute(builder:(_)=>ProfilePage()),
 
+                      //   );
+                      // }catch (e){
+                      //   throw Exception("ERROR"+e.toString());
+                      // }finally {
+                      //   setState(()=>_isLoading=false);
+                      // }
+                      try{
+                        UserCredential credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                          email: _emailController.text.trim(),
+                          password: _passwordController.text.trim(),
                         );
-                      }catch (e){
-                        throw Exception("ERROR"+e.toString());
-                      }finally {
-                        setState(()=>_isLoading=false);
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder:(_)=> ProfilePage()));
+                      } on FirebaseAuthException catch (e) {
+                        if (!mounted) return;
+                        if (e.code == 'user-not-found') {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('No user found for that email.')),
+                          );
+                        } else if (e.code == 'wrong-password') {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Wrong password provided for that user.')),
+                          );
+                        }
+                      } finally {
+                        setState(() => _isLoading = false);
                       }
                     }
                 },
