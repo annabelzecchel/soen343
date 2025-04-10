@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:soen343/views/home_page_view_scrollable.dart';
 import 'package:soen343/components/openai_chatbot.dart';
-import 'package:soen343/views/home_page_view.dart';
+//import 'package:soen343/views/home_page_view.dart';
 import 'package:soen343/components/app_theme.dart';
 import 'package:logging/logging.dart';
 import 'package:soen343/service/openai_service.dart';
