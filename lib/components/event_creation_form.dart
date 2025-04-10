@@ -118,60 +118,61 @@ class _EventCreationFormState extends State<EventCreationForm> {
     }
   }
 
- Future<String?> _uploadFile() async {
-  try {
-    if (_imageBytes == null) {
-      print('No image bytes to upload');
-      return null;
-    }
+  Future<String?> _uploadFile() async {
+    try {
+      if (_imageBytes == null) {
+        print('No image bytes to upload');
+        return null;
+      }
 
-    if (_fileName == null) {
-      print('No filename specified');
-      return null;
-    }
+      if (_fileName == null) {
+        print('No filename specified');
+        return null;
+      }
 
-    print('Starting upload of $_fileName (${_imageBytes!.length} bytes)');
+      print('Starting upload of $_fileName (${_imageBytes!.length} bytes)');
 
-    final ref = firebase_storage.FirebaseStorage.instance
-        .ref()
-        .child('event_images')
-        .child('${DateTime.now().millisecondsSinceEpoch}_$_fileName');
+      final ref = firebase_storage.FirebaseStorage.instance
+          .ref()
+          .child('event_images')
+          .child('${DateTime.now().millisecondsSinceEpoch}_$_fileName');
 
-    final metadata = firebase_storage.SettableMetadata(
-      contentType: _getMimeType(_fileName!),
-    );
+      final metadata = firebase_storage.SettableMetadata(
+        contentType: _getMimeType(_fileName!),
+      );
 
-    // Create the upload task
-    final uploadTask = ref.putData(_imageBytes!, metadata);
+      // Create the upload task
+      final uploadTask = ref.putData(_imageBytes!, metadata);
 
-    // Listen to progress changes
-    uploadTask.snapshotEvents.listen((snapshot) {
-      final progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-      print('Upload progress: ${progress.toStringAsFixed(1)}%');
-    }, onError: (e) {
+      // Listen to progress changes
+      uploadTask.snapshotEvents.listen((snapshot) {
+        final progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        print('Upload progress: ${progress.toStringAsFixed(1)}%');
+      }, onError: (e) {
+        print('Upload error: $e');
+      });
+
+      // Wait for task to complete (important change here)
+      final taskSnapshot = await uploadTask;
+
+      if (taskSnapshot.state == firebase_storage.TaskState.success) {
+        final downloadUrl = await taskSnapshot.ref.getDownloadURL();
+        print('File uploaded successfully. URL: $downloadUrl');
+        return downloadUrl;
+      } else {
+        print('Upload failed with state: ${taskSnapshot.state}');
+        return null;
+      }
+    } catch (e) {
       print('Upload error: $e');
-    });
-
-    // Wait for task to complete (important change here)
-    final taskSnapshot = await uploadTask;
-
-    if (taskSnapshot.state == firebase_storage.TaskState.success) {
-      final downloadUrl = await taskSnapshot.ref.getDownloadURL();
-      print('File uploaded successfully. URL: $downloadUrl');
-      return downloadUrl;
-    } else {
-      print('Upload failed with state: ${taskSnapshot.state}');
+      if (e is firebase_storage.FirebaseException) {
+        print('Error code: ${e.code}');
+        print('Error message: ${e.message}');
+      }
       return null;
     }
-  } catch (e) {
-    print('Upload error: $e');
-    if (e is firebase_storage.FirebaseException) {
-      print('Error code: ${e.code}');
-      print('Error message: ${e.message}');
-    }
-    return null;
   }
-}
 
   String _getMimeType(String filename) {
     final extension = filename.split('.').last.toLowerCase();
@@ -444,10 +445,12 @@ class _EventCreationFormState extends State<EventCreationForm> {
                           setState(() {
                             _isProcessing = true;
                           });
-                          
+
                           // First upload the image if one was selected
                           if (_imageBytes != null) {
-                            imageURL = await _uploadFile();
+                            // imageURL = await _uploadFile();
+                            imageURL =
+                                "https://media.istockphoto.com/id/867944542/photo/blurred-background-vintage-filter-customer-in-coffee-shop-blur-background-with-bokeh.jpg";
                             if (imageURL == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -498,6 +501,17 @@ class _EventCreationFormState extends State<EventCreationForm> {
                             _imageBytes = null;
                             _fileName = null;
                             _isProcessing = false;
+                            _nameController.clear();
+                            _typeController.clear();
+                            _descriptionController.clear();
+                            _formatController.clear();
+                            _dateTimeController.clear();
+                            _locationController.clear();
+                            _priceController.clear();
+                            _discountController.clear();
+                            _instagramController.clear();
+                            _facebookController.clear();
+                            _youtubeController.clear();
                           });
                         } catch (e) {
                           print('Error creating event: $e');
