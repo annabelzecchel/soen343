@@ -175,7 +175,7 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
                       }
                     }
                 },
-                        child: const Text('Sign Up'),
+                        child: const Text('Sign Up', style: TextStyle(color: Colors.white)),
                       ),
               ],
             ),

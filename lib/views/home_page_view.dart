@@ -82,14 +82,68 @@ class _HomePageState extends State<HomePage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Create a combined filter options list.
-    // Add "My Stakeholder Events" only if the user is a stakeholder or an admin.
     final List<String> filterOptions = List.from(_categories);
     if (type != null &&
         (type!.toLowerCase() == 'stakeholders' ||
             type!.toLowerCase() == 'administration')) {
       filterOptions.add('My Sponsorships');
     }
+
+    // Hero Section
+    final heroSection = Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.primary, // Medium green
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.brown.withOpacity(0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+                  ),          ],
+        ),
+        child: Stack(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset(
+              '../../assets/cathcart.jpg', // Replace with your image path
+              height: 450,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter, // Align to show more of the top
+              ),
+            ),
+            Positioned(
+              bottom: 20,
+              left: 20,
+              right: 20,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Discover Amazing Events',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Find events that match your interests and connect with others.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: Colors.white.withOpacity(0.9),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
 
     return Scaffold(
       backgroundColor: colorScheme.surface, // Soft green background
@@ -179,9 +233,10 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+
+      
       body: Column(
         children: [
-          // Search Bar - Styled with green and brown
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Container(
@@ -222,7 +277,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // Category Chips with extra filter button for stakeholder events if applicable
+          heroSection,
           SizedBox(
             height: 60,
             child: ListView.builder(
@@ -309,9 +364,7 @@ class _HomePageState extends State<HomePage> {
                   );
                 }
 
-                // Filter events according to the selected category.
-                // If "My Stakeholder Events" is selected, only include events
-                // where event.stakeholder equals the user's name.
+
                 final filteredEvents = snapshot.data!.where((event) {
                   bool matchesCategory;
                   if (_selectedCategory == 'All') {

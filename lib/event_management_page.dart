@@ -93,38 +93,52 @@ class _EventManagementState extends State<EventManagementPage> {
       ),
       body: Row(
         children: [
-          Container(
+            Container(
             width: 200,
             decoration: const BoxDecoration(
               border: Border(
-                right: BorderSide(color: Colors.grey, width: 1),
+              right: BorderSide(color: Colors.grey, width: 1),
               ),
             ),
             child: NavigationRail(
+              backgroundColor: const Color.fromARGB(255, 96, 124, 100),
               onDestinationSelected: (int index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
+              setState(() {
+              _selectedIndex = index;
+              });
               },
               selectedIndex: _selectedIndex,
-              destinations:  [
-              if (type == 'organizer'||type == 'Stakeholders'||type == 'administration')
-                NavigationRailDestination(
-                  icon: Icon(Icons.event),
-                  label: Text('Events Creation'),
-                ),
-          
-                NavigationRailDestination(
-                  icon: Icon(Icons.person),
-                  label: Text('Event Management'),
-                ),
-                if (type == 'organizer'||type == 'Stakeholders'||type == 'administration')
-                NavigationRailDestination(
-                  icon: Icon(Icons.analytics),
-                  label: Text('Analytics & Reports'),
-                ),
+              destinations: [
+              if (type == 'organizer' || type == 'Stakeholders' || type == 'administration')
+              NavigationRailDestination(
+              icon: Icon(Icons.event, color: Colors.white),
+              label: Text(
+                'Events Creation',
+                style: const TextStyle(color: Colors.white),
+              ),
+              selectedIcon: Icon(Icons.event, color: const Color.fromARGB(255, 96, 124, 100)),
+              ),
+              NavigationRailDestination(
+              icon: Icon(Icons.person, color: Colors.white),
+              label: Text(
+              'Event Management',
+              style: const TextStyle(color: Colors.white),
+              ),
+              selectedIcon: Icon(Icons.person, color: const Color.fromARGB(255, 96, 124, 100)),
+              ),
+              if (type == 'organizer' || type == 'Stakeholders' || type == 'administration')
+              NavigationRailDestination(
+              icon: Icon(Icons.analytics, color: Colors.white),
+              label: Text(
+                'Analytics & Reports',
+                style: const TextStyle(color: Colors.white),
+              ),
+              selectedIcon: Icon(Icons.analytics, color: const Color.fromARGB(255, 96, 124, 100)),
+              ),
               ],
               labelType: NavigationRailLabelType.all,
+              selectedLabelTextStyle: const TextStyle(color: const Color.fromARGB(255, 96, 124, 100)),
+              selectedIconTheme: const IconThemeData(color: const Color.fromARGB(255, 96, 124, 100)),
             ),
           ),
           Expanded(child: screens[_selectedIndex]),

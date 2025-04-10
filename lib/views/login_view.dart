@@ -131,7 +131,7 @@ Widget build(BuildContext context) {
                       }
                     }
                 },
-                child: const Text('Login'),
+                child: const Text('Login', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
